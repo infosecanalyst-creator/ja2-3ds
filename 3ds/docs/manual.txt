@@ -1,0 +1,288 @@
+# Contents
+== CONTENTS
+Jagged Alliance 2 - New 3DS edition
+Engine: JA2 Stracciatella. Data: your JA2 Gold.
+
+ 1  Controls
+ 2  The two screens
+ 3  Getting started
+ 4  Hiring mercenaries
+ 5  Tactical combat
+ 6  Shooting and aiming
+ 7  The strategic map
+ 8  Assignments and militia
+ 9  Money, mines and towns
+10  Inventory and items
+11  Saving and options
+12  Tips for a first campaign
+
+In this manual:
+  Circle Pad / C-Stick   scroll the text
+  D-Pad                  move between sections
+  L / R                  previous / next section
+  Tap a section on the touch screen to jump.
+  B or START closes the manual.
+# Controls
+== 1. CONTROLS  (1/2): STYLUS
+The touch screen is the whole game. The stylus
+is the mouse: tap = left click, drag = drag.
+For a right click, press B (it clicks at the
+cursor, i.e. where you last touched).
+
+In battle, a tap does not act at once. JA2's
+touch buttons pop up beside the target:
+  Do     confirm the move / shot / action
+  Run    move at a run          (moves)
+  Item   use the item in hand   (moves)
+  Aim    add an aim click       (shots)
+  Mode   single / burst fire    (shots)
+  X      cancel
+You can also steer the cursor with the Circle
+Pad and click with A / B.
+== 1. CONTROLS  (2/2): BUTTONS
+Circle Pad / C    move the cursor
+A                 left click at the cursor
+B                 right click at the cursor
+D-pad             scroll the map
+X                 next merc (Space)
+                  map screen: pause / resume time
+Y                 strategic map  (M)
+L                 stance down (crouch / prone)
+R                 stance up / climb onto a roof
+ZL                cursor level: ground / roof
+ZR                END TURN  (D)
+START             Esc: cancel, close windows,
+                  map screen: enter the sector
+SELECT            this manual
+# The two screens
+== 2. THE TWO SCREENS
+BOTTOM (touch): the complete game. Everything
+you click is here; the stylus is the mouse.
+
+TOP: the dashboard. It shows the date, time
+and sector, the selected merc's health,
+energy, morale, action points and skills,
+and the controls for the screen you are on.
+
+SWAP: open this manual (SELECT) and tap
+"Swap screens" to put the game on the top
+screen and the dashboard on the touch screen.
+Tap the button at the foot of the touch
+screen to swap back. The choice is saved.
+The 3D slider is not used.
+# Getting started
+== 3. GETTING STARTED  (1/2)
+The tiny nation of Arulco is ruled by Queen
+Deidranna. Her exiled husband Enrico
+Chivaldori pays you to free it, town by town.
+
+New game: choose difficulty (Novice is a fair
+first try), game style (Realistic, or Sci-Fi
+with creatures) and Save Anytime / Iron Man.
+
+You start in the laptop, in your office. The
+clock does not run until your first team has
+landed, so take your time here.
+== 3. GETTING STARTED  (2/2)
+First steps:
+ 1. Read Enrico's e-mail (Mail button).
+ 2. Hire 3 - 6 mercs on the A.I.M. site, or
+    make your own on I.M.P. (chapter 4).
+ 3. Close the laptop. On the map, your team
+    is in the helicopter heading for Omerta.
+ 4. Press START (Esc) or tap Omerta to land.
+ 5. In Omerta, find the rebels and speak to
+    Fatima, then Dimitri - they give you the
+    next lead. Drassen (to the east) has an
+    airport: taking it lets new mercs fly in
+    closer to the front.
+# Hiring mercenaries
+== 4. HIRING MERCENARIES  (1/2)
+A.I.M. (laptop > A.I.M.): the elite agency.
+  Members > tap a face for stats and price.
+  Contracts are 1 day, 1 week or 2 weeks;
+  longer is cheaper per day. Mercs with
+  high Leadership and Wisdom are good early;
+  a medic (Medical skill) is essential.
+  Some mercs refuse to work with people they
+  dislike, or until you prove yourself.
+M.E.R.C. (Speck's site) opens a few days in:
+  cheaper, paid daily, a mixed bag.
+I.M.P.: create your own merc ($3000). A
+  personality quiz decides skills and stats.
+  Typing a name opens the 3DS keyboard.
+== 4. HIRING MERCENARIES  (2/2)
+Equipment arrives with the merc (pick "buy
+equipment" on A.I.M.). Bobby Ray's (laptop)
+sells guns, ammo and armour by mail; orders
+are delivered to Drassen airport once you
+hold it.
+
+Pay attention to:
+  Health / Agility / Dexterity  - survival,
+      speed and accuracy.
+  Marksmanship                  - hitting.
+  Medical, Mechanical,
+  Explosives, Leadership        - jobs.
+  Experience level              - interrupts.
+Morale drops when mercs are hurt, unpaid or
+working with people they dislike.
+# Tactical combat
+== 5. TACTICAL COMBAT  (1/2)
+In a sector with no enemies in sight, time
+runs in real time. When either side spots
+the other, the game switches to TURNS.
+
+ACTION POINTS (AP): each merc gets AP every
+turn. Walking, kneeling, opening doors,
+reloading and shooting all cost AP. The cost
+shows next to the cursor before you click.
+Unused AP carry a small bonus into the next
+turn.
+
+ZR (D) ends your turn. Enemies then move.
+INTERRUPTS: a merc who spots an enemy moving
+may get to act in the middle of their turn.
+== 5. TACTICAL COMBAT  (2/2)
+Moving: tap a tile. The path and its AP cost
+  show; tap Do (or Run) to go, X to cancel.
+STANCE (L / R): standing, crouched, prone.
+  Crouched and prone mercs are harder to hit
+  and aim better, but cost more AP to move.
+Climbing: R next to a low building climbs
+  onto the roof; ZL switches the cursor to
+  roof level so you can pick roof tiles.
+Doors: tap a door, then Do, to open it; with
+  the cursor on a door B gives options
+  (lockpick, force, explosives, examine).
+Healing: bandage bleeding mercs at once
+  (first aid kit in hand, then the merc).
+  Bleeding mercs lose health every turn.
+# Shooting and aiming
+== 6. SHOOTING AND AIMING
+With a gun in hand, tap an enemy. The chance
+to hit shows, with Aim / Mode / Do / X.
+  Aim   each tap adds an aim click: costs AP,
+        raises the chance to hit
+  Mode  single shot or burst (if the gun has
+        one). Bursts use more ammo but hit
+        more often at short range.
+  Do    fire
+With buttons: move the cursor onto the enemy,
+B adds aim, A fires.
+
+Range and light matter: night, smoke and
+distance hurt accuracy. Head shots kill but
+are hard; aim at the body.
+Grenades: put one in hand, then target a tile.
+# The strategic map
+== 7. THE STRATEGIC MAP  (1/2)
+Y (M) opens the map. Arulco is a grid of
+sectors (A1 - P16). Towns are named; red
+sectors hold enemy forces you know about.
+
+Moving: tap a squad's name, choose Plot
+  Route, tap sectors, then confirm. Squads
+  walk; vehicles and the helicopter are
+  faster.
+Time: X (Space) pauses / resumes. The time
+  buttons along the bottom set the speed
+  (5 min, 30 min, 60 min, 6 hours per
+  second). Time stops automatically when
+  something needs you.
+== 7. THE STRATEGIC MAP  (2/2)
+Entering a sector: move a squad in. If
+  enemies are there you choose to attack,
+  or retreat when they attack you.
+START (Esc) on a highlighted sector with
+  your mercs in it shows that sector.
+
+Enemy patrols move too. The Queen will
+  counter-attack towns you take, so leave
+  defenders (militia, chapter 8).
+Airspace: you need SAM sites under your
+  control before the helicopter (Skyrider,
+  found in Drassen) can fly safely.
+# Assignments and militia
+== 8. ASSIGNMENTS AND MILITIA
+In the map screen, tap a merc's Assign
+column to give them a job:
+  On duty      part of a squad (default)
+  Doctor       heals others in the sector
+               (needs a medical kit)
+  Patient      rests to heal faster
+  Repair       fixes items (toolkit)
+  Train Town   trains militia - only in a
+               town sector you control,
+               costs money
+  Practice / Student / Trainer
+               raise a stat over time
+Mercs need sleep. Tired mercs fight badly.
+
+MILITIA defend towns on their own. Train them
+in every sector of a town you want to keep.
+# Money, mines and towns
+== 9. MONEY, MINES AND TOWNS
+Enrico's money runs out quickly. Real income
+comes from MINES: take a town's mine and its
+head miner starts paying you daily.
+
+LOYALTY: each town's loyalty (shown on the
+map) rises as you free it, train militia and
+treat people well, and falls if you steal,
+kill civilians or lose battles there. Low
+loyalty cuts mine income.
+
+Spend on: merc contracts (renew before they
+run out!), militia training, Bobby Ray's
+orders and medical care.
+The financial report (laptop > Finances)
+shows daily income and expenses.
+# Inventory and items
+== 10. INVENTORY AND ITEMS
+Tap a merc's face (or the inventory switch on
+the panel) to open their inventory. On the
+map screen, Enter shows the merc's gear and
+the sector's ground items.
+
+Moving items: tap an item to pick it up, tap
+  a slot to drop it. Tap a merc's face to
+  pass it to them.
+Hands: what is in the main hand is used in
+  combat. Put ammo on a gun to reload it.
+Attachments: tap an item with another item to
+  combine or attach (scopes, silencers...).
+  Hold (right click) an item for details.
+Weight: heavy loads cost AP and energy.
+The top screen is the easiest way to read
+item names and stats - point at them.
+# Saving and options
+== 11. SAVING AND OPTIONS
+Options screen: from the map screen tap the
+"Options" button, or in tactical open the
+system menu. It holds Save, Load and Quit.
+Use the button below to open it from here.
+
+Saves go to sdmc:/3ds/ja2/SavedGames/.
+Save often - before every attack.
+Iron Man games only save between battles.
+
+Quitting: Options > Quit, or the HOME button
+(the game is then closed).
+
+Settings file: sdmc:/3ds/ja2/ja2.json
+Game data:     sdmc:/3ds/ja2/gamedata/Data
+# Tips
+== 12. TIPS FOR A FIRST CAMPAIGN
+- Hire a medic and at least one good shot.
+- Fight crouched or prone, behind walls.
+- Let enemies come to you; overwatch from
+  cover rather than charging.
+- Save before entering any sector.
+- Take Drassen and its mine early.
+- Train militia in every town you hold.
+- Renew contracts before they expire - mercs
+  leave mid-mission otherwise.
+- Night attacks are stronger with good
+  equipment, deadlier without it.
+- When in doubt, retreat and heal.

@@ -1,0 +1,292 @@
+diff --git a/src/video/SDL_sysvideo.h b/src/video/SDL_sysvideo.h
+index 76d924c..953995e 100644
+--- a/src/video/SDL_sysvideo.h
++++ b/src/video/SDL_sysvideo.h
+@@ -539,6 +539,7 @@ extern VideoBootStrap RPI_bootstrap;
+ extern VideoBootStrap KMSDRM_bootstrap;
+ extern VideoBootStrap DUMMY_bootstrap;
+ extern VideoBootStrap DUMMY_evdev_bootstrap;
++extern VideoBootStrap FBDEV_bootstrap;
+ extern VideoBootStrap Wayland_preferred_bootstrap;
+ extern VideoBootStrap Wayland_bootstrap;
+ extern VideoBootStrap VIVANTE_bootstrap;
+diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
+index 2d9a59a..29de1a3 100644
+--- a/src/video/SDL_video.c
++++ b/src/video/SDL_video.c
+@@ -144,6 +144,9 @@ static VideoBootStrap *bootstrap[] = {
+     &OFFSCREEN_bootstrap,
+ #endif
+ #ifdef SDL_VIDEO_DRIVER_DUMMY
++#ifdef SDL_INPUT_LINUXEV
++    &FBDEV_bootstrap,
++#endif
+     &DUMMY_bootstrap,
+ #ifdef SDL_INPUT_LINUXEV
+     &DUMMY_evdev_bootstrap,
+diff --git a/src/video/dummy/SDL_fbdevvideo.c b/src/video/dummy/SDL_fbdevvideo.c
+new file mode 100644
+index 0000000..0d65d1f
+--- /dev/null
++++ b/src/video/dummy/SDL_fbdevvideo.c
+@@ -0,0 +1,260 @@
++/*
++  Linux fbdev video driver for SDL3 (software framebuffer + evdev input).
++  Written for the TrimUI Brick (TG3040), whose firmware exposes only /dev/fb0.
++  Select with SDL_VIDEO_DRIVER=fbdev. Device node override: SDL_FBDEV=/dev/fbN.
++  Optional 180-degree flip: SDL_FBDEV_ROTATE=180.
++
++  This software is provided 'as-is', without any express or implied warranty.
++  (zlib license, same as SDL.)
++*/
++#include "SDL_internal.h"
++
++#if defined(SDL_VIDEO_DRIVER_DUMMY) && defined(SDL_INPUT_LINUXEV)
++
++#include "../SDL_sysvideo.h"
++#include "../../events/SDL_events_c.h"
++#include "../../events/SDL_mouse_c.h"
++#include "../../events/SDL_keyboard_c.h"
++#include "../../core/linux/SDL_evdev.h"
++#include "../../SDL_properties_c.h"
++
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/ioctl.h>
++#include <sys/mman.h>
++#include <linux/fb.h>
++
++#define FBDEV_SURFACE "SDL.internal.window.fbdev_surface"
++
++typedef struct
++{
++    int fd;
++    Uint8 *mem;
++    size_t memlen;
++    struct fb_var_screeninfo var;
++    struct fb_fix_screeninfo fix;
++    SDL_PixelFormat format;
++    bool set_alpha;
++    bool rotate180;
++} FBDEV_Data;
++
++static FBDEV_Data fbdev;
++
++static bool FBDEV_Available(void)
++{
++    const char *hint = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
++    return hint && SDL_strstr(hint, "fbdev") != NULL;
++}
++
++static bool FBDEV_VideoInit(SDL_VideoDevice *_this)
++{
++    const char *node = SDL_getenv("SDL_FBDEV");
++    const char *rot = SDL_getenv("SDL_FBDEV_ROTATE");
++    SDL_DisplayMode mode;
++
++    SDL_zero(fbdev);
++    fbdev.fd = open(node ? node : "/dev/fb0", O_RDWR | O_CLOEXEC);
++    if (fbdev.fd < 0) {
++        return SDL_SetError("fbdev: cannot open %s", node ? node : "/dev/fb0");
++    }
++    if (ioctl(fbdev.fd, FBIOGET_VSCREENINFO, &fbdev.var) < 0 ||
++        ioctl(fbdev.fd, FBIOGET_FSCREENINFO, &fbdev.fix) < 0) {
++        close(fbdev.fd);
++        return SDL_SetError("fbdev: screeninfo ioctl failed");
++    }
++    fbdev.memlen = fbdev.fix.smem_len;
++    fbdev.mem = (Uint8 *)mmap(NULL, fbdev.memlen, PROT_READ | PROT_WRITE, MAP_SHARED, fbdev.fd, 0);
++    if (fbdev.mem == MAP_FAILED) {
++        close(fbdev.fd);
++        return SDL_SetError("fbdev: mmap failed");
++    }
++
++    if (fbdev.var.bits_per_pixel == 32) {
++        fbdev.format = (fbdev.var.red.offset == 0) ? SDL_PIXELFORMAT_XBGR8888 : SDL_PIXELFORMAT_XRGB8888;
++        fbdev.set_alpha = fbdev.var.transp.length > 0;
++    } else if (fbdev.var.bits_per_pixel == 16) {
++        fbdev.format = SDL_PIXELFORMAT_RGB565;
++    } else {
++        munmap(fbdev.mem, fbdev.memlen);
++        close(fbdev.fd);
++        return SDL_SetError("fbdev: unsupported depth %u", fbdev.var.bits_per_pixel);
++    }
++    fbdev.rotate180 = rot && SDL_strcmp(rot, "180") == 0;
++
++    SDL_Log("fbdev: %ux%u %ubpp (virtual %ux%u, line %u) r%u g%u b%u a%u/%u",
++            fbdev.var.xres, fbdev.var.yres, fbdev.var.bits_per_pixel,
++            fbdev.var.xres_virtual, fbdev.var.yres_virtual, fbdev.fix.line_length,
++            fbdev.var.red.offset, fbdev.var.green.offset, fbdev.var.blue.offset,
++            fbdev.var.transp.offset, fbdev.var.transp.length);
++
++    SDL_zero(mode);
++    mode.format = fbdev.format;
++    mode.w = (int)fbdev.var.xres;
++    mode.h = (int)fbdev.var.yres;
++    mode.refresh_rate = 60.0f;
++    if (SDL_AddBasicVideoDisplay(&mode) == 0) {
++        return false;
++    }
++
++    SDL_EVDEV_Init();
++    return true;
++}
++
++static void FBDEV_VideoQuit(SDL_VideoDevice *_this)
++{
++    SDL_EVDEV_Quit();
++    if (fbdev.mem && fbdev.mem != MAP_FAILED) {
++        /* leave a black screen behind for the launcher */
++        SDL_memset(fbdev.mem, 0, fbdev.memlen);
++        munmap(fbdev.mem, fbdev.memlen);
++    }
++    if (fbdev.fd > 0) {
++        close(fbdev.fd);
++    }
++    SDL_zero(fbdev);
++}
++
++static void FBDEV_PumpEvents(SDL_VideoDevice *_this)
++{
++    SDL_EVDEV_Poll();
++}
++
++/* Every window is fullscreen at the panel size. */
++static bool FBDEV_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID props)
++{
++    window->x = 0;
++    window->y = 0;
++    window->w = window->floating.w = window->windowed.w = (int)fbdev.var.xres;
++    window->h = window->floating.h = window->windowed.h = (int)fbdev.var.yres;
++    window->flags |= SDL_WINDOW_FULLSCREEN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
++    SDL_SetMouseFocus(window);
++    SDL_SetKeyboardFocus(window);
++    return true;
++}
++
++static void FBDEV_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
++{
++    /* size is fixed to the panel */
++    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, (int)fbdev.var.xres, (int)fbdev.var.yres);
++}
++
++static SDL_FullscreenResult FBDEV_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window,
++                                                      SDL_VideoDisplay *display, SDL_FullscreenOp fullscreen)
++{
++    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, (int)fbdev.var.xres, (int)fbdev.var.yres);
++    return SDL_FULLSCREEN_SUCCEEDED;
++}
++
++static bool FBDEV_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, SDL_PixelFormat *format,
++                                          void **pixels, int *pitch)
++{
++    int w, h;
++    SDL_Surface *surface;
++
++    SDL_GetWindowSizeInPixels(window, &w, &h);
++    surface = SDL_CreateSurface(w, h, fbdev.format);
++    if (!surface) {
++        return false;
++    }
++    SDL_SetSurfaceProperty(SDL_GetWindowProperties(window), FBDEV_SURFACE, surface);
++    *format = fbdev.format;
++    *pixels = surface->pixels;
++    *pitch = surface->pitch;
++    return true;
++}
++
++static bool FBDEV_UpdateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, const SDL_Rect *rects, int numrects)
++{
++    SDL_Surface *s = (SDL_Surface *)SDL_GetPointerProperty(SDL_GetWindowProperties(window), FBDEV_SURFACE, NULL);
++    const int bpp = (int)fbdev.var.bits_per_pixel / 8;
++    const int fw = (int)fbdev.var.xres, fh = (int)fbdev.var.yres;
++    const int line = (int)fbdev.fix.line_length;
++    Uint8 *base;
++    int w, h, y;
++
++    if (!s) {
++        return SDL_SetError("fbdev: no surface");
++    }
++    w = SDL_min(s->w, fw);
++    h = SDL_min(s->h, fh);
++    /* draw into the page currently being scanned out */
++    base = fbdev.mem + (size_t)fbdev.var.yoffset * line + (size_t)fbdev.var.xoffset * bpp;
++
++    for (y = 0; y < h; ++y) {
++        const Uint8 *src = (const Uint8 *)s->pixels + (size_t)y * s->pitch;
++        if (!fbdev.rotate180) {
++            Uint8 *dst = base + (size_t)y * line;
++            if (bpp == 4 && fbdev.set_alpha) {
++                const Uint32 *sp = (const Uint32 *)src;
++                Uint32 *dp = (Uint32 *)dst;
++                int x;
++                for (x = 0; x < w; ++x) {
++                    dp[x] = sp[x] | 0xFF000000u;
++                }
++            } else {
++                SDL_memcpy(dst, src, (size_t)w * bpp);
++            }
++        } else {
++            Uint8 *dst = base + (size_t)(fh - 1 - y) * line;
++            int x;
++            if (bpp == 4) {
++                const Uint32 *sp = (const Uint32 *)src;
++                Uint32 *dp = (Uint32 *)dst;
++                const Uint32 a = fbdev.set_alpha ? 0xFF000000u : 0;
++                for (x = 0; x < w; ++x) {
++                    dp[fw - 1 - x] = sp[x] | a;
++                }
++            } else {
++                const Uint16 *sp = (const Uint16 *)src;
++                Uint16 *dp = (Uint16 *)dst;
++                for (x = 0; x < w; ++x) {
++                    dp[fw - 1 - x] = sp[x];
++                }
++            }
++        }
++    }
++    return true;
++}
++
++static void FBDEV_DestroyWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window)
++{
++    SDL_ClearProperty(SDL_GetWindowProperties(window), FBDEV_SURFACE);
++}
++
++static void FBDEV_DeleteDevice(SDL_VideoDevice *device)
++{
++    SDL_free(device);
++}
++
++static SDL_VideoDevice *FBDEV_CreateDevice(void)
++{
++    SDL_VideoDevice *device;
++
++    if (!FBDEV_Available()) {
++        return NULL;
++    }
++    device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
++    if (!device) {
++        return NULL;
++    }
++    device->VideoInit = FBDEV_VideoInit;
++    device->VideoQuit = FBDEV_VideoQuit;
++    device->PumpEvents = FBDEV_PumpEvents;
++    device->CreateSDLWindow = FBDEV_CreateWindow;
++    device->SetWindowSize = FBDEV_SetWindowSize;
++    device->SetWindowFullscreen = FBDEV_SetWindowFullscreen;
++    device->CreateWindowFramebuffer = FBDEV_CreateWindowFramebuffer;
++    device->UpdateWindowFramebuffer = FBDEV_UpdateWindowFramebuffer;
++    device->DestroyWindowFramebuffer = FBDEV_DestroyWindowFramebuffer;
++    device->free = FBDEV_DeleteDevice;
++    return device;
++}
++
++VideoBootStrap FBDEV_bootstrap = {
++    "fbdev", "SDL Linux framebuffer video driver (software, evdev input)",
++    FBDEV_CreateDevice,
++    NULL,
++    false
++};
++
++#endif

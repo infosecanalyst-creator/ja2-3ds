@@ -1,0 +1,19 @@
+# Jagged Alliance 2 v1.13 - TrimUI Brick controls (gptokeyb)
+# D-pad moves the mouse cursor; hold L1 for slow, precise movement.
+up = mouse_movement_up
+down = mouse_movement_down
+left = mouse_movement_left
+right = mouse_movement_right
+dpad_mouse_step = 6
+mouse_delay = 16
+l1 = mouse_slow
+mouse_slow_scale = 35
+
+a = mouse_left
+b = mouse_right
+x = space
+y = m
+r1 = pageup
+l2 = pagedown
+r2 = d
+start = esc

@@ -1,0 +1,13 @@
+# never commit game data or build output
+*.slf
+*.SLF
+Data/
+gamedata/
+*.3dsx
+*.elf
+*.smdh
+brick/sdk/
+brick/out/
+brick/work/
+work/
+build/
