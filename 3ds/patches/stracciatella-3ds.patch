@@ -1,3 +1,24 @@
+ja2-3ds: modifications to JA2 Stracciatella v0.22.1 for the New 3DS.
+
+NOTICE (SFI-SCLA section 4): this patch CHANGES the original Software. Every file
+it touches is a modified file, not the original. Changes made 2026-10 by the ja2-3ds
+authors. Distributed under the Strategy First Inc. Source Code License Agreement
+(non-commercial only); see "SFI Source Code license agreement.txt" in this repository.
+
+Modified files:
+  CMakeLists.txt, dependencies/lib-stracciatella/CMakeLists.txt,
+  rust/stracciatella/src/config/stracciatella_home.rs, rust/stracciatella/src/fs.rs,
+  rust/stracciatella/src/logger.rs, rust/stracciatella/src/mods/mod.rs,
+  rust/stracciatella/src/stracciatella.rs, rust/stracciatella/src/vfile.rs,
+  rust/stracciatella/src/vfs/dir.rs, src/externalized/DefaultContentManager.cc,
+  src/externalized/ItemModel.cc, src/externalized/json/Json.h, src/game/GameLoop.cc,
+  src/game/Laptop/Insurance_Contract.cc, src/game/SaveLoadScreen.cc,
+  src/sgp/CMakeLists.txt, src/sgp/SGP.cc, src/sgp/SoundMan.cc, src/sgp/Types.h,
+  src/sgp/Video.cc, src/sgp/n3ds/N3DS_Dashboard.cc, src/sgp/n3ds/N3DS_Dashboard.h,
+  src/sgp/n3ds/N3DS_Font.h, src/sgp/n3ds/N3DS_Font.h.metrics.json,
+  src/sgp/n3ds/N3DS_Manual.h, src/sgp/n3ds/N3DS_Platform.cc,
+  src/sgp/n3ds/N3DS_Platform.h
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 5fa4044..030abac 100644
 --- a/CMakeLists.txt
