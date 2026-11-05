@@ -23,6 +23,7 @@ jobs:
       - name: Collect
         if: always()
         run: |
+          sudo chown -R "$USER" . || true
           mkdir -p out
           cp build.log out/ 2>/dev/null || true
           echo "$GITHUB_SHA" > out/SOURCE_COMMIT
