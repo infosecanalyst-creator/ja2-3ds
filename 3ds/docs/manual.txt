@@ -140,7 +140,8 @@ shows next to the cursor before you click.
 Unused AP carry a small bonus into the next
 turn.
 
-Hold ZR (D) for half a second to end your turn. Enemies then move.
+Hold ZR (D) for half a second to end your
+turn. Enemies then move.
 INTERRUPTS: a merc who spots an enemy moving
 may get to act in the middle of their turn.
 == 5. TACTICAL COMBAT  (2/2)
