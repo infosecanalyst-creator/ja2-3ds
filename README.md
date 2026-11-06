@@ -15,7 +15,7 @@ engine (v0.22.1), patched for the New 3DS (`armv6k-nintendo-3ds`).
 - **Top screen:** dashboard: date/time/sector, selected merc's health, energy, morale,
   action points and skills, and the controls for the current screen.
 - **SWAP** (from the manual) puts the game on the top screen; the choice is saved.
-- **Manual** on SELECT: Circle Pad / C-Stick scroll, D-Pad moves between sections,
+- **ZL swaps the screens** at any time. **Manual** on SELECT: Circle Pad / C-Stick scroll, D-Pad moves between sections,
   L/R previous/next section, tap a section, B or START closes.
 - Quiet click and press animation on the manual's touch buttons; any button skips the intro.
 

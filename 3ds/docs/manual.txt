@@ -49,8 +49,8 @@ X                 next merc (Space)
 Y                 strategic map  (M)
 L                 stance down (crouch / prone)
 R                 stance up / climb onto a roof
-ZL                cursor level: ground / roof
-ZR                END TURN  (D)
+ZL                swap the screens
+ZR                tap: roof level, hold: END TURN
 START             Esc: cancel, close windows,
                   map screen: enter the sector
 SELECT            this manual
@@ -64,12 +64,12 @@ and sector, the selected merc's health,
 energy, morale, action points and skills,
 and the controls for the screen you are on.
 
-SWAP: open this manual (SELECT) and tap
-"Swap screens" to put the game on the top
-screen and the dashboard on the touch screen.
-Tap the button at the foot of the touch
-screen to swap back. The choice is saved.
-The 3D slider is not used.
+SWAP: press ZL at any time to put the game on
+the top screen and the dashboard on the touch
+screen. Press ZL again (or tap the button at
+the foot of the touch screen) to swap back.
+The choice is saved. The stylus is off while
+the game is on top. The 3D slider is not used.
 # Getting started
 == 3. GETTING STARTED  (1/2)
 The tiny nation of Arulco is ruled by Queen
@@ -140,7 +140,7 @@ shows next to the cursor before you click.
 Unused AP carry a small bonus into the next
 turn.
 
-ZR (D) ends your turn. Enemies then move.
+Hold ZR (D) for half a second to end your turn. Enemies then move.
 INTERRUPTS: a merc who spots an enemy moving
 may get to act in the middle of their turn.
 == 5. TACTICAL COMBAT  (2/2)
@@ -150,7 +150,7 @@ STANCE (L / R): standing, crouched, prone.
   Crouched and prone mercs are harder to hit
   and aim better, but cost more AP to move.
 Climbing: R next to a low building climbs
-  onto the roof; ZL switches the cursor to
+  onto the roof; ZR switches the cursor to
   roof level so you can pick roof tiles.
 Doors: tap a door, then Do, to open it; with
   the cursor on a door B gives options
