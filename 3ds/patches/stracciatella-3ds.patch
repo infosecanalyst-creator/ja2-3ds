@@ -1706,3 +1706,23 @@ index 7104055..493c5ce 100644
  		if (bufferServiceThread == NULL) {
  			throw std::runtime_error(ST::format("SDL_CreateThread for SoundManBufferServiceThread returned error: {}", SDL_GetError()).c_str());
  		}
+diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
+index afb5d46..a5c8813 100644
+--- a/src/sgp/SGP.cc
++++ b/src/sgp/SGP.cc
+@@ -92,6 +92,7 @@ static void shutdownGame()
+ /** Deinitialize the game an exit. */
+ static void deinitGameAndExit()
+ {
++	printf("[3ds] deinitGameAndExit(): SDL_QUIT received, shutting down\n"); fflush(stdout); // 3DS debug
+ 	SLOGD("Deinitializing Game");
+ 	// If we are in Dead is Dead mode, save before exit
+ 	// Does this code also fire on crash? Let's hope not!
+@@ -107,6 +108,7 @@ static void deinitGameAndExit()
+  * Call this function if you want to exit the game. */
+ void requestGameExit()
+ {
++	printf("[3ds] requestGameExit() called\n"); fflush(stdout); // 3DS debug
+ 	SDL_Event event;
+ 	event.type = SDL_QUIT;
+ 	SDL_PushEvent(&event);
