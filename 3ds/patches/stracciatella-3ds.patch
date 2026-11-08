@@ -1738,3 +1738,17 @@ index 1056840..d6901fe 100644
  		exit(EXIT_FAILURE); \
  	} \
  	memset(p,0,x); \
+diff --git a/src/game/Intro.cc b/src/game/Intro.cc
+index a751166..bf57847 100644
+--- a/src/game/Intro.cc
++++ b/src/game/Intro.cc
+@@ -253,6 +253,9 @@ static INT32 GetNextIntroVideo(UINT32 uiCurrentVideo)
+ {
+ 	INT32 iStringToUse = -1;
+ 
++	// 3DS: the intro/ending movies are loaded whole into memory (tens of MB) and run the heap dry (smk_malloc exit()), so skip them
++	if (gbIntroScreenMode == INTRO_BEGINING || gbIntroScreenMode == INTRO_ENDING) return -1;
++
+ 	//switch on whether it is the beginging or the end game video
+ 	switch( gbIntroScreenMode )
+ 	{
