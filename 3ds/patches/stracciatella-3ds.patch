@@ -939,7 +939,7 @@ new file mode 100644
 index 0000000..5f3cd93
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,668 @@
+@@ -0,0 +1,670 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1050,6 +1050,8 @@ index 0000000..5f3cd93
 +	static char argv0[] = "ja2";
 +	static char* fakeArgv[] = { argv0, nullptr };
 +	if (argc <= 0 || !argv) { argc = 1; argv = fakeArgv; }
++	mkdir("/3ds", 0777); mkdir("/3ds/ja2", 0777); mkdir("/3ds/ja2/tmp", 0777);
++	setenv("TMPDIR", "/3ds/ja2/tmp", 1); // the 3DS has no /tmp; Rust's temp_dir() reads TMPDIR
 +	osSetSpeedupEnable(true); // 804 MHz from the very start (loading is CPU bound)
 +	mkdir(N3DS_DIR, 0777);
 +	chdir(N3DS_DIR);
