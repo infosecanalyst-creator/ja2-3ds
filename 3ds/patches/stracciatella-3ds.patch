@@ -1693,3 +1693,16 @@ index 0000000..e7e0e5c
 +void N3DS_LogMem(const char* tag);
 +void N3DS_BootStatus(const char* fmt, ...); // startup progress on screen + console.txt               // buttons / circle pad -> SDL events
 +#endif
+diff --git a/src/sgp/SoundMan.cc b/src/sgp/SoundMan.cc
+index 7104055..493c5ce 100644
+--- a/src/sgp/SoundMan.cc
++++ b/src/sgp/SoundMan.cc
+@@ -1021,7 +1021,7 @@ static BOOLEAN SoundInitHardware(void)
+ 			}
+ 		}
+ 
+-		bufferServiceThread = SDL_CreateThread(SoundServiceBuffers, "SoundManBufferServiceThread", (void *)NULL);
++		bufferServiceThread = SDL_CreateThreadWithStackSize(SoundServiceBuffers, "SoundManBufferServiceThread", 256 * 1024, (void *)NULL); // 3DS: SDL default is 16 KB, too small for resampling + logging
+ 		if (bufferServiceThread == NULL) {
+ 			throw std::runtime_error(ST::format("SDL_CreateThread for SoundManBufferServiceThread returned error: {}", SDL_GetError()).c_str());
+ 		}
