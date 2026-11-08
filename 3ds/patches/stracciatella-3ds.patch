@@ -1620,3 +1620,51 @@ index 0000000..7e7772b
 +void N3DS_PumpInput();
 +void N3DS_BootStatus(const char* fmt, ...); // startup progress on screen + console.txt               // buttons / circle pad -> SDL events
 +#endif
+diff --git a/rust/stracciatella_c_api/src/c/mod.rs b/rust/stracciatella_c_api/src/c/mod.rs
+index 8aaa1d5..171c182 100644
+--- a/rust/stracciatella_c_api/src/c/mod.rs
++++ b/rust/stracciatella_c_api/src/c/mod.rs
+@@ -100,12 +100,14 @@ pub(crate) mod common {
+     }
+ 
+     /// Gets a mutable reference from a mutable C pointer.
++    #[track_caller]
+     pub fn unsafe_mut<'a, T>(ptr: *mut T) -> &'a mut T {
+         assert!(!ptr.is_null());
+         unsafe { &mut *ptr }
+     }
+ 
+     /// Gets a mutable reference from a mutable C pointer.
++    #[track_caller]
+     pub fn unsafe_mut_option<'a, T>(ptr: *mut T) -> Option<&'a mut T> {
+         if ptr.is_null() {
+             None
+@@ -115,24 +117,28 @@ pub(crate) mod common {
+     }
+ 
+     /// Gets a reference from a const C pointer.
++    #[track_caller]
+     pub fn unsafe_ref<'a, T>(ptr: *const T) -> &'a T {
+         assert!(!ptr.is_null());
+         unsafe { &*ptr }
+     }
+ 
+     /// Gets a CStr from a const C character pointer.
++    #[track_caller]
+     pub fn unsafe_c_str<'a>(ptr: *const c_char) -> &'a CStr {
+         assert!(!ptr.is_null());
+         unsafe { CStr::from_ptr(ptr) }
+     }
+ 
+     /// Gets a slice from a const C pointer and length.
++    #[track_caller]
+     pub fn unsafe_slice<'a, T>(ptr: *const T, len: usize) -> &'a [T] {
+         assert!(!ptr.is_null());
+         unsafe { slice::from_raw_parts(ptr, len) }
+     }
+ 
+     /// Gets a mutable slice from a mutable C pointer and length.
++    #[track_caller]
+     pub fn unsafe_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+         assert!(!ptr.is_null());
+         unsafe { slice::from_raw_parts_mut(ptr, len) }
