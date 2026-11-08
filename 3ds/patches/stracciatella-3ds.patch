@@ -980,7 +980,7 @@ new file mode 100644
 index 0000000..3d01871
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,695 @@
+@@ -0,0 +1,696 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1076,6 +1076,7 @@ index 0000000..3d01871
 +// ---- memory: give malloc most of the application memory, keep a small linear heap (SDL/ndsp buffers)
 +extern "C" {
 +u32 __ctru_linear_heap_size = 16 * 1024 * 1024; // everything else (malloc heap) is the rest of the application memory
++u32 __stacksize__ = 1024 * 1024; // main thread stack (libctru default is 32 KB, far too small for JA2: overflow corrupted return addresses -> PC=0 crash)
 +}
 +void N3DS_LogMem(const char* tag)
 +{
