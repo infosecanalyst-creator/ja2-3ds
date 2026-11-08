@@ -1726,3 +1726,15 @@ index afb5d46..a5c8813 100644
  	SDL_Event event;
  	event.type = SDL_QUIT;
  	SDL_PushEvent(&event);
+diff --git a/dependencies/lib-smacker/libsmacker/smk_malloc.h b/dependencies/lib-smacker/libsmacker/smk_malloc.h
+index 1056840..d6901fe 100644
+--- a/dependencies/lib-smacker/libsmacker/smk_malloc.h
++++ b/dependencies/lib-smacker/libsmacker/smk_malloc.h
+@@ -60,6 +60,7 @@
+ 	if (!p) \
+ 	{ \
+ 		fprintf(stderr,"libsmacker::smk_malloc(" #p ",%lu) - ERROR: malloc() returned NULL (file: %s, line: %lu)\n", (unsigned long) x,  __FILE__, (unsigned long)__LINE__); \
++		printf("[3ds] smk_malloc FAILED: %lu bytes (" #p ") line %lu\n", (unsigned long) x, (unsigned long)__LINE__); fflush(stdout); \
+ 		exit(EXIT_FAILURE); \
+ 	} \
+ 	memset(p,0,x); \
