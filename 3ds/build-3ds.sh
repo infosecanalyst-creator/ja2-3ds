@@ -33,6 +33,7 @@ python3 -c "from PIL import Image; Image.open('$W/strac/assets/icons/logo.png').
 smdhtool --create "Stracciatella 3DS" "Plays your own JA2 Gold data (non-commercial)" "ja2-3ds (unofficial)" $W/icon48.png $W/ja2.smdh
 OUT=${OUT:-$HERE/../../SD-CARD/3ds/ja2}; mkdir -p $OUT   # override with OUT=...
 3dsxtool $W/build/ja2.elf $OUT/ja2.3dsx --smdh=$W/ja2.smdh
+arm-none-eabi-nm -C -n $W/build/ja2.elf | gzip -9 > $OUT/ja2.sym.gz   # symbol map for crash analysis (3dsx base 0x100000)
 cp -r $W/strac/assets/externalized $OUT/
 # SFI-SCLA: a build is a derivative work, so it travels with the licence and the change notice
 cp "$W/strac/SFI Source Code license agreement.txt" $OUT/
