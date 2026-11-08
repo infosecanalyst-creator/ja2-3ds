@@ -977,10 +977,10 @@ index 0000000..a1344b9
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..663fb99
+index 0000000..3d01871
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,693 @@
+@@ -0,0 +1,695 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1127,6 +1127,7 @@ index 0000000..663fb99
 +		}
 +	}
 +
++	atexit([] { printf("[3ds] atexit: process is exiting\n"); });
 +	std::set_new_handler(N3DS_NewHandler);
 +	N3DS_LogMem("startup");
 +	int rc = 1;
@@ -1670,6 +1671,7 @@ index 0000000..663fb99
 +	if (up & KEY_B)   PushMouseButton(SDL_BUTTON_RIGHT, false);
 +
 +	if (!aptMainLoop()) {
++		printf("[3ds] aptMainLoop() returned false (the system asked the app to quit) -> SDL_QUIT\n");
 +		SDL_Event e; SDL_zero(e); e.type = SDL_QUIT; SDL_PushEvent(&e);
 +	}
 +}
