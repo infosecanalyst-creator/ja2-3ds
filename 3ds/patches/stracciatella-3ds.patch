@@ -1674,3 +1674,16 @@ index 8aaa1d5..171c182 100644
      pub fn unsafe_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
          assert!(!ptr.is_null());
          unsafe { slice::from_raw_parts_mut(ptr, len) }
+diff --git a/src/sgp/Input.cc b/src/sgp/Input.cc
+index d276eef..2ab0dbe 100644
+--- a/src/sgp/Input.cc
++++ b/src/sgp/Input.cc
+@@ -11,7 +11,7 @@
+ 
+ #define BUTTON_REPEAT_TIMEOUT		250
+ #define BUTTON_REPEAT_TIME			50
+-#define TOUCH_REPEAT_TIMEOUT		750
++#define TOUCH_REPEAT_TIMEOUT		2000 // 3DS: B is the right click; a slow frame must not turn a tap into a long press
+ #define TOUCH_REPEAT_TIME 			100
+ 
+ // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
