@@ -1,24 +1,3 @@
-ja2-3ds: modifications to JA2 Stracciatella v0.22.1 for the New 3DS.
-
-NOTICE (SFI-SCLA section 4): this patch CHANGES the original Software. Every file
-it touches is a modified file, not the original. Changes made 2026-10 by the ja2-3ds
-authors. Distributed under the Strategy First Inc. Source Code License Agreement
-(non-commercial only); see "SFI Source Code license agreement.txt" in this repository.
-
-Modified files:
-  CMakeLists.txt, dependencies/lib-stracciatella/CMakeLists.txt,
-  rust/stracciatella/src/config/stracciatella_home.rs, rust/stracciatella/src/fs.rs,
-  rust/stracciatella/src/logger.rs, rust/stracciatella/src/mods/mod.rs,
-  rust/stracciatella/src/stracciatella.rs, rust/stracciatella/src/vfile.rs,
-  rust/stracciatella/src/vfs/dir.rs, src/externalized/DefaultContentManager.cc,
-  src/externalized/ItemModel.cc, src/externalized/json/Json.h, src/game/GameLoop.cc,
-  src/game/Laptop/Insurance_Contract.cc, src/game/SaveLoadScreen.cc,
-  src/sgp/CMakeLists.txt, src/sgp/SGP.cc, src/sgp/SoundMan.cc, src/sgp/Types.h,
-  src/sgp/Video.cc, src/sgp/n3ds/N3DS_Dashboard.cc, src/sgp/n3ds/N3DS_Dashboard.h,
-  src/sgp/n3ds/N3DS_Font.h, src/sgp/n3ds/N3DS_Font.h.metrics.json,
-  src/sgp/n3ds/N3DS_Manual.h, src/sgp/n3ds/N3DS_Platform.cc,
-  src/sgp/n3ds/N3DS_Platform.h
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 5fa4044..030abac 100644
 --- a/CMakeLists.txt
@@ -391,6 +370,54 @@ index 68d7c9d..f061002 100644
 +        Ok(())
      }
  }
+diff --git a/rust/stracciatella_c_api/src/c/mod.rs b/rust/stracciatella_c_api/src/c/mod.rs
+index 8aaa1d5..171c182 100644
+--- a/rust/stracciatella_c_api/src/c/mod.rs
++++ b/rust/stracciatella_c_api/src/c/mod.rs
+@@ -100,12 +100,14 @@ pub(crate) mod common {
+     }
+ 
+     /// Gets a mutable reference from a mutable C pointer.
++    #[track_caller]
+     pub fn unsafe_mut<'a, T>(ptr: *mut T) -> &'a mut T {
+         assert!(!ptr.is_null());
+         unsafe { &mut *ptr }
+     }
+ 
+     /// Gets a mutable reference from a mutable C pointer.
++    #[track_caller]
+     pub fn unsafe_mut_option<'a, T>(ptr: *mut T) -> Option<&'a mut T> {
+         if ptr.is_null() {
+             None
+@@ -115,24 +117,28 @@ pub(crate) mod common {
+     }
+ 
+     /// Gets a reference from a const C pointer.
++    #[track_caller]
+     pub fn unsafe_ref<'a, T>(ptr: *const T) -> &'a T {
+         assert!(!ptr.is_null());
+         unsafe { &*ptr }
+     }
+ 
+     /// Gets a CStr from a const C character pointer.
++    #[track_caller]
+     pub fn unsafe_c_str<'a>(ptr: *const c_char) -> &'a CStr {
+         assert!(!ptr.is_null());
+         unsafe { CStr::from_ptr(ptr) }
+     }
+ 
+     /// Gets a slice from a const C pointer and length.
++    #[track_caller]
+     pub fn unsafe_slice<'a, T>(ptr: *const T, len: usize) -> &'a [T] {
+         assert!(!ptr.is_null());
+         unsafe { slice::from_raw_parts(ptr, len) }
+     }
+ 
+     /// Gets a mutable slice from a mutable C pointer and length.
++    #[track_caller]
+     pub fn unsafe_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
+         assert!(!ptr.is_null());
+         unsafe { slice::from_raw_parts_mut(ptr, len) }
 diff --git a/src/externalized/DefaultContentManager.cc b/src/externalized/DefaultContentManager.cc
 index 4316a68..6848ab9 100644
 --- a/src/externalized/DefaultContentManager.cc
@@ -558,8 +585,21 @@ index ef31945..9a57e44 100644
  if (WITH_UNITTESTS)
      set(LOCAL_JA2_SOURCES
          ${LOCAL_JA2_SOURCES}
+diff --git a/src/sgp/Input.cc b/src/sgp/Input.cc
+index d276eef..2ab0dbe 100644
+--- a/src/sgp/Input.cc
++++ b/src/sgp/Input.cc
+@@ -11,7 +11,7 @@
+ 
+ #define BUTTON_REPEAT_TIMEOUT		250
+ #define BUTTON_REPEAT_TIME			50
+-#define TOUCH_REPEAT_TIMEOUT		750
++#define TOUCH_REPEAT_TIMEOUT		2000 // 3DS: B is the right click; a slow frame must not turn a tap into a long press
+ #define TOUCH_REPEAT_TIME 			100
+ 
+ // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
 diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..0a16205 100644
+index afb5d46..1145daa 100644
 --- a/src/sgp/SGP.cc
 +++ b/src/sgp/SGP.cc
 @@ -1,3 +1,6 @@
@@ -641,17 +681,18 @@ index afb5d46..0a16205 100644
  
  		SLOGD("Initializing Random");
  		// Initialize random number generator
-@@ -411,6 +438,9 @@ int main(int argc, char* argv[])
+@@ -411,6 +438,10 @@ int main(int argc, char* argv[])
  		SLOGD("Initializing Game Manager");
  		// Initialize the Game
  		InitializeGame();
 +#ifdef JA2_3DS
 +	N3DS_BootStatus("game initialised, starting");
++	N3DS_LogMem("game initialised");
 +#endif
  
  		gfGameInitialized = TRUE;
  
-@@ -431,6 +461,9 @@ int main(int argc, char* argv[])
+@@ -431,6 +462,9 @@ int main(int argc, char* argv[])
  
  		return EXIT_SUCCESS;
  	} catch (...) {
@@ -884,12 +925,12 @@ new file mode 100644
 index 0000000..4f73fa6
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Font.h.metrics.json
-@@ -0,0 +1,1 @@
+@@ -0,0 +1 @@
 +{"kFontSans": {" ": 4, "!": 5, "\"": 6, "#": 10, "$": 8, "%": 11, "&": 9, "'": 3, "(": 5, ")": 5, "*": 6, "+": 10, ",": 4, "-": 4, ".": 4, "/": 4, "0": 8, "1": 8, "2": 8, "3": 8, "4": 8, "5": 8, "6": 8, "7": 8, "8": 8, "9": 8, ":": 4, ";": 4, "<": 10, "=": 10, ">": 10, "?": 6, "@": 12, "A": 8, "B": 8, "C": 8, "D": 9, "E": 8, "F": 7, "G": 9, "H": 9, "I": 4, "J": 4, "K": 8, "L": 7, "M": 10, "N": 9, "O": 9, "P": 7, "Q": 9, "R": 8, "S": 8, "T": 7, "U": 9, "V": 8, "W": 12, "X": 8, "Y": 7, "Z": 8, "[": 5, "\\": 4, "]": 5, "^": 10, "_": 6, "`": 6, "a": 7, "b": 8, "c": 7, "d": 8, "e": 7, "f": 4, "g": 8, "h": 8, "i": 3, "j": 3, "k": 7, "l": 3, "m": 12, "n": 8, "o": 7, "p": 8, "q": 8, "r": 5, "s": 6, "t": 5, "u": 8, "v": 7, "w": 10, "x": 7, "y": 7, "z": 6, "{": 8, "|": 4, "}": 8, "~": 10}, "kFontBold": {" ": 5, "!": 6, "\"": 7, "#": 11, "$": 9, "%": 13, "&": 11, "'": 4, "(": 6, ")": 6, "*": 7, "+": 11, ",": 5, "-": 5, ".": 5, "/": 5, "0": 9, "1": 9, "2": 9, "3": 9, "4": 9, "5": 9, "6": 9, "7": 9, "8": 9, "9": 9, ":": 5, ";": 5, "<": 11, "=": 11, ">": 11, "?": 8, "@": 13, "A": 10, "B": 10, "C": 10, "D": 11, "E": 9, "F": 9, "G": 11, "H": 11, "I": 5, "J": 5, "K": 10, "L": 8, "M": 13, "N": 11, "O": 11, "P": 10, "Q": 11, "R": 10, "S": 9, "T": 9, "U": 11, "V": 10, "W": 14, "X": 10, "Y": 9, "Z": 9, "[": 6, "\\": 5, "]": 6, "^": 11, "_": 6, "`": 6, "a": 9, "b": 9, "c": 8, "d": 9, "e": 9, "f": 6, "g": 9, "h": 9, "i": 4, "j": 4, "k": 9, "l": 4, "m": 14, "n": 9, "o": 9, "p": 9, "q": 9, "r": 6, "s": 8, "t": 6, "u": 9, "v": 8, "w": 12, "x": 8, "y": 8, "z": 8, "{": 9, "|": 5, "}": 9, "~": 11}, "kFontMono": {" ": 7, "!": 7, "\"": 7, "#": 7, "$": 7, "%": 7, "&": 7, "'": 7, "(": 7, ")": 7, "*": 7, "+": 7, ",": 7, "-": 7, ".": 7, "/": 7, "0": 7, "1": 7, "2": 7, "3": 7, "4": 7, "5": 7, "6": 7, "7": 7, "8": 7, "9": 7, ":": 7, ";": 7, "<": 7, "=": 7, ">": 7, "?": 7, "@": 7, "A": 7, "B": 7, "C": 7, "D": 7, "E": 7, "F": 7, "G": 7, "H": 7, "I": 7, "J": 7, "K": 7, "L": 7, "M": 7, "N": 7, "O": 7, "P": 7, "Q": 7, "R": 7, "S": 7, "T": 7, "U": 7, "V": 7, "W": 7, "X": 7, "Y": 7, "Z": 7, "[": 7, "\\": 7, "]": 7, "^": 7, "_": 7, "`": 7, "a": 7, "b": 7, "c": 7, "d": 7, "e": 7, "f": 7, "g": 7, "h": 7, "i": 7, "j": 7, "k": 7, "l": 7, "m": 7, "n": 7, "o": 7, "p": 7, "q": 7, "r": 7, "s": 7, "t": 7, "u": 7, "v": 7, "w": 7, "x": 7, "y": 7, "z": 7, "{": 7, "|": 7, "}": 7, "~": 7}, "kFontBig": {" ": 6, "!": 8, "\"": 9, "#": 15, "$": 13, "%": 18, "&": 16, "'": 6, "(": 8, ")": 8, "*": 9, "+": 15, ",": 7, "-": 7, ".": 7, "/": 7, "0": 13, "1": 13, "2": 13, "3": 13, "4": 13, "5": 13, "6": 13, "7": 13, "8": 13, "9": 13, ":": 7, ";": 7, "<": 15, "=": 15, ">": 15, "?": 10, "@": 18, "A": 14, "B": 14, "C": 13, "D": 15, "E": 12, "F": 12, "G": 15, "H": 15, "I": 7, "J": 7, "K": 14, "L": 11, "M": 18, "N": 15, "O": 15, "P": 13, "Q": 15, "R": 14, "S": 13, "T": 12, "U": 15, "V": 14, "W": 20, "X": 14, "Y": 13, "Z": 13, "[": 8, "\\": 7, "]": 8, "^": 15, "_": 9, "`": 9, "a": 12, "b": 13, "c": 11, "d": 13, "e": 12, "f": 8, "g": 13, "h": 13, "i": 6, "j": 6, "k": 12, "l": 6, "m": 19, "n": 13, "o": 12, "p": 13, "q": 13, "r": 9, "s": 11, "t": 9, "u": 13, "v": 12, "w": 17, "x": 12, "y": 12, "z": 10, "{": 13, "|": 7, "}": 13, "~": 15}}
 \ No newline at end of file
 diff --git a/src/sgp/n3ds/N3DS_Manual.h b/src/sgp/n3ds/N3DS_Manual.h
 new file mode 100644
-index 0000000..808e7db
+index 0000000..a1344b9
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Manual.h
 @@ -0,0 +1,41 @@
@@ -936,10 +977,10 @@ index 0000000..808e7db
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..5f3cd93
+index 0000000..38eb767
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,670 @@
+@@ -0,0 +1,688 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1017,6 +1058,8 @@ index 0000000..5f3cd93
 +#include <sys/stat.h>
 +#include <unistd.h>
 +#include <exception>
++#include <new>
++#include <malloc.h>
 +#include <stdexcept>
 +#include <string>
 +#include <vector>
@@ -1029,6 +1072,20 @@ index 0000000..5f3cd93
 +
 +// startup progress: shown on the top screen until the game draws its first frame
 +static u64 g_bootT0 = 0;
++
++// ---- memory: give malloc most of the application memory, keep a small linear heap (SDL/ndsp buffers)
++extern "C" {
++u32 __ctru_linear_heap_size = 16 * 1024 * 1024; // everything else (malloc heap) is the rest of the application memory
++}
++void N3DS_LogMem(const char* tag)
++{
++	struct mallinfo mi = mallinfo();
++	printf("[mem] %s: app-free=%lu KB linear-free=%lu KB malloc-in-use=%d KB malloc-arena=%d KB\n", tag,
++	       (unsigned long)(osGetMemRegionFree(MEMREGION_APPLICATION) / 1024), (unsigned long)(linearSpaceFree() / 1024),
++	       mi.uordblks / 1024, mi.arena / 1024);
++}
++static void N3DS_NewHandler() { N3DS_LogMem("operator new FAILED"); throw std::bad_alloc(); }
++
 +void N3DS_BootStatus(const char* fmt, ...)
 +{
 +	char msg[160];
@@ -1070,6 +1127,8 @@ index 0000000..5f3cd93
 +		}
 +	}
 +
++	std::set_new_handler(N3DS_NewHandler);
++	N3DS_LogMem("startup");
 +	int rc = 1;
 +	std::string why;
 +	try {
@@ -1612,10 +1671,10 @@ index 0000000..5f3cd93
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Platform.h b/src/sgp/n3ds/N3DS_Platform.h
 new file mode 100644
-index 0000000..7e7772b
+index 0000000..e7e0e5c
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.h
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,11 @@
 +#pragma once
 +// Nintendo 3DS platform layer for JA2 Stracciatella
 +#ifdef JA2_3DS
@@ -1624,66 +1683,6 @@ index 0000000..7e7772b
 +void N3DS_Init();                    // CPU speedup, screen formats
 +void N3DS_Present(SDL_Surface* screen, int cursorX, int cursorY); // draw both screens
 +void N3DS_PumpInput();
++void N3DS_LogMem(const char* tag);
 +void N3DS_BootStatus(const char* fmt, ...); // startup progress on screen + console.txt               // buttons / circle pad -> SDL events
 +#endif
-diff --git a/rust/stracciatella_c_api/src/c/mod.rs b/rust/stracciatella_c_api/src/c/mod.rs
-index 8aaa1d5..171c182 100644
---- a/rust/stracciatella_c_api/src/c/mod.rs
-+++ b/rust/stracciatella_c_api/src/c/mod.rs
-@@ -100,12 +100,14 @@ pub(crate) mod common {
-     }
- 
-     /// Gets a mutable reference from a mutable C pointer.
-+    #[track_caller]
-     pub fn unsafe_mut<'a, T>(ptr: *mut T) -> &'a mut T {
-         assert!(!ptr.is_null());
-         unsafe { &mut *ptr }
-     }
- 
-     /// Gets a mutable reference from a mutable C pointer.
-+    #[track_caller]
-     pub fn unsafe_mut_option<'a, T>(ptr: *mut T) -> Option<&'a mut T> {
-         if ptr.is_null() {
-             None
-@@ -115,24 +117,28 @@ pub(crate) mod common {
-     }
- 
-     /// Gets a reference from a const C pointer.
-+    #[track_caller]
-     pub fn unsafe_ref<'a, T>(ptr: *const T) -> &'a T {
-         assert!(!ptr.is_null());
-         unsafe { &*ptr }
-     }
- 
-     /// Gets a CStr from a const C character pointer.
-+    #[track_caller]
-     pub fn unsafe_c_str<'a>(ptr: *const c_char) -> &'a CStr {
-         assert!(!ptr.is_null());
-         unsafe { CStr::from_ptr(ptr) }
-     }
- 
-     /// Gets a slice from a const C pointer and length.
-+    #[track_caller]
-     pub fn unsafe_slice<'a, T>(ptr: *const T, len: usize) -> &'a [T] {
-         assert!(!ptr.is_null());
-         unsafe { slice::from_raw_parts(ptr, len) }
-     }
- 
-     /// Gets a mutable slice from a mutable C pointer and length.
-+    #[track_caller]
-     pub fn unsafe_slice_mut<'a, T>(ptr: *mut T, len: usize) -> &'a mut [T] {
-         assert!(!ptr.is_null());
-         unsafe { slice::from_raw_parts_mut(ptr, len) }
-diff --git a/src/sgp/Input.cc b/src/sgp/Input.cc
-index d276eef..2ab0dbe 100644
---- a/src/sgp/Input.cc
-+++ b/src/sgp/Input.cc
-@@ -11,7 +11,7 @@
- 
- #define BUTTON_REPEAT_TIMEOUT		250
- #define BUTTON_REPEAT_TIME			50
--#define TOUCH_REPEAT_TIMEOUT		750
-+#define TOUCH_REPEAT_TIMEOUT		2000 // 3DS: B is the right click; a slow frame must not turn a tap into a long press
- #define TOUCH_REPEAT_TIME 			100
- 
- // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
