@@ -1383,7 +1383,7 @@ index 0000000..3d01871
 +		y += 32;
 +	} else if (d.screen == N3DS_SCR_MENU || !d.inGame) {
 +		y += 20;
-+		const char* l1 = d.screen == N3DS_SCR_MENU ? "Tap a menu item to choose it." : "Loading...";
++		const char* l1 = d.screen == N3DS_SCR_MENU ? "Tap a menu item to choose it." : d.screen == N3DS_SCR_INTRO ? "Loading..." : "Tap an option on the bottom screen.";
 +		Text(c, (W - TextW(l1, kFontBold)) / 2, y, l1, kText, kFontBold); y += 22;
 +		const char* l2 = "SELECT opens the manual at any time.";
 +		Text(c, (W - TextW(l2, kFontSans)) / 2, y, l2, kDim, kFontSans);
