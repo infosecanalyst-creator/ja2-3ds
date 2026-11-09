@@ -940,7 +940,7 @@ index 0000000..a1344b9
 +static const N3DSManualPage kN3DSManual[] = {
 +  { "CONTENTS", 22, { "Jagged Alliance 2 - New 3DS edition", "Engine: JA2 Stracciatella. Data: your JA2 Gold.", "", " 1  Controls", " 2  The two screens", " 3  Getting started", " 4  Hiring mercenaries", " 5  Tactical combat", " 6  Shooting and aiming", " 7  The strategic map", " 8  Assignments and militia", " 9  Money, mines and towns", "10  Inventory and items", "11  Saving and options", "12  Tips for a first campaign", "", "In this manual:", "  Circle Pad / C-Stick   scroll the text", "  D-Pad                  move between sections", "  L / R                  previous / next section", "  Tap a section on the touch screen to jump.", "  B or START closes the manual." } },
 +  { "1. CONTROLS  (1/2): STYLUS", 15, { "The touch screen is the whole game. The stylus", "is the mouse: tap = left click, drag = drag.", "For a right click, press B (it clicks at the", "cursor, i.e. where you last touched).", "", "In battle, a tap does not act at once. JA2's", "touch buttons pop up beside the target:", "  Do     confirm the move / shot / action", "  Run    move at a run          (moves)", "  Item   use the item in hand   (moves)", "  Aim    add an aim click       (shots)", "  Mode   single / burst fire    (shots)", "  X      cancel", "You can also steer the cursor with the Circle", "Pad and click with A / B." } },
-+  { "1. CONTROLS  (2/2): BUTTONS", 14, { "Circle Pad / C    move the cursor", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "START             Esc: cancel, close windows,", "                  map screen: enter the sector", "SELECT            this manual" } },
++  { "1. CONTROLS  (2/2): BUTTONS", 19, { "Circle Pad / C    move the cursor", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "START             Esc: cancel, close windows,", "                  map screen: enter the sector", "SELECT            this manual", "", "Left-handed (button on this manual screen):", "  the D-pad and A/B/X/Y swap jobs. Y/A/B/X act", "  as D-pad up/right/down/left; D-pad right =", "  A, down = B, up = X, left = Y." } },
 +  { "2. THE TWO SCREENS", 14, { "BOTTOM (touch): the complete game. Everything", "you click is here; the stylus is the mouse.", "", "TOP: the dashboard. It shows the date, time", "and sector, the selected merc's health,", "energy, morale, action points and skills,", "and the controls for the screen you are on.", "", "SWAP: press ZL at any time to put the game on", "the top screen and the dashboard on the touch", "screen. Press ZL again (or tap the button at", "the foot of the touch screen) to swap back.", "The choice is saved. The stylus is off while", "the game is on top. The 3D slider is not used." } },
 +  { "3. GETTING STARTED  (1/2)", 11, { "The tiny nation of Arulco is ruled by Queen", "Deidranna. Her exiled husband Enrico", "Chivaldori pays you to free it, town by town.", "", "New game: choose difficulty (Novice is a fair", "first try), game style (Realistic, or Sci-Fi", "with creatures) and Save Anytime / Iron Man.", "", "You start in the laptop, in your office. The", "clock does not run until your first team has", "landed, so take your time here." } },
 +  { "3. GETTING STARTED  (2/2)", 12, { "First steps:", " 1. Read Enrico's e-mail (Mail button).", " 2. Hire 3 - 6 mercs on the A.I.M. site, or", "    make your own on I.M.P. (chapter 4).", " 3. Close the laptop. On the map, your team", "    is in the helicopter heading for Omerta.", " 4. Press START (Esc) or tap Omerta to land.", " 5. In Omerta, find the rebels and speak to", "    Fatima, then Dimitri - they give you the", "    next lead. Drassen (to the east) has an", "    airport: taking it lets new mercs fly in", "    closer to the front." } },
@@ -980,7 +980,7 @@ new file mode 100644
 index 0000000..3d01871
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,696 @@
+@@ -0,0 +1,719 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1297,6 +1297,27 @@ index 0000000..3d01871
 +	SDL_EventState(SDL_FINGERDOWN, st); SDL_EventState(SDL_FINGERUP, st); SDL_EventState(SDL_FINGERMOTION, st);
 +	if (on) { if (FILE* f = fopen(N3DS_DIR "/.swap", "w")) fclose(f); } else remove(N3DS_DIR "/.swap");
 +}
+++// Left-handed play (UI rule 10): the D-pad and the face buttons swap jobs, so the free hand always has controls.
++static bool g_lefty = false;
++static void SetLefty(bool on)
++{
++	g_lefty = on;
++	if (on) { if (FILE* f = fopen(N3DS_DIR "/.lefty", "w")) fclose(f); } else remove(N3DS_DIR "/.lefty");
++}
++static u32 Remap(u32 m) // physical keys -> logical keys the rest of the code uses
++{
++	if (!g_lefty) return m;
++	u32 o = m & ~(KEY_DUP | KEY_DDOWN | KEY_DLEFT | KEY_DRIGHT | KEY_A | KEY_B | KEY_X | KEY_Y);
++	if (m & KEY_Y) o |= KEY_DUP;
++	if (m & KEY_A) o |= KEY_DRIGHT;
++	if (m & KEY_B) o |= KEY_DDOWN;
++	if (m & KEY_X) o |= KEY_DLEFT;
++	if (m & KEY_DUP) o |= KEY_X;
++	if (m & KEY_DRIGHT) o |= KEY_A;
++	if (m & KEY_DDOWN) o |= KEY_B;
++	if (m & KEY_DLEFT) o |= KEY_Y;
++	return o;
++}
 +
 +void N3DS_Init()
 +{
@@ -1309,6 +1330,7 @@ index 0000000..3d01871
 +	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 +	struct stat sb;
 +	SetSwap(stat(N3DS_DIR "/.swap", &sb) == 0);
++	SetLefty(stat(N3DS_DIR "/.lefty", &sb) == 0);
 +	g_ready = true;
 +}
 +
@@ -1393,9 +1415,9 @@ index 0000000..3d01871
 +	Fill(c, 0, sy, W, stripH, kPanel);
 +	const char *a, *b;
 +	switch (d.screen) {
-+		case N3DS_SCR_TACTICAL: a = "Tap=click  B=right click  ZR hold=end turn"; b = "L/R stance   X next merc   Y map   SELECT manual"; break;
-+		case N3DS_SCR_MAP:      a = "Tap = click   B = right click   X = time on/off"; b = "START enter sector   SELECT manual"; break;
-+		default:                a = "Tap or A = click   B = right click"; b = "Circle Pad = cursor   SELECT = manual"; break;
++		case N3DS_SCR_TACTICAL: a = g_lefty ? "Tap=click  D-Pad down=right click  ZR hold=end turn" : "Tap=click  B=right click  ZR hold=end turn"; b = g_lefty ? "L/R stance  D-Pad up=next merc  left=map  SELECT=manual" : "L/R stance   X next merc   Y map   SELECT manual"; break;
++		case N3DS_SCR_MAP:      a = g_lefty ? "Tap=click  D-Pad down=right click  up=time on/off" : "Tap = click   B = right click   X = time on/off"; b = "START enter sector   SELECT manual"; break;
++		default:                a = g_lefty ? "Tap or D-Pad right = click   D-Pad down = right click" : "Tap or A = click   B = right click"; b = "Circle Pad = cursor   SELECT = manual"; break;
 +	}
 +	Text(c, 6, sy + 3, a, kText, kFontSans, W - 12);
 +	Text(c, 6, sy + 18, b, kDim, kFontSans, W - 12);
@@ -1501,7 +1523,7 @@ index 0000000..3d01871
 +	return v;
 +}
 +static const int kManRows = 14, kManLineH = 15;
-+static const int kBtnSwap = 100, kBtnOpts = 101;
++static const int kBtnSwap = 100, kBtnLefty = 101, kBtnOpts = 102;
 +
 +static void DrawManualTop(int scroll, const std::vector<ManLine>& lines)
 +{
@@ -1518,7 +1540,7 @@ index 0000000..3d01871
 +		Fill(t, t.w - 6, 2 + barH * scroll / (int)lines.size(), 4, thumb < 8 ? 8 : thumb, kDim);
 +	}
 +	Fill(t, 0, t.h - 18, t.w, 18, kSel);
-+	Text(t, 8, t.h - 16, "Stick: scroll    D-Pad / L / R: section    B: close", kText, kFontSans, t.w - 16);
++	Text(t, 8, t.h - 16, g_lefty ? "Stick: scroll   A/B/X/Y or L/R: section   D-Pad down: close" : "Stick: scroll    D-Pad / L / R: section    B: close", kText, kFontSans, t.w - 16);
 +}
 +static void DrawManualBottom(int ch, int sel, int pressed)
 +{
@@ -1542,8 +1564,9 @@ index 0000000..3d01871
 +		const int tw = std::min(TextW(label, kFontSans), w - 8);
 +		Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + 7 + (pr ? 1 : 0), label, pr ? kBg : kText, kFontSans, w - 8);
 +	};
-+	button(kBtnSwap, 4, 152, g_swap ? "Game to touch screen" : "Swap screens");
-+	button(kBtnOpts, 164, 152, "Save / Load / Quit");
++	button(kBtnSwap, 6, 98, g_swap ? "Game to touch" : "Swap screens");
++	button(kBtnLefty, 108, 98, g_lefty ? "Left hand: on" : "Left hand: off");
++	button(kBtnOpts, 210, 104, "Save/Load/Quit");
 +}
 +
 +static void N3DS_RunManual(int startChapter = 0)
@@ -1556,21 +1579,21 @@ index 0000000..3d01871
 +	auto press = [&](int id) { pressed = id; pressFrames = 6; Click(); };
 +	while (aptMainLoop()) {
 +		hidScanInput();
-+		const u32 down = hidKeysDown(), rep = hidKeysDownRepeat();
++		const u32 down = Remap(hidKeysDown()), rep = Remap(hidKeysDownRepeat());
 +		if (!pressFrames && (down & (KEY_B | KEY_START | KEY_SELECT))) break;
 +		const int maxScroll = (int)lines.size() > kManRows ? (int)lines.size() - kManRows : 0;
 +		if (rep & (KEY_CPAD_DOWN | KEY_CSTICK_DOWN)) { if (scroll < maxScroll) ++scroll; }
 +		if (rep & (KEY_CPAD_UP | KEY_CSTICK_UP)) { if (scroll > 0) --scroll; }
 +		if (rep & KEY_DDOWN) { if (sel < kN3DSManualChapterCount - 1) go(sel + 1); else if (sel < kN3DSManualChapterCount) sel = kBtnSwap; }
 +		if (rep & KEY_DUP) { if (sel >= kBtnSwap) sel = ch; else if (sel > 0) go(sel - 1); }
-+		if ((rep & KEY_DRIGHT) && sel == kBtnSwap) sel = kBtnOpts;
-+		if ((rep & KEY_DLEFT) && sel == kBtnOpts) sel = kBtnSwap;
++		if ((rep & KEY_DRIGHT) && sel >= kBtnSwap && sel < kBtnOpts) ++sel;
++		if ((rep & KEY_DLEFT) && sel > kBtnSwap) --sel;
 +		if (down & KEY_R) { if (ch < kN3DSManualChapterCount - 1) go(ch + 1); }
 +		if (down & KEY_L) { if (ch > 0) go(ch - 1); }
-+		if (down & KEY_A) { press(sel); if (sel == kBtnOpts) action = 1; else if (sel == kBtnSwap) action = 2; }
++		if (down & KEY_A) { press(sel); if (sel == kBtnOpts) action = 1; else if (sel == kBtnSwap) action = 2; else if (sel == kBtnLefty) SetLefty(!g_lefty); }
 +		if (down & KEY_TOUCH) {
 +			touchPosition tp; hidTouchRead(&tp);
-+			if (tp.py >= 240 - 32) { const int id = tp.px < 160 ? kBtnSwap : kBtnOpts; press(id); action = id == kBtnOpts ? 1 : 2; }
++			if (tp.py >= 240 - 32) { const int id = tp.px < 106 ? kBtnSwap : tp.px < 208 ? kBtnLefty : kBtnOpts; press(id); if (id == kBtnLefty) SetLefty(!g_lefty); else action = id == kBtnOpts ? 1 : 2; }
 +			else { const int i = ((int)tp.py - 20) / 14; if (tp.py >= 20 && i >= 0 && i < kN3DSManualChapterCount) { press(i); go(i); } }
 +		}
 +		DrawManualTop(scroll, lines);
@@ -1606,14 +1629,14 @@ index 0000000..3d01871
 +		if (stat(N3DS_DIR "/.manual_seen", &sb) != 0) {
 +			if (FILE* f = fopen(N3DS_DIR "/.manual_seen", "w")) fclose(f);
 +			N3DS_RunManual(1); // open on the Controls chapter the first time
-+			prev = hidKeysHeld();
++			prev = Remap(hidKeysHeld());
 +		}
 +	}
-+	const u32 held = hidKeysHeld();
++	const u32 held = Remap(hidKeysHeld());
 +	const u32 down = held & ~prev, up = prev & ~held;
 +	if ((down & KEY_SELECT) && scr != N3DS_SCR_INTRO) {
 +		N3DS_RunManual();
-+		prev = hidKeysHeld();
++		prev = Remap(hidKeysHeld());
 +		return;
 +	}
 +	prev = held;
