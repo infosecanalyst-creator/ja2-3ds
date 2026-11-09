@@ -1297,7 +1297,7 @@ index 0000000..3d01871
 +	SDL_EventState(SDL_FINGERDOWN, st); SDL_EventState(SDL_FINGERUP, st); SDL_EventState(SDL_FINGERMOTION, st);
 +	if (on) { if (FILE* f = fopen(N3DS_DIR "/.swap", "w")) fclose(f); } else remove(N3DS_DIR "/.swap");
 +}
-++// Left-handed play (UI rule 10): the D-pad and the face buttons swap jobs, so the free hand always has controls.
++// Left-handed play (UI rule 10): the D-pad and the face buttons swap jobs, so the free hand always has controls.
 +static bool g_lefty = false;
 +static void SetLefty(bool on)
 +{
