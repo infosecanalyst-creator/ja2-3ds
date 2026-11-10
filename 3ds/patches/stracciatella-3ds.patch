@@ -979,7 +979,7 @@ diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,729 @@
+@@ -0,0 +1,778 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1053,6 +1053,7 @@ new file mode 100644
 +
 +// ---------------------------------------------------------------- startup diagnostics
 +#include <stdio.h>
++#include <stdlib.h>
 +#include <stdarg.h>
 +#include <sys/stat.h>
 +#include <unistd.h>
@@ -1289,6 +1290,7 @@ new file mode 100644
 +
 +// ================================================================ screen swap
 +static bool g_swap = false; // false: game on touch screen, dashboard on top
++static bool g_padOn = false; // swapped: the stylus is down on the touchpad
 +static void SetSwap(bool on)
 +{
 +	g_swap = on;
@@ -1346,6 +1348,22 @@ new file mode 100644
 +		for (int x = 0; x < 320; ++x) {
 +			const int sx = x * 2;
 +			if (u16* p = PxP(c, ox + x, y)) *p = avg565(avg565(r0[sx], r0[sx + 1]), avg565(r1[sx], r1[sx + 1]));
++		}
++	}
++}
++
++// Swapped (UI rule 8): the 640x480 frame fills the whole 400x240 top screen, no side bars.
++// Each top pixel averages a 2x2 block of the frame (columns step 1.6, rows 2).
++static void DrawGameFill(const Canvas& c, SDL_Surface* screen)
++{
++	const int spitch = screen->pitch / 2;
++	const u16* src = (const u16*)screen->pixels;
++	for (int y = 0; y < 240; ++y) {
++		const u16* r0 = src + (y * 2) * spitch;
++		const u16* r1 = r0 + spitch;
++		for (int x = 0; x < 400; ++x) {
++			int sx = (x * 8) / 5; if (sx > 638) sx = 638;
++			if (u16* p = PxP(c, x, y)) *p = avg565(avg565(r0[sx], r0[sx + 1]), avg565(r1[sx], r1[sx + 1]));
 +		}
 +	}
 +}
@@ -1410,7 +1428,7 @@ new file mode 100644
 +		Text(c, (W - TextW(l2, kFontSans)) / 2, y, l2, kDim, kFontSans);
 +	}
 +	// controls strip
-+	const int stripH = withSwapButton ? 58 : 36, sy = c.h - stripH;
++	const int stripH = withSwapButton ? 70 : 36, sy = c.h - stripH;
 +	Fill(c, 0, sy, W, stripH, kPanel);
 +	const char *a, *b;
 +	switch (d.screen) {
@@ -1418,12 +1436,16 @@ new file mode 100644
 +		case N3DS_SCR_MAP:      a = g_lefty ? "Tap=click  D-Pad down=right click  up=time on/off" : "Tap = click   B = right click   X = time on/off"; b = "START enter sector   SELECT manual"; break;
 +		default:                a = g_lefty ? "Tap or D-Pad right = click   D-Pad down = right click" : "Tap or A = click   B = right click"; b = "Circle Pad = cursor   SELECT = manual"; break;
 +	}
++	if (withSwapButton) {   // the game is on top: this screen is its touchpad (UI rule 7)
++		a = "Slide here: move the pointer   Tap: click";
++		b = g_lefty ? "D-Pad down: right click   ZL: swap back" : "B: right click   ZL: swap back";
++	}
 +	Text(c, 6, sy + 3, a, kText, kFontSans, W - 12);
 +	Text(c, 6, sy + 18, b, kDim, kFontSans, W - 12);
-+	if (withSwapButton) {
-+		Fill(c, 6, c.h - 22, W - 12, 18, kBtn);
++	if (withSwapButton) {   // UI rule 11: 26 px tall, 6 px from the edges
++		Fill(c, 6, c.h - 6 - 26, W - 12, 26, kBtn);
 +		const char* t = "Tap here: put the game back on this screen";
-+		Text(c, (W - std::min(TextW(t, kFontSans), W - 20)) / 2, c.h - 20, t, kText, kFontSans, W - 20);
++		Text(c, (W - std::min(TextW(t, kFontSans), W - 20)) / 2, c.h - 6 - 26 + 6, t, kText, kFontSans, W - 20);
 +	}
 +}
 +
@@ -1435,9 +1457,7 @@ new file mode 100644
 +		DrawGameHalf(CanvasFor(GFX_BOTTOM), 0, screen);
 +		DrawDashboard(CanvasFor(GFX_TOP), false);
 +	} else {
-+		Canvas t = CanvasFor(GFX_TOP);
-+		Fill(t, 0, 0, 40, 240, 0); Fill(t, 360, 0, 40, 240, 0);
-+		DrawGameHalf(t, 40, screen);
++		DrawGameFill(CanvasFor(GFX_TOP), screen);
 +		DrawDashboard(CanvasFor(GFX_BOTTOM), true);
 +	}
 +	gfxFlushBuffers();
@@ -1656,10 +1676,39 @@ new file mode 100644
 +		return;
 +	}
 +
-+	// game on the top screen: the touch screen is the dashboard, its button swaps back
-+	if (g_swap && (down & KEY_TOUCH)) {
-+		touchPosition tp; hidTouchRead(&tp);
-+		if (tp.py >= 240 - 24) { Click(); SetSwap(false); }
++	// game on the top screen (UI rule 7): the touch screen is a touchpad. Slide = move the pointer
++	// (relative, 2 game pixels per touch pixel), a short tap = left click where it points; B is the
++	// right click as always (R is JA2's stance key). The button at the foot swaps back.
++	{
++		static bool padMoved = false, padButton = false;
++		bool& padOn = g_padOn;
++		static int lastX = 0, lastY = 0, startX = 0, startY = 0;
++		static u64 padAt = 0;
++		if (g_swap && (down & KEY_TOUCH)) {
++			touchPosition tp; hidTouchRead(&tp);
++			if (tp.py >= 240 - 6 - 26 - 2) { Click(); SetSwap(false); padOn = false; padButton = true; }
++			else { padOn = true; padMoved = false; lastX = startX = tp.px; lastY = startY = tp.py; padAt = osGetTime(); fx = (float)gN3DSCursorX; fy = (float)gN3DSCursorY; }
++		} else if (g_swap && padOn && (held & KEY_TOUCH)) {
++			touchPosition tp; hidTouchRead(&tp);
++			const int dx = tp.px - lastX, dy = tp.py - lastY;
++			if (abs(tp.px - startX) + abs(tp.py - startY) > 6) padMoved = true;
++			if (dx || dy) {
++				fx += dx * 2.0f; fy += dy * 2.0f;
++				if (fx < 0) fx = 0; if (fx > 639) fx = 639;
++				if (fy < 0) fy = 0; if (fy > 479) fy = 479;
++				g_mx = (int)fx; g_my = (int)fy;
++				PushMouseMove();
++			}
++			lastX = tp.px; lastY = tp.py;
++		} else if (padOn && (up & KEY_TOUCH)) {
++			padOn = false;
++			if (g_swap && !padMoved && osGetTime() - padAt < 350) {
++				g_mx = (int)fx; g_my = (int)fy;
++				PushMouseButton(SDL_BUTTON_LEFT, true); PushMouseButton(SDL_BUTTON_LEFT, false);   // B stays the right click (R is stance)
++				Click();
++			}
++		}
++		if (padButton && !(held & KEY_TOUCH)) padButton = false;
 +	}
 +
 +	// ZL swaps the screens at any time. ZR: tap = cursor level ground / roof, hold 0.5 s = END TURN
@@ -1675,7 +1724,7 @@ new file mode 100644
 +		if (up & m.key)   PushKey(m.sym, false);
 +	}
 +
-+	if (fx < 0 || (held & (KEY_CPAD_UP|KEY_CPAD_DOWN|KEY_CPAD_LEFT|KEY_CPAD_RIGHT|KEY_CSTICK_UP|KEY_CSTICK_DOWN|KEY_CSTICK_LEFT|KEY_CSTICK_RIGHT)) == 0) {
++	if (!g_padOn && (fx < 0 || (held & (KEY_CPAD_UP|KEY_CPAD_DOWN|KEY_CPAD_LEFT|KEY_CPAD_RIGHT|KEY_CSTICK_UP|KEY_CSTICK_DOWN|KEY_CSTICK_LEFT|KEY_CSTICK_RIGHT)) == 0)) {
 +		fx = (float)gN3DSCursorX; fy = (float)gN3DSCursorY;
 +	}
 +	circlePosition cp, cs;
@@ -1694,7 +1743,7 @@ new file mode 100644
 +		if (fy < 0) fy = 0; if (fy > 479) fy = 479;
 +		g_mx = (int)fx; g_my = (int)fy;
 +		PushMouseMove();
-+	} else {
++	} else if (!g_padOn) {
 +		g_mx = gN3DSCursorX; g_my = gN3DSCursorY;
 +	}
 +

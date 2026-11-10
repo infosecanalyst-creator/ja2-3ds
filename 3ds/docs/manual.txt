@@ -68,8 +68,11 @@ SWAP: press ZL at any time to put the game on
 the top screen and the dashboard on the touch
 screen. Press ZL again (or tap the button at
 the foot of the touch screen) to swap back.
-The choice is saved. The stylus is off while
-the game is on top. The 3D slider is not used.
+The choice is saved. The game then fills the
+whole top screen, and the touch screen is a
+touchpad: slide to move the pointer, tap to
+click where it points (B is still the right
+click). The 3D slider is not used.
 # Getting started
 == 3. GETTING STARTED  (1/2)
 The tiny nation of Arulco is ruled by Queen
