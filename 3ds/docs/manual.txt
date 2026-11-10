@@ -10,8 +10,8 @@ Engine: JA2 Stracciatella. Data: your JA2 Gold.
  5  Tactical combat
  6  Shooting and aiming
  7  The strategic map
- 8  Assignments and militia
- 9  Money, mines and towns
+ 8  Jobs and militia
+ 9  Money and mines
 10  Inventory and items
 11  Saving and options
 12  Tips for a first campaign
@@ -204,7 +204,7 @@ Enemy patrols move too. The Queen will
 Airspace: you need SAM sites under your
   control before the helicopter (Skyrider,
   found in Drassen) can fly safely.
-# Assignments and militia
+# Jobs and militia
 == 8. ASSIGNMENTS AND MILITIA
 In the map screen, tap a merc's Assign
 column to give them a job:
@@ -222,7 +222,7 @@ Mercs need sleep. Tired mercs fight badly.
 
 MILITIA defend towns on their own. Train them
 in every sector of a town you want to keep.
-# Money, mines and towns
+# Money and mines
 == 9. MONEY, MINES AND TOWNS
 Enrico's money runs out quickly. Real income
 comes from MINES: take a town's mine and its
