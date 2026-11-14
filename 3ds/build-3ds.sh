@@ -21,7 +21,16 @@ mkdir -p $W/prefix/strac/include $W/prefix/strac/lib
   cargo +nightly build -Z build-std=std,panic_abort --target armv6k-nintendo-3ds --release -p stracciatella_c_api)
 cp $W/ctarget/armv6k-nintendo-3ds/release/libstracciatella_c_api.a $W/prefix/strac/lib/
 # 4. Game
+# Hardware test hooks (3ds-test-suite hwtest/selftest): inactive unless the test
+# agent starts the game with --selftest=<script>. Linked as one object with --wrap.
+arm-none-eabi-gcc -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -D__3DS__ \
+  -I$DEVKITPRO/libctru/include -c $HERE/selftest/selftest.c -o $W/selftest.o
+SELFTEST_LD="$W/selftest.o"
+for f in hidScanInput hidKeysHeld hidKeysDown hidKeysDownRepeat hidKeysUp hidTouchRead hidCircleRead irrstCstickRead aptMainLoop; do
+  SELFTEST_LD="$SELFTEST_LD -Wl,--wrap=$f"
+done
 cmake -S $W/strac -B $W/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_EXE_LINKER_FLAGS_RELEASE="$SELFTEST_LD" \
   -DPREBUILT_STRACCIATELLA_DIR=$W/prefix/strac -DSDL2_INCLUDE_DIR=$W/prefix/include/SDL2 \
   -DSDL2_LIBRARY_TEMP=$W/prefix/lib/libSDL2.a -DSDL2MAIN_LIBRARY=$W/prefix/lib/libSDL2main.a \
   -DWITH_UNITTESTS=OFF -DWITH_RUST_BINARIES=OFF -DBUILD_LAUNCHER=OFF
