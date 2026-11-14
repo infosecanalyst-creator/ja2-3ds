@@ -21,6 +21,10 @@ mkdir -p $W/prefix/strac/include $W/prefix/strac/lib
   cargo +nightly build -Z build-std=std,panic_abort --target armv6k-nintendo-3ds --release -p stracciatella_c_api)
 cp $W/ctarget/armv6k-nintendo-3ds/release/libstracciatella_c_api.a $W/prefix/strac/lib/
 # 4. Game
+# Generated headers first: the game is compiled with them (they used to be written
+# after ninja, so builds shipped the stale manual from the patch: labels cut off).
+python3 $HERE/tools/gen_font.py $W/strac/src/sgp/n3ds/N3DS_Font.h
+python3 $HERE/tools/gen_manual.py $HERE/docs/manual.txt $W/strac/src/sgp/n3ds/N3DS_Manual.h
 # Hardware test hooks (3ds-test-suite hwtest/selftest): inactive unless the test
 # agent starts the game with --selftest=<script>. Linked as one object with --wrap.
 arm-none-eabi-gcc -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -D__3DS__ \
@@ -36,8 +40,6 @@ cmake -S $W/strac -B $W/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3
   -DWITH_UNITTESTS=OFF -DWITH_RUST_BINARIES=OFF -DBUILD_LAUNCHER=OFF
 ninja -C $W/build
 # 5. Package into the one SD-CARD location
-python3 $HERE/tools/gen_font.py $W/strac/src/sgp/n3ds/N3DS_Font.h
-python3 $HERE/tools/gen_manual.py $HERE/docs/manual.txt $W/strac/src/sgp/n3ds/N3DS_Manual.h
 python3 -c "from PIL import Image; Image.open('$W/strac/assets/icons/logo.png').convert('RGBA').resize((48,48)).save('$W/icon48.png')"
 smdhtool --create "Stracciatella 3DS" "Plays your own JA2 Gold data (non-commercial)" "ja2-3ds (unofficial)" $W/icon48.png $W/ja2.smdh
 OUT=${OUT:-$HERE/../../SD-CARD/3ds/ja2}; mkdir -p $OUT   # override with OUT=...

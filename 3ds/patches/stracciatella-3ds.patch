@@ -15,6 +15,18 @@ index 5fa4044..030abac 100644
  set(JA2_BINARY "ja2")
  set(LAUNCHER_BINARY "ja2-launcher")
  set(CMAKE_CXX_STANDARD 17)
+diff --git a/dependencies/lib-smacker/libsmacker/smk_malloc.h b/dependencies/lib-smacker/libsmacker/smk_malloc.h
+index 1056840..d6901fe 100644
+--- a/dependencies/lib-smacker/libsmacker/smk_malloc.h
++++ b/dependencies/lib-smacker/libsmacker/smk_malloc.h
+@@ -60,6 +60,7 @@
+ 	if (!p) \
+ 	{ \
+ 		fprintf(stderr,"libsmacker::smk_malloc(" #p ",%lu) - ERROR: malloc() returned NULL (file: %s, line: %lu)\n", (unsigned long) x,  __FILE__, (unsigned long)__LINE__); \
++		printf("[3ds] smk_malloc FAILED: %lu bytes (" #p ") line %lu\n", (unsigned long) x, (unsigned long)__LINE__); fflush(stdout); \
+ 		exit(EXIT_FAILURE); \
+ 	} \
+ 	memset(p,0,x); \
 diff --git a/dependencies/lib-stracciatella/CMakeLists.txt b/dependencies/lib-stracciatella/CMakeLists.txt
 index e5ddcc3..3dfe3a6 100644
 --- a/dependencies/lib-stracciatella/CMakeLists.txt
@@ -531,6 +543,20 @@ index 36bbf40..d0a3e6e 100644
  	{
  		if (gfEditMode && GameMode::getInstance()->isEditorMode())
  		{
+diff --git a/src/game/Intro.cc b/src/game/Intro.cc
+index a751166..bf57847 100644
+--- a/src/game/Intro.cc
++++ b/src/game/Intro.cc
+@@ -253,6 +253,9 @@ static INT32 GetNextIntroVideo(UINT32 uiCurrentVideo)
+ {
+ 	INT32 iStringToUse = -1;
+ 
++	// 3DS: the intro/ending movies are loaded whole into memory (tens of MB) and run the heap dry (smk_malloc exit()), so skip them
++	if (gbIntroScreenMode == INTRO_BEGINING || gbIntroScreenMode == INTRO_ENDING) return -1;
++
+ 	//switch on whether it is the beginging or the end game video
+ 	switch( gbIntroScreenMode )
+ 	{
 diff --git a/src/game/Laptop/Insurance_Contract.cc b/src/game/Laptop/Insurance_Contract.cc
 index d260c8a..7f61e80 100644
 --- a/src/game/Laptop/Insurance_Contract.cc
@@ -599,7 +625,7 @@ index d276eef..2ab0dbe 100644
  
  // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
 diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..1145daa 100644
+index afb5d46..01bf0cb 100644
 --- a/src/sgp/SGP.cc
 +++ b/src/sgp/SGP.cc
 @@ -1,3 +1,6 @@
@@ -609,7 +635,23 @@ index afb5d46..1145daa 100644
  #include "Button_System.h"
  #include "FPS.h"
  #include "GameLoop.h"
-@@ -122,6 +125,9 @@ static void MainLoop()
+@@ -92,6 +95,7 @@ static void shutdownGame()
+ /** Deinitialize the game an exit. */
+ static void deinitGameAndExit()
+ {
++	printf("[3ds] deinitGameAndExit(): SDL_QUIT received, shutting down\n"); fflush(stdout); // 3DS debug
+ 	SLOGD("Deinitializing Game");
+ 	// If we are in Dead is Dead mode, save before exit
+ 	// Does this code also fire on crash? Let's hope not!
+@@ -107,6 +111,7 @@ static void deinitGameAndExit()
+  * Call this function if you want to exit the game. */
+ void requestGameExit()
+ {
++	printf("[3ds] requestGameExit() called\n"); fflush(stdout); // 3DS debug
+ 	SDL_Event event;
+ 	event.type = SDL_QUIT;
+ 	SDL_PushEvent(&event);
+@@ -122,6 +127,9 @@ static void MainLoop()
  		extern void UpdateJA2Clock();
  		UpdateJA2Clock();
  
@@ -619,7 +661,7 @@ index afb5d46..1145daa 100644
  		SDL_Event event;
  		if (SDL_PollEvent(&event))
  		{
-@@ -266,7 +272,13 @@ std::vector<ST::string> InitGlobalLocale()
+@@ -266,7 +274,13 @@ std::vector<ST::string> InitGlobalLocale()
  	return problems;
  }
  
@@ -633,7 +675,7 @@ index afb5d46..1145daa 100644
  {
      try {
  		#ifdef __ANDROID__
-@@ -357,6 +369,9 @@ int main(int argc, char* argv[])
+@@ -357,6 +371,9 @@ int main(int argc, char* argv[])
  		////////////////////////////////////////////////////////////
  
  		SDL_Init(SDL_INIT_VIDEO);
@@ -643,7 +685,7 @@ index afb5d46..1145daa 100644
  
  		// restore output to the console (on windows when built with MINGW)
  	#ifdef __MINGW32__
-@@ -379,6 +394,9 @@ int main(int argc, char* argv[])
+@@ -379,6 +396,9 @@ int main(int argc, char* argv[])
  		}
  
  		cm->logConfiguration();
@@ -653,7 +695,7 @@ index afb5d46..1145daa 100644
  
  		if (!cm->loadGameData())
  		{
-@@ -386,11 +404,17 @@ int main(int argc, char* argv[])
+@@ -386,11 +406,17 @@ int main(int argc, char* argv[])
  		}
  
  		GCM = cm;
@@ -671,7 +713,7 @@ index afb5d46..1145daa 100644
  		VideoSetBrightness(brightness);
  
  		SLOGD("Initializing Video Object Manager");
-@@ -403,6 +427,9 @@ int main(int argc, char* argv[])
+@@ -403,6 +429,9 @@ int main(int argc, char* argv[])
  
  		SLOGD("Initializing Sound Manager");
  		InitializeSoundManager();
@@ -681,7 +723,7 @@ index afb5d46..1145daa 100644
  
  		SLOGD("Initializing Random");
  		// Initialize random number generator
-@@ -411,6 +438,10 @@ int main(int argc, char* argv[])
+@@ -411,6 +440,10 @@ int main(int argc, char* argv[])
  		SLOGD("Initializing Game Manager");
  		// Initialize the Game
  		InitializeGame();
@@ -692,7 +734,7 @@ index afb5d46..1145daa 100644
  
  		gfGameInitialized = TRUE;
  
-@@ -431,6 +462,9 @@ int main(int argc, char* argv[])
+@@ -431,6 +464,9 @@ int main(int argc, char* argv[])
  
  		return EXIT_SUCCESS;
  	} catch (...) {
@@ -703,7 +745,7 @@ index afb5d46..1145daa 100644
  			TerminationHandler();
  		} catch (...) {
 diff --git a/src/sgp/SoundMan.cc b/src/sgp/SoundMan.cc
-index 7104055..7d37059 100644
+index 7104055..fea9d8c 100644
 --- a/src/sgp/SoundMan.cc
 +++ b/src/sgp/SoundMan.cc
 @@ -37,6 +37,9 @@
@@ -716,6 +758,15 @@ index 7104055..7d37059 100644
  #define MA_NO_GENERATION
  #define MA_NO_ENCODING
  #include <miniaudio.h>
+@@ -1021,7 +1024,7 @@ static BOOLEAN SoundInitHardware(void)
+ 			}
+ 		}
+ 
+-		bufferServiceThread = SDL_CreateThread(SoundServiceBuffers, "SoundManBufferServiceThread", (void *)NULL);
++		bufferServiceThread = SDL_CreateThreadWithStackSize(SoundServiceBuffers, "SoundManBufferServiceThread", 256 * 1024, (void *)NULL); // 3DS: SDL default is 16 KB, too small for resampling + logging
+ 		if (bufferServiceThread == NULL) {
+ 			throw std::runtime_error(ST::format("SDL_CreateThread for SoundManBufferServiceThread returned error: {}", SDL_GetError()).c_str());
+ 		}
 diff --git a/src/sgp/Types.h b/src/sgp/Types.h
 index a4ead1b..dd5b468 100644
 --- a/src/sgp/Types.h
@@ -930,7 +981,7 @@ index 0000000..4f73fa6
 \ No newline at end of file
 diff --git a/src/sgp/n3ds/N3DS_Manual.h b/src/sgp/n3ds/N3DS_Manual.h
 new file mode 100644
-index 0000000..a1344b9
+index 0000000..2abfbd0
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Manual.h
 @@ -0,0 +1,41 @@
@@ -938,19 +989,19 @@ index 0000000..a1344b9
 +#pragma once
 +struct N3DSManualPage { const char* title; int n; const char* lines[25]; };
 +static const N3DSManualPage kN3DSManual[] = {
-+  { "CONTENTS", 22, { "Jagged Alliance 2 - New 3DS edition", "Engine: JA2 Stracciatella. Data: your JA2 Gold.", "", " 1  Controls", " 2  The two screens", " 3  Getting started", " 4  Hiring mercenaries", " 5  Tactical combat", " 6  Shooting and aiming", " 7  The strategic map", " 8  Assignments and militia", " 9  Money, mines and towns", "10  Inventory and items", "11  Saving and options", "12  Tips for a first campaign", "", "In this manual:", "  Circle Pad / C-Stick   scroll the text", "  D-Pad                  move between sections", "  L / R                  previous / next section", "  Tap a section on the touch screen to jump.", "  B or START closes the manual." } },
++  { "CONTENTS", 22, { "Jagged Alliance 2 - New 3DS edition", "Engine: JA2 Stracciatella. Data: your JA2 Gold.", "", " 1  Controls", " 2  The two screens", " 3  Getting started", " 4  Hiring mercenaries", " 5  Tactical combat", " 6  Shooting and aiming", " 7  The strategic map", " 8  Jobs and militia", " 9  Money and mines", "10  Inventory and items", "11  Saving and options", "12  Tips for a first campaign", "", "In this manual:", "  Circle Pad / C-Stick   scroll the text", "  D-Pad                  move between sections", "  L / R                  previous / next section", "  Tap a section on the touch screen to jump.", "  B or START closes the manual." } },
 +  { "1. CONTROLS  (1/2): STYLUS", 15, { "The touch screen is the whole game. The stylus", "is the mouse: tap = left click, drag = drag.", "For a right click, press B (it clicks at the", "cursor, i.e. where you last touched).", "", "In battle, a tap does not act at once. JA2's", "touch buttons pop up beside the target:", "  Do     confirm the move / shot / action", "  Run    move at a run          (moves)", "  Item   use the item in hand   (moves)", "  Aim    add an aim click       (shots)", "  Mode   single / burst fire    (shots)", "  X      cancel", "You can also steer the cursor with the Circle", "Pad and click with A / B." } },
-+  { "1. CONTROLS  (2/2): BUTTONS", 19, { "Circle Pad / C    move the cursor", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "START             Esc: cancel, close windows,", "                  map screen: enter the sector", "SELECT            this manual", "", "Left-handed (button on this manual screen):", "  the D-pad and A/B/X/Y swap jobs. Y/A/B/X act", "  as D-pad up/right/down/left; D-pad right =", "  A, down = B, up = X, left = Y." } },
-+  { "2. THE TWO SCREENS", 14, { "BOTTOM (touch): the complete game. Everything", "you click is here; the stylus is the mouse.", "", "TOP: the dashboard. It shows the date, time", "and sector, the selected merc's health,", "energy, morale, action points and skills,", "and the controls for the screen you are on.", "", "SWAP: press ZL at any time to put the game on", "the top screen and the dashboard on the touch", "screen. Press ZL again (or tap the button at", "the foot of the touch screen) to swap back.", "The choice is saved. The stylus is off while", "the game is on top. The 3D slider is not used." } },
++  { "1. CONTROLS  (2/2): BUTTONS", 15, { "Circle Pad / C    move the cursor", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "SELECT            Esc: cancel, close windows,", "                  map screen: enter the sector", "START             menu: resume, manual, save /", "                  load / options, left hand, exit" } },
++  { "2. THE TWO SCREENS", 17, { "BOTTOM (touch): the complete game. Everything", "you click is here; the stylus is the mouse.", "", "TOP: the dashboard. It shows the date, time", "and sector, the selected merc's health,", "energy, morale, action points and skills,", "and the controls for the screen you are on.", "", "SWAP: press ZL at any time to put the game on", "the top screen and the dashboard on the touch", "screen. Press ZL again (or tap the button at", "the foot of the touch screen) to swap back.", "The choice is saved. The game then fills the", "whole top screen, and the touch screen is a", "touchpad: slide to move the pointer, tap to", "click where it points (B is still the right", "click). The 3D slider is not used." } },
 +  { "3. GETTING STARTED  (1/2)", 11, { "The tiny nation of Arulco is ruled by Queen", "Deidranna. Her exiled husband Enrico", "Chivaldori pays you to free it, town by town.", "", "New game: choose difficulty (Novice is a fair", "first try), game style (Realistic, or Sci-Fi", "with creatures) and Save Anytime / Iron Man.", "", "You start in the laptop, in your office. The", "clock does not run until your first team has", "landed, so take your time here." } },
-+  { "3. GETTING STARTED  (2/2)", 12, { "First steps:", " 1. Read Enrico's e-mail (Mail button).", " 2. Hire 3 - 6 mercs on the A.I.M. site, or", "    make your own on I.M.P. (chapter 4).", " 3. Close the laptop. On the map, your team", "    is in the helicopter heading for Omerta.", " 4. Press START (Esc) or tap Omerta to land.", " 5. In Omerta, find the rebels and speak to", "    Fatima, then Dimitri - they give you the", "    next lead. Drassen (to the east) has an", "    airport: taking it lets new mercs fly in", "    closer to the front." } },
++  { "3. GETTING STARTED  (2/2)", 12, { "First steps:", " 1. Read Enrico's e-mail (Mail button).", " 2. Hire 3 - 6 mercs on the A.I.M. site, or", "    make your own on I.M.P. (chapter 4).", " 3. Close the laptop. On the map, your team", "    is in the helicopter heading for Omerta.", " 4. Press SELECT (Esc) or tap Omerta to land.", " 5. In Omerta, find the rebels and speak to", "    Fatima, then Dimitri - they give you the", "    next lead. Drassen (to the east) has an", "    airport: taking it lets new mercs fly in", "    closer to the front." } },
 +  { "4. HIRING MERCENARIES  (1/2)", 13, { "A.I.M. (laptop > A.I.M.): the elite agency.", "  Members > tap a face for stats and price.", "  Contracts are 1 day, 1 week or 2 weeks;", "  longer is cheaper per day. Mercs with", "  high Leadership and Wisdom are good early;", "  a medic (Medical skill) is essential.", "  Some mercs refuse to work with people they", "  dislike, or until you prove yourself.", "M.E.R.C. (Speck's site) opens a few days in:", "  cheaper, paid daily, a mixed bag.", "I.M.P.: create your own merc ($3000). A", "  personality quiz decides skills and stats.", "  Typing a name opens the 3DS keyboard." } },
 +  { "4. HIRING MERCENARIES  (2/2)", 15, { "Equipment arrives with the merc (pick \"buy", "equipment\" on A.I.M.). Bobby Ray's (laptop)", "sells guns, ammo and armour by mail; orders", "are delivered to Drassen airport once you", "hold it.", "", "Pay attention to:", "  Health / Agility / Dexterity  - survival,", "      speed and accuracy.", "  Marksmanship                  - hitting.", "  Medical, Mechanical,", "  Explosives, Leadership        - jobs.", "  Experience level              - interrupts.", "Morale drops when mercs are hurt, unpaid or", "working with people they dislike." } },
-+  { "5. TACTICAL COMBAT  (1/2)", 14, { "In a sector with no enemies in sight, time", "runs in real time. When either side spots", "the other, the game switches to TURNS.", "", "ACTION POINTS (AP): each merc gets AP every", "turn. Walking, kneeling, opening doors,", "reloading and shooting all cost AP. The cost", "shows next to the cursor before you click.", "Unused AP carry a small bonus into the next", "turn.", "", "ZR (D) ends your turn. Enemies then move.", "INTERRUPTS: a merc who spots an enemy moving", "may get to act in the middle of their turn." } },
++  { "5. TACTICAL COMBAT  (1/2)", 15, { "In a sector with no enemies in sight, time", "runs in real time. When either side spots", "the other, the game switches to TURNS.", "", "ACTION POINTS (AP): each merc gets AP every", "turn. Walking, kneeling, opening doors,", "reloading and shooting all cost AP. The cost", "shows next to the cursor before you click.", "Unused AP carry a small bonus into the next", "turn.", "", "Hold ZR (D) for half a second to end your", "turn. Enemies then move.", "INTERRUPTS: a merc who spots an enemy moving", "may get to act in the middle of their turn." } },
 +  { "5. TACTICAL COMBAT  (2/2)", 14, { "Moving: tap a tile. The path and its AP cost", "  show; tap Do (or Run) to go, X to cancel.", "STANCE (L / R): standing, crouched, prone.", "  Crouched and prone mercs are harder to hit", "  and aim better, but cost more AP to move.", "Climbing: R next to a low building climbs", "  onto the roof; ZR switches the cursor to", "  roof level so you can pick roof tiles.", "Doors: tap a door, then Do, to open it; with", "  the cursor on a door B gives options", "  (lockpick, force, explosives, examine).", "Healing: bandage bleeding mercs at once", "  (first aid kit in hand, then the merc).", "  Bleeding mercs lose health every turn." } },
 +  { "6. SHOOTING AND AIMING", 15, { "With a gun in hand, tap an enemy. The chance", "to hit shows, with Aim / Mode / Do / X.", "  Aim   each tap adds an aim click: costs AP,", "        raises the chance to hit", "  Mode  single shot or burst (if the gun has", "        one). Bursts use more ammo but hit", "        more often at short range.", "  Do    fire", "With buttons: move the cursor onto the enemy,", "B adds aim, A fires.", "", "Range and light matter: night, smoke and", "distance hurt accuracy. Head shots kill but", "are hard; aim at the body.", "Grenades: put one in hand, then target a tile." } },
 +  { "7. THE STRATEGIC MAP  (1/2)", 13, { "Y (M) opens the map. Arulco is a grid of", "sectors (A1 - P16). Towns are named; red", "sectors hold enemy forces you know about.", "", "Moving: tap a squad's name, choose Plot", "  Route, tap sectors, then confirm. Squads", "  walk; vehicles and the helicopter are", "  faster.", "Time: X (Space) pauses / resumes. The time", "  buttons along the bottom set the speed", "  (5 min, 30 min, 60 min, 6 hours per", "  second). Time stops automatically when", "  something needs you." } },
-+  { "7. THE STRATEGIC MAP  (2/2)", 12, { "Entering a sector: move a squad in. If", "  enemies are there you choose to attack,", "  or retreat when they attack you.", "START (Esc) on a highlighted sector with", "  your mercs in it shows that sector.", "", "Enemy patrols move too. The Queen will", "  counter-attack towns you take, so leave", "  defenders (militia, chapter 8).", "Airspace: you need SAM sites under your", "  control before the helicopter (Skyrider,", "  found in Drassen) can fly safely." } },
++  { "7. THE STRATEGIC MAP  (2/2)", 12, { "Entering a sector: move a squad in. If", "  enemies are there you choose to attack,", "  or retreat when they attack you.", "SELECT (Esc) on a highlighted sector with", "  your mercs in it shows that sector.", "", "Enemy patrols move too. The Queen will", "  counter-attack towns you take, so leave", "  defenders (militia, chapter 8).", "Airspace: you need SAM sites under your", "  control before the helicopter (Skyrider,", "  found in Drassen) can fly safely." } },
 +  { "8. ASSIGNMENTS AND MILITIA", 16, { "In the map screen, tap a merc's Assign", "column to give them a job:", "  On duty      part of a squad (default)", "  Doctor       heals others in the sector", "               (needs a medical kit)", "  Patient      rests to heal faster", "  Repair       fixes items (toolkit)", "  Train Town   trains militia - only in a", "               town sector you control,", "               costs money", "  Practice / Student / Trainer", "               raise a stat over time", "Mercs need sleep. Tired mercs fight badly.", "", "MILITIA defend towns on their own. Train them", "in every sector of a town you want to keep." } },
 +  { "9. MONEY, MINES AND TOWNS", 15, { "Enrico's money runs out quickly. Real income", "comes from MINES: take a town's mine and its", "head miner starts paying you daily.", "", "LOYALTY: each town's loyalty (shown on the", "map) rises as you free it, train militia and", "treat people well, and falls if you steal,", "kill civilians or lose battles there. Low", "loyalty cuts mine income.", "", "Spend on: merc contracts (renew before they", "run out!), militia training, Bobby Ray's", "orders and medical care.", "The financial report (laptop > Finances)", "shows daily income and expenses." } },
 +  { "10. INVENTORY AND ITEMS", 16, { "Tap a merc's face (or the inventory switch on", "the panel) to open their inventory. On the", "map screen, Enter shows the merc's gear and", "the sector's ground items.", "", "Moving items: tap an item to pick it up, tap", "  a slot to drop it. Tap a merc's face to", "  pass it to them.", "Hands: what is in the main hand is used in", "  combat. Put ammo on a gun to reload it.", "Attachments: tap an item with another item to", "  combine or attach (scopes, silencers...).", "  Hold (right click) an item for details.", "Weight: heavy loads cost AP and energy.", "The top screen is the easiest way to read", "item names and stats - point at them." } },
@@ -968,8 +1019,8 @@ index 0000000..a1344b9
 +  { "Tactical combat", 8 },
 +  { "Shooting and aiming", 10 },
 +  { "The strategic map", 11 },
-+  { "Assignments and militia", 13 },
-+  { "Money, mines and towns", 14 },
++  { "Jobs and militia", 13 },
++  { "Money and mines", 14 },
 +  { "Inventory and items", 15 },
 +  { "Saving and options", 16 },
 +  { "Tips", 17 },
@@ -977,9 +1028,10 @@ index 0000000..a1344b9
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
+index 0000000..655ed9d
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,778 @@
+@@ -0,0 +1,882 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1199,7 +1251,7 @@ new file mode 100644
 +	{ KEY_Y,      SDLK_m },         // strategic map
 +	{ KEY_L,      SDLK_PAGEDOWN },  // stance down
 +	{ KEY_R,      SDLK_PAGEUP },    // stance up / climb
-+	{ KEY_START,  SDLK_ESCAPE },    // cancel / enter sector from map
++	{ KEY_SELECT, SDLK_ESCAPE },    // Esc: cancel / close / enter sector from map (START opens the port menu)
 +};
 +
 +
@@ -1249,8 +1301,10 @@ new file mode 100644
 +	}
 +	return x - x0;
 +}
-+const u16 kBg = C565(14, 20, 40), kPanel = C565(26, 36, 64), kText = C565(230, 230, 230), kTitle = C565(255, 214, 110),
-+          kDim = C565(150, 160, 180), kSel = C565(50, 80, 140), kBtn = C565(120, 60, 30), kBtnHi = C565(190, 100, 45),
++// House style palette (claude/3ds-look-and-feel.md): navy background, navy-blue faces, gold captions.
++const u16 kBg = C565(8, 12, 40), kPanel = C565(20, 30, 70), kText = C565(240, 240, 240), kTitle = C565(255, 204, 64),
++          kDim = C565(150, 150, 165), kSel = C565(40, 56, 120), kBtn = C565(40, 56, 120), kBtnHi = C565(80, 104, 180),
++          kEdge = C565(120, 150, 230),
 +          kBarBg = C565(40, 44, 70);
 +} // namespace
 +
@@ -1391,11 +1445,11 @@ new file mode 100644
 +	const int W = c.w;
 +	Fill(c, 0, 0, W, c.h, kBg);
 +	// header
-+	Fill(c, 0, 0, W, 20, kSel);
-+	Text(c, 6, 3, "JAGGED ALLIANCE 2", kTitle, kFontBold);
++	Fill(c, 0, 0, W, 22, kSel);
++	Text(c, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
 +	const char* where = d.screen == N3DS_SCR_MENU ? "Main menu" : d.screen == N3DS_SCR_TACTICAL ? "Tactical" :
 +	                    d.screen == N3DS_SCR_MAP ? "Strategic map" : d.screen == N3DS_SCR_LAPTOP ? "Laptop" : "";
-+	Text(c, W - 6 - TextW(where, kFontSans), 4, where, kText, kFontSans);
++	Text(c, W - 6 - TextW(where, kFontSans), 5, where, kText, kFontSans);
 +	int y = 26;
 +	if (d.inGame) {
 +		Text(c, 6, y, d.time.c_str(), kTitle, kFontBold, W / 2);
@@ -1424,26 +1478,28 @@ new file mode 100644
 +		y += 20;
 +		const char* l1 = d.screen == N3DS_SCR_MENU ? "Tap a menu item to choose it." : d.screen == N3DS_SCR_INTRO ? "Loading..." : "Tap an option on the bottom screen.";
 +		Text(c, (W - TextW(l1, kFontBold)) / 2, y, l1, kText, kFontBold); y += 22;
-+		const char* l2 = "SELECT opens the manual at any time.";
++		const char* l2 = "START opens the menu: manual, save, exit.";
 +		Text(c, (W - TextW(l2, kFontSans)) / 2, y, l2, kDim, kFontSans);
 +	}
-+	// controls strip
-+	const int stripH = withSwapButton ? 70 : 36, sy = c.h - stripH;
-+	Fill(c, 0, sy, W, stripH, kPanel);
++	// controls: what the screen's buttons do (grey line), then the house hint strip
++	// (16 px, gold, at the foot of the top screen; above the swap button when swapped)
 +	const char *a, *b;
 +	switch (d.screen) {
-+		case N3DS_SCR_TACTICAL: a = g_lefty ? "Tap=click  D-Pad down=right click  ZR hold=end turn" : "Tap=click  B=right click  ZR hold=end turn"; b = g_lefty ? "L/R stance  D-Pad up=next merc  left=map  SELECT=manual" : "L/R stance   X next merc   Y map   SELECT manual"; break;
-+		case N3DS_SCR_MAP:      a = g_lefty ? "Tap=click  D-Pad down=right click  up=time on/off" : "Tap = click   B = right click   X = time on/off"; b = "START enter sector   SELECT manual"; break;
-+		default:                a = g_lefty ? "Tap or D-Pad right = click   D-Pad down = right click" : "Tap or A = click   B = right click"; b = "Circle Pad = cursor   SELECT = manual"; break;
++		case N3DS_SCR_TACTICAL: a = g_lefty ? "Tap=click  D-Pad down=right click  ZR hold=end turn" : "Tap=click  B=right click  ZR hold=end turn  L/R stance"; b = g_lefty ? "START menu   SELECT Esc   D-Pad up next merc" : "START menu   SELECT Esc   X next merc   Y map"; break;
++		case N3DS_SCR_MAP:      a = g_lefty ? "Tap=click  D-Pad down=right click  up=time on/off" : "Tap = click   B = right click   X = time on/off"; b = "START menu   SELECT Esc / enter sector   ZL swap"; break;
++		default:                a = g_lefty ? "Tap or D-Pad right = click   D-Pad down = right click" : "Tap or A = click   B = right click   Circle Pad = cursor"; b = "START menu   SELECT Esc   ZL swap screens"; break;
 +	}
 +	if (withSwapButton) {   // the game is on top: this screen is its touchpad (UI rule 7)
 +		a = "Slide here: move the pointer   Tap: click";
-+		b = g_lefty ? "D-Pad down: right click   ZL: swap back" : "B: right click   ZL: swap back";
++		b = g_lefty ? "D-Pad down right click   ZL swap back" : "B right click   ZL swap back   START menu";
 +	}
-+	Text(c, 6, sy + 3, a, kText, kFontSans, W - 12);
-+	Text(c, 6, sy + 18, b, kDim, kFontSans, W - 12);
++	const int stripY = withSwapButton ? c.h - 6 - 26 - 4 - 16 : c.h - 16;
++	Text(c, 6, stripY - 17, a, kDim, kFontSans, W - 12);
++	Fill(c, 0, stripY, W, 16, kPanel);
++	Text(c, (W - std::min(TextW(b, kFontSans), W - 12)) / 2, stripY + 1, b, kTitle, kFontSans, W - 12);
 +	if (withSwapButton) {   // UI rule 11: 26 px tall, 6 px from the edges
-+		Fill(c, 6, c.h - 6 - 26, W - 12, 26, kBtn);
++		Fill(c, 6, c.h - 6 - 26, W - 12, 26, kEdge);
++		Fill(c, 7, c.h - 6 - 25, W - 14, 24, kBtn);
 +		const char* t = "Tap here: put the game back on this screen";
 +		Text(c, (W - std::min(TextW(t, kFontSans), W - 20)) / 2, c.h - 6 - 26 + 6, t, kText, kFontSans, W - 20);
 +	}
@@ -1578,7 +1634,7 @@ new file mode 100644
 +		int x, y; ManSectionRect(i, x, y);
 +		const bool pr = i == pressed;
 +		if (pr) Fill(b, x + 2, y + 2, kManColW - 4, kManRowH - 4, kTitle);
-+		else Fill(b, x, y, kManColW, kManRowH, i == ch ? kSel : kBtn);
++		else { Fill(b, x, y, kManColW, kManRowH, kEdge); Fill(b, x + 1, y + 1, kManColW - 2, kManRowH - 2, i == ch ? kBtnHi : kBtn); }
 +		if (i == sel && !pr) { Fill(b, x, y, kManColW, 2, kTitle); Fill(b, x, y + kManRowH - 2, kManColW, 2, kTitle); }
 +		char line[64];
 +		if (i == 0) snprintf(line, sizeof line, "%s", kN3DSManualChapters[i].name); else snprintf(line, sizeof line, "%d. %s", i, kN3DSManualChapters[i].name);
@@ -1586,7 +1642,7 @@ new file mode 100644
 +	}
 +	auto button = [&](int id, int x, int w, const char* label) {
 +		const int y = kManBtnY, h = kManBtnH; const bool pr = id == pressed;
-+		if (pr) Fill(b, x + 2, y + 2, w - 4, h - 4, kTitle); else Fill(b, x, y, w, h, kBtn);
++		if (pr) Fill(b, x + 2, y + 2, w - 4, h - 4, kTitle); else { Fill(b, x, y, w, h, kEdge); Fill(b, x + 1, y + 1, w - 2, h - 2, kBtn); }
 +		if (id == sel && !pr) { Fill(b, x, y, w, 2, kTitle); Fill(b, x, y + h - 2, w, 2, kTitle); }
 +		const int tw = std::min(TextW(label, kFontSans), w - 8);
 +		Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + 7 + (pr ? 1 : 0), label, pr ? kBg : kText, kFontSans, w - 8);
@@ -1639,6 +1695,103 @@ new file mode 100644
 +	if (action == 2) SetSwap(!g_swap);
 +}
 +
++
++// ---------------------------------------------------------------- START: the port menu
++// House style (claude/3ds-look-and-feel.md): RESUME, MANUAL, SAVE / LOAD / OPTIONS (the game's
++// options screen, which holds Save, Load and Quit), LEFT HAND and EXIT GAME, which asks first.
++// Full-width buttons filling the touch screen (rule 11), D-pad + A or a tap, B or START resumes.
++void requestGameExit();
++static void N3DS_RunPortMenu()
++{
++	enum { kResume, kManual, kOptions, kLefty, kExit };
++	static const int kIds[] = { kResume, kManual, kOptions, kLefty, kExit };
++	const int n = 5;
++	int focus = 0, pressed = -1, pressFrames = 0, chosen = -1;
++	bool confirm = false;
++	hidSetRepeatParameters(18, 4);
++	auto label = [&](int id) -> const char* {
++		switch (id) {
++			case kResume: return "RESUME";
++			case kManual: return "MANUAL";
++			case kOptions: return "SAVE / LOAD / OPTIONS";
++			case kLefty: return g_lefty ? "LEFT HAND: ON" : "LEFT HAND: OFF";
++			default: return "EXIT GAME";
++		}
++	};
++	auto rectOf = [&](int i, int& x, int& y, int& w, int& h) {
++		if (!confirm) { const int y0 = 28, gap = 4; h = (240 - 6 - y0 - gap * (n - 1)) / n; x = 6; w = 308; y = y0 + i * (h + gap); }
++		else { x = i == 0 ? 6 : 164; y = 120; w = 150; h = 112; }
++	};
++	while (aptMainLoop() && chosen < 0) {
++		hidScanInput();
++		const u32 down = Remap(hidKeysDown()), rep = Remap(hidKeysDownRepeat());
++		const int nb = confirm ? 2 : n;
++		int hit = -1;
++		if (!pressFrames) {
++			if (rep & (KEY_DUP | KEY_DLEFT)) focus = (focus + nb - 1) % nb;
++			if (rep & (KEY_DDOWN | KEY_DRIGHT)) focus = (focus + 1) % nb;
++			if (down & KEY_A) hit = focus;
++			if (down & KEY_TOUCH) {
++				touchPosition tp; hidTouchRead(&tp);
++				for (int i = 0; i < nb; ++i) { int x, y, w, h; rectOf(i, x, y, w, h); if (tp.px >= x && tp.px < x + w && tp.py >= y && tp.py < y + h) hit = i; }
++			}
++			if (down & (KEY_B | KEY_START)) { if (confirm) { confirm = false; focus = n - 1; } else chosen = kResume; }
++		}
++		if (hit >= 0) {
++			Click(); pressed = hit; pressFrames = 6; focus = hit;
++		}
++		// draw (the press shows for a few frames, then acts: the page it leads to is drawn next)
++		Canvas t = CanvasFor(GFX_TOP);
++		Fill(t, 0, 0, t.w, t.h, kBg);
++		Fill(t, 0, 0, t.w, 22, kSel);
++		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
++		Text(t, t.w - 6 - TextW("PAUSED", kFontSans), 5, "PAUSED", kText, kFontSans);
++		Text(t, 8, 40, confirm ? "Exit the game?" : "The game is paused.", kText, kFontBold);
++		Text(t, 8, 62, confirm ? "Anything you have not saved is lost." : "Choose on the touch screen, or with the D-pad and A.", kDim, kFontSans, t.w - 16);
++		Fill(t, 0, t.h - 16, t.w, 16, kPanel);
++		const char* hint = confirm ? "A choose    B no" : "A choose    B / START resume";
++		Text(t, (t.w - TextW(hint, kFontSans)) / 2, t.h - 15, hint, kTitle, kFontSans);
++		Canvas b = CanvasFor(GFX_BOTTOM);
++		Fill(b, 0, 0, b.w, b.h, kBg);
++		Fill(b, 0, 0, b.w, 22, kSel);
++		Text(b, 6, 4, confirm ? "EXIT GAME" : "MENU", kTitle, kFontBold);
++		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, "Unsaved progress is lost.", kDim, kFontSans); }
++		for (int i = 0; i < nb; ++i) {
++			int x, y, w, h; rectOf(i, x, y, w, h);
++			const bool pr = pressFrames > 0 && i == pressed;
++			const char* l = confirm ? (i == 0 ? "YES, EXIT" : "NO") : label(kIds[i]);
++			Fill(b, x, y, w, h, kEdge);
++			Fill(b, x + 1, y + 1, w - 2, h - 2, pr ? kTitle : kBtn);
++			if (!pr) Fill(b, x + 1, y + h - 2, w - 2, 1, kPanel);   // raised edge
++			const int tw = std::min(TextW(l, kFontSans), w - 8);
++			Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + (h - 14) / 2 + (pr ? 1 : 0), l, pr ? kBg : kText, kFontSans, w - 8);
++			if (i == focus && !pr) {            // 2 px gold focus ring
++				Fill(b, x - 2, y - 2, w + 4, 2, kTitle); Fill(b, x - 2, y + h, w + 4, 2, kTitle);
++				Fill(b, x - 2, y, 2, h, kTitle); Fill(b, x + w, y, 2, h, kTitle);
++			}
++		}
++		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		if (pressFrames > 0 && --pressFrames == 0) {
++			if (!confirm) {
++				const int id = kIds[pressed];
++				if (id == kLefty) SetLefty(!g_lefty);
++				else if (id == kExit) { confirm = true; focus = 1; }
++				else chosen = id;
++			} else if (pressed == 0) chosen = kExit;
++			else { confirm = false; focus = n - 1; }
++			pressed = -1;
++		}
++	}
++	while (aptMainLoop()) { // don't let the closing press leak into the game
++		hidScanInput();
++		if (!(hidKeysHeld() & (KEY_B | KEY_START | KEY_TOUCH | KEY_A))) break;
++		gspWaitForVBlank();
++	}
++	if (chosen == kManual) N3DS_RunManual();
++	else if (chosen == kOptions) { PushKey(SDLK_o, true); PushKey(SDLK_o, false); }
++	else if (chosen == kExit) requestGameExit();
++}
++
 +extern int gN3DSCursorX, gN3DSCursorY; // kept in sync by Video.cc
 +
 +void N3DS_PumpInput()
@@ -1663,8 +1816,8 @@ new file mode 100644
 +	}
 +	const u32 held = Remap(hidKeysHeld());
 +	const u32 down = held & ~prev, up = prev & ~held;
-+	if ((down & KEY_SELECT) && scr != N3DS_SCR_INTRO) {
-+		N3DS_RunManual();
++	if ((down & KEY_START) && scr != N3DS_SCR_INTRO) {   // house style: START = the port menu (Esc is on SELECT)
++		N3DS_RunPortMenu();
 +		prev = Remap(hidKeysHeld());
 +		return;
 +	}
@@ -1720,6 +1873,9 @@ new file mode 100644
 +		if ((up & KEY_ZR) && !zrFired) { PushKey(SDLK_TAB, true); PushKey(SDLK_TAB, false); }
 +	}
 +	for (const KeyMap& m : kKeyMap) {
++		// Esc on JA2's main menu quits the game at once: not from a button there (Quit is on screen;
++		// EXIT GAME in the START menu asks first). Seen on the real 3DS, Nov 13 2026.
++		if (m.sym == SDLK_ESCAPE && scr == N3DS_SCR_MENU) continue;
 +		if (down & m.key) PushKey(m.sym, true);
 +		if (up & m.key)   PushKey(m.sym, false);
 +	}
@@ -1775,62 +1931,3 @@ index 0000000..e7e0e5c
 +void N3DS_LogMem(const char* tag);
 +void N3DS_BootStatus(const char* fmt, ...); // startup progress on screen + console.txt               // buttons / circle pad -> SDL events
 +#endif
-diff --git a/src/sgp/SoundMan.cc b/src/sgp/SoundMan.cc
-index 7104055..493c5ce 100644
---- a/src/sgp/SoundMan.cc
-+++ b/src/sgp/SoundMan.cc
-@@ -1021,7 +1021,7 @@ static BOOLEAN SoundInitHardware(void)
- 			}
- 		}
- 
--		bufferServiceThread = SDL_CreateThread(SoundServiceBuffers, "SoundManBufferServiceThread", (void *)NULL);
-+		bufferServiceThread = SDL_CreateThreadWithStackSize(SoundServiceBuffers, "SoundManBufferServiceThread", 256 * 1024, (void *)NULL); // 3DS: SDL default is 16 KB, too small for resampling + logging
- 		if (bufferServiceThread == NULL) {
- 			throw std::runtime_error(ST::format("SDL_CreateThread for SoundManBufferServiceThread returned error: {}", SDL_GetError()).c_str());
- 		}
-diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..a5c8813 100644
---- a/src/sgp/SGP.cc
-+++ b/src/sgp/SGP.cc
-@@ -92,6 +92,7 @@ static void shutdownGame()
- /** Deinitialize the game an exit. */
- static void deinitGameAndExit()
- {
-+	printf("[3ds] deinitGameAndExit(): SDL_QUIT received, shutting down\n"); fflush(stdout); // 3DS debug
- 	SLOGD("Deinitializing Game");
- 	// If we are in Dead is Dead mode, save before exit
- 	// Does this code also fire on crash? Let's hope not!
-@@ -107,6 +108,7 @@ static void deinitGameAndExit()
-  * Call this function if you want to exit the game. */
- void requestGameExit()
- {
-+	printf("[3ds] requestGameExit() called\n"); fflush(stdout); // 3DS debug
- 	SDL_Event event;
- 	event.type = SDL_QUIT;
- 	SDL_PushEvent(&event);
-diff --git a/dependencies/lib-smacker/libsmacker/smk_malloc.h b/dependencies/lib-smacker/libsmacker/smk_malloc.h
-index 1056840..d6901fe 100644
---- a/dependencies/lib-smacker/libsmacker/smk_malloc.h
-+++ b/dependencies/lib-smacker/libsmacker/smk_malloc.h
-@@ -60,6 +60,7 @@
- 	if (!p) \
- 	{ \
- 		fprintf(stderr,"libsmacker::smk_malloc(" #p ",%lu) - ERROR: malloc() returned NULL (file: %s, line: %lu)\n", (unsigned long) x,  __FILE__, (unsigned long)__LINE__); \
-+		printf("[3ds] smk_malloc FAILED: %lu bytes (" #p ") line %lu\n", (unsigned long) x, (unsigned long)__LINE__); fflush(stdout); \
- 		exit(EXIT_FAILURE); \
- 	} \
- 	memset(p,0,x); \
-diff --git a/src/game/Intro.cc b/src/game/Intro.cc
-index a751166..bf57847 100644
---- a/src/game/Intro.cc
-+++ b/src/game/Intro.cc
-@@ -253,6 +253,9 @@ static INT32 GetNextIntroVideo(UINT32 uiCurrentVideo)
- {
- 	INT32 iStringToUse = -1;
- 
-+	// 3DS: the intro/ending movies are loaded whole into memory (tens of MB) and run the heap dry (smk_malloc exit()), so skip them
-+	if (gbIntroScreenMode == INTRO_BEGINING || gbIntroScreenMode == INTRO_ENDING) return -1;
-+
- 	//switch on whether it is the beginging or the end game video
- 	switch( gbIntroScreenMode )
- 	{

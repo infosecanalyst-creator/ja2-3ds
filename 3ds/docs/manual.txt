@@ -51,9 +51,10 @@ L                 stance down (crouch / prone)
 R                 stance up / climb onto a roof
 ZL                swap the screens
 ZR                tap: roof level, hold: END TURN
-START             Esc: cancel, close windows,
+SELECT            Esc: cancel, close windows,
                   map screen: enter the sector
-SELECT            this manual
+START             menu: resume, manual, save /
+                  load / options, left hand, exit
 # The two screens
 == 2. THE TWO SCREENS
 BOTTOM (touch): the complete game. Everything
@@ -93,7 +94,7 @@ First steps:
     make your own on I.M.P. (chapter 4).
  3. Close the laptop. On the map, your team
     is in the helicopter heading for Omerta.
- 4. Press START (Esc) or tap Omerta to land.
+ 4. Press SELECT (Esc) or tap Omerta to land.
  5. In Omerta, find the rebels and speak to
     Fatima, then Dimitri - they give you the
     next lead. Drassen (to the east) has an
@@ -198,7 +199,7 @@ Time: X (Space) pauses / resumes. The time
 Entering a sector: move a squad in. If
   enemies are there you choose to attack,
   or retreat when they attack you.
-START (Esc) on a highlighted sector with
+SELECT (Esc) on a highlighted sector with
   your mercs in it shows that sector.
 
 Enemy patrols move too. The Queen will
