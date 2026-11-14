@@ -1,0 +1,2165 @@
+Unable to find image 'devkitpro/devkitarm:latest' locally
+latest: Pulling from devkitpro/devkitarm
+74701f26999d: Pulling fs layer
+3c5026e520ae: Pulling fs layer
+ea5d3216df1f: Pulling fs layer
+59e22667830b: Pulling fs layer
+956ab3702a6f: Download complete
+ea5d3216df1f: Download complete
+59e22667830b: Download complete
+59e22667830b: Pull complete
+3c5026e520ae: Download complete
+74701f26999d: Download complete
+74701f26999d: Pull complete
+ea5d3216df1f: Pull complete
+3c5026e520ae: Pull complete
+Digest: sha256:116afba8df8453961de2936ffab20dd441edf4d682856c1ec8b0e53d7ed0bbf5
+Status: Downloaded newer image for devkitpro/devkitarm:latest
+info: downloading installer
+info: profile set to minimal
+info: default host tuple is x86_64-unknown-linux-gnu
+info: syncing channel updates for nightly-x86_64-unknown-linux-gnu
+info: latest update on 2026-11-14 for version 1.102.0-nightly (5f4effd57 2026-11-13)
+info: downloading 4 components
+
+info: default toolchain set to nightly-x86_64-unknown-linux-gnu
+  nightly-x86_64-unknown-linux-gnu installed - rustc 1.102.0-nightly (5f4effd57 2026-11-13)
+
+
+Rust is installed now. Great!
+
+To get started you may need to restart your current shell.
+This would reload your PATH environment variable to include
+Cargo's bin directory ($HOME/.cargo/bin).
+
+To configure your current shell, you need to source the
+corresponding env file under $HOME/.cargo.
+
+Consider running the right command for your shell (note the leading DOT):
+. "$HOME/.cargo/env" # For sh/ash/dash/pdksh/bash
+cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+CC_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+CC_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+cargo:rerun-if-env-changed=CPATH
+cargo:rerun-if-env-changed=C_INCLUDE_PATH
+cargo:rerun-if-env-changed=CPLUS_INCLUDE_PATH
+cargo:rerun-if-env-changed=OBJC_INCLUDE_PATH
+cargo:rerun-if-env-changed=OBJCPLUS_INCLUDE_PATH
+cargo:rerun-if-env-changed=COMPILER_PATH
+cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+cargo:rerun-if-env-changed=GCC_EXEC_PREFIX
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+CFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+CFLAGS_x86_64-unknown-linux-gnu = None
+Note: switching to 'c98c4fbff6d8f3016a3ce6685bf8f43433c3efcc'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+CMake Deprecation Warning at CMakeLists.txt:8 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- The C compiler identification is GNU 16.1.0
+-- The CXX compiler identification is GNU 16.1.0
+-- Detected multilib folder: armv6k/fpu
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /opt/devkitpro/portlibs/3ds/bin/arm-none-eabi-pkg-config (found version "1.8.1")
+-- Looking for __GLIBC__
+-- Looking for __GLIBC__ - not found
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32 - Success
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64 - Failed
+-- Performing Test HAVE_GCC_WALL
+-- Performing Test HAVE_GCC_WALL - Success
+-- Performing Test HAVE_GCC_WUNDEF
+-- Performing Test HAVE_GCC_WUNDEF - Success
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING - Success
+-- Performing Test HAVE_GCC_WDOCUMENTATION
+-- Performing Test HAVE_GCC_WDOCUMENTATION - Failed
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND - Failed
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS - Failed
+-- Performing Test HAVE_CLANG_COMMENT_BLOCK_COMMANDS
+-- Performing Test HAVE_CLANG_COMMENT_BLOCK_COMMANDS - Failed
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT - Success
+-- Performing Test HAVE_GCC_ATOMICS
+-- Performing Test HAVE_GCC_ATOMICS - Success
+-- Performing Test HAVE_GCC_FVISIBILITY
+-- Performing Test HAVE_GCC_FVISIBILITY - Success
+-- Performing Test HAVE_GCC_WSHADOW
+-- Performing Test HAVE_GCC_WSHADOW - Success
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS - Success
+-- Performing Test HAVE_NO_UNDEFINED
+-- Performing Test HAVE_NO_UNDEFINED - Success
+-- Looking for immintrin.h
+-- Looking for immintrin.h - not found
+-- Performing Test HAVE_ALTIVEC_H_HDR
+-- Performing Test HAVE_ALTIVEC_H_HDR - Failed
+-- Performing Test CPU_SUPPORTS_ALTIVEC
+-- Performing Test CPU_SUPPORTS_ALTIVEC - Failed
+-- Looking for ctype.h
+-- Looking for ctype.h - found
+-- Looking for float.h
+-- Looking for float.h - found
+-- Looking for iconv.h
+-- Looking for iconv.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for limits.h
+-- Looking for limits.h - found
+-- Looking for malloc.h
+-- Looking for malloc.h - found
+-- Looking for math.h
+-- Looking for math.h - found
+-- Looking for memory.h
+-- Looking for memory.h - found
+-- Looking for signal.h
+-- Looking for signal.h - found
+-- Looking for stdarg.h
+-- Looking for stdarg.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stdio.h
+-- Looking for stdio.h - found
+-- Looking for stdlib.h
+-- Looking for stdlib.h - found
+-- Looking for string.h
+-- Looking for string.h - found
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for wchar.h
+-- Looking for wchar.h - found
+-- Looking for 7 include files stddef.h, ..., float.h
+-- Looking for 7 include files stddef.h, ..., float.h - found
+-- Looking for M_PI
+-- Looking for M_PI - found
+-- Performing Test HAVE_MPROTECT
+-- Performing Test HAVE_MPROTECT - Failed
+-- Looking for strtod
+-- Looking for strtod - found
+-- Looking for malloc
+-- Looking for malloc - found
+-- Looking for calloc
+-- Looking for calloc - found
+-- Looking for realloc
+-- Looking for realloc - found
+-- Looking for free
+-- Looking for free - found
+-- Looking for getenv
+-- Looking for getenv - found
+-- Looking for setenv
+-- Looking for setenv - found
+-- Looking for putenv
+-- Looking for putenv - found
+-- Looking for unsetenv
+-- Looking for unsetenv - found
+-- Looking for bsearch
+-- Looking for bsearch - found
+-- Looking for qsort
+-- Looking for qsort - found
+-- Looking for abs
+-- Looking for abs - found
+-- Looking for bcopy
+-- Looking for bcopy - found
+-- Looking for memset
+-- Looking for memset - found
+-- Looking for memcpy
+-- Looking for memcpy - found
+-- Looking for memmove
+-- Looking for memmove - found
+-- Looking for memcmp
+-- Looking for memcmp - found
+-- Looking for strlen
+-- Looking for strlen - found
+-- Looking for strlcpy
+-- Looking for strlcpy - found
+-- Looking for strlcat
+-- Looking for strlcat - found
+-- Looking for _strrev
+-- Looking for _strrev - not found
+-- Looking for _strupr
+-- Looking for _strupr - not found
+-- Looking for _strlwr
+-- Looking for _strlwr - not found
+-- Looking for index
+-- Looking for index - found
+-- Looking for rindex
+-- Looking for rindex - found
+-- Looking for strchr
+-- Looking for strchr - found
+-- Looking for strrchr
+-- Looking for strrchr - found
+-- Looking for strstr
+-- Looking for strstr - found
+-- Looking for strtok_r
+-- Looking for strtok_r - found
+-- Looking for itoa
+-- Looking for itoa - found
+-- Looking for _ltoa
+-- Looking for _ltoa - not found
+-- Looking for _uitoa
+-- Looking for _uitoa - not found
+-- Looking for _ultoa
+-- Looking for _ultoa - not found
+-- Looking for strtol
+-- Looking for strtol - found
+-- Looking for strtoul
+-- Looking for strtoul - found
+-- Looking for _i64toa
+-- Looking for _i64toa - not found
+-- Looking for _ui64toa
+-- Looking for _ui64toa - not found
+-- Looking for strtoll
+-- Looking for strtoll - found
+-- Looking for strtoull
+-- Looking for strtoull - found
+-- Looking for atoi
+-- Looking for atoi - found
+-- Looking for atof
+-- Looking for atof - found
+-- Looking for strcmp
+-- Looking for strcmp - found
+-- Looking for strncmp
+-- Looking for strncmp - found
+-- Looking for _stricmp
+-- Looking for _stricmp - not found
+-- Looking for strcasecmp
+-- Looking for strcasecmp - found
+-- Looking for _strnicmp
+-- Looking for _strnicmp - not found
+-- Looking for strncasecmp
+-- Looking for strncasecmp - found
+-- Looking for strcasestr
+-- Looking for strcasestr - found
+-- Looking for wcscmp
+-- Looking for wcscmp - found
+-- Looking for _wcsdup
+-- Looking for _wcsdup - not found
+-- Looking for wcsdup
+-- Looking for wcsdup - found
+-- Looking for wcslcat
+-- Looking for wcslcat - found
+-- Looking for wcslcpy
+-- Looking for wcslcpy - found
+-- Looking for wcslen
+-- Looking for wcslen - found
+-- Looking for wcsncmp
+-- Looking for wcsncmp - found
+-- Looking for wcsstr
+-- Looking for wcsstr - found
+-- Looking for wcscasecmp
+-- Looking for wcscasecmp - found
+-- Looking for _wcsicmp
+-- Looking for _wcsicmp - not found
+-- Looking for wcsncasecmp
+-- Looking for wcsncasecmp - found
+-- Looking for _wcsnicmp
+-- Looking for _wcsnicmp - not found
+-- Looking for sscanf
+-- Looking for sscanf - found
+-- Looking for vsscanf
+-- Looking for vsscanf - found
+-- Looking for vsnprintf
+-- Looking for vsnprintf - found
+-- Looking for fopen64
+-- Looking for fopen64 - not found
+-- Looking for fseeko
+-- Looking for fseeko - found
+-- Looking for fseeko64
+-- Looking for fseeko64 - not found
+-- Looking for _Exit
+-- Looking for _Exit - found
+-- Looking for sigaction
+-- Looking for sigaction - not found
+-- Looking for setjmp
+-- Looking for setjmp - found
+-- Looking for nanosleep
+-- Looking for nanosleep - found
+-- Looking for sysconf
+-- Looking for sysconf - found
+-- Looking for sysctlbyname
+-- Looking for sysctlbyname - not found
+-- Looking for getauxval
+-- Looking for getauxval - not found
+-- Looking for elf_aux_info
+-- Looking for elf_aux_info - not found
+-- Looking for poll
+-- Looking for poll - found
+-- Looking for memfd_create
+-- Looking for memfd_create - not found
+-- Looking for posix_fallocate
+-- Looking for posix_fallocate - not found
+-- Looking for pow in m
+-- Looking for pow in m - found
+-- Looking for atan
+-- Looking for atan - found
+-- Looking for atan2
+-- Looking for atan2 - found
+-- Looking for atanf
+-- Looking for atanf - found
+-- Looking for atan2f
+-- Looking for atan2f - found
+-- Looking for ceil
+-- Looking for ceil - found
+-- Looking for ceilf
+-- Looking for ceilf - found
+-- Looking for copysign
+-- Looking for copysign - found
+-- Looking for copysignf
+-- Looking for copysignf - found
+-- Looking for cos
+-- Looking for cos - found
+-- Looking for cosf
+-- Looking for cosf - found
+-- Looking for exp
+-- Looking for exp - found
+-- Looking for expf
+-- Looking for expf - found
+-- Looking for fabs
+-- Looking for fabs - found
+-- Looking for fabsf
+-- Looking for fabsf - found
+-- Looking for floor
+-- Looking for floor - found
+-- Looking for floorf
+-- Looking for floorf - found
+-- Looking for fmod
+-- Looking for fmod - found
+-- Looking for fmodf
+-- Looking for fmodf - found
+-- Looking for log
+-- Looking for log - found
+-- Looking for logf
+-- Looking for logf - found
+-- Looking for log10
+-- Looking for log10 - found
+-- Looking for log10f
+-- Looking for log10f - found
+-- Looking for lround
+-- Looking for lround - found
+-- Looking for lroundf
+-- Looking for lroundf - found
+-- Looking for pow
+-- Looking for pow - found
+-- Looking for powf
+-- Looking for powf - found
+-- Looking for round
+-- Looking for round - found
+-- Looking for roundf
+-- Looking for roundf - found
+-- Looking for scalbn
+-- Looking for scalbn - found
+-- Looking for scalbnf
+-- Looking for scalbnf - found
+-- Looking for sin
+-- Looking for sin - found
+-- Looking for sinf
+-- Looking for sinf - found
+-- Looking for sqrt
+-- Looking for sqrt - found
+-- Looking for sqrtf
+-- Looking for sqrtf - found
+-- Looking for tan
+-- Looking for tan - found
+-- Looking for tanf
+-- Looking for tanf - found
+-- Looking for acos
+-- Looking for acos - found
+-- Looking for acosf
+-- Looking for acosf - found
+-- Looking for asin
+-- Looking for asin - found
+-- Looking for asinf
+-- Looking for asinf - found
+-- Looking for trunc
+-- Looking for trunc - found
+-- Looking for truncf
+-- Looking for truncf - found
+-- Performing Test ICONV_IN_LIBC
+-- Performing Test ICONV_IN_LIBC - Failed
+-- Performing Test ICONV_IN_LIBICONV
+-- Performing Test ICONV_IN_LIBICONV - Failed
+-- Looking for alloca.h
+-- Looking for alloca.h - found
+-- Looking for alloca
+-- Looking for alloca - found
+-- Looking for alloca
+-- Looking for alloca - found
+-- Looking for alloca
+-- Looking for alloca - not found
+-- Performing Test HAVE_SA_SIGACTION
+-- Performing Test HAVE_SA_SIGACTION - Failed
+-- Found Git: /usr/bin/git (found version "2.39.5")
+CMake Deprecation Warning at CMakeLists.txt:3245 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- 
+-- SDL2 was configured with the following options:
+-- 
+-- Platform: Nintendo3DS-1
+-- 64-bit:   FALSE
+-- Compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
+-- Revision: SDL-release-2.30.9-0-gc98c4fb
+-- 
+-- Subsystems:
+--   Atomic:	ON
+--   Audio:	ON
+--   Video:	ON
+--   Render:	ON
+--   Events:	ON
+--   Joystick:	ON
+--   Haptic:	ON
+--   Hidapi:	ON
+--   Power:	ON
+--   Threads:	ON
+--   Timers:	ON
+--   File:	ON
+--   Loadso:	OFF
+--   CPUinfo:	ON
+--   Filesystem:	ON
+--   Sensor:	ON
+--   Locale:	ON
+--   Misc:	ON
+-- 
+-- Options:
+--   SDL2_DISABLE_INSTALL        (Wanted: OFF): OFF
+--   SDL2_DISABLE_SDL2MAIN       (Wanted: OFF): OFF
+--   SDL2_DISABLE_UNINSTALL      (Wanted: OFF): OFF
+--   SDL_3DNOW                   (Wanted: OFF): OFF
+--   SDL_ALSA                    (Wanted: OFF): OFF
+--   SDL_ALSA_SHARED             (Wanted: OFF): OFF
+--   SDL_ALTIVEC                 (Wanted: ON): OFF
+--   SDL_ARMNEON                 (Wanted: OFF): OFF
+--   SDL_ARMSIMD                 (Wanted: OFF): OFF
+--   SDL_ARTS                    (Wanted: OFF): OFF
+--   SDL_ARTS_SHARED             (Wanted: OFF): OFF
+--   SDL_ASAN                    (Wanted: OFF): OFF
+--   SDL_ASSEMBLY                (Wanted: ON): ON
+--   SDL_ASSERTIONS              (Wanted: auto): auto
+--   SDL_BACKGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_CCACHE                  (Wanted: ON): OFF
+--   SDL_CLOCK_GETTIME           (Wanted: OFF): OFF
+--   SDL_COCOA                   (Wanted: OFF): OFF
+--   SDL_DBUS                    (Wanted: OFF): OFF
+--   SDL_DIRECTFB                (Wanted: OFF): OFF
+--   SDL_DIRECTFB_SHARED         (Wanted: OFF): OFF
+--   SDL_DIRECTX                 (Wanted: OFF): OFF
+--   SDL_DISKAUDIO               (Wanted: ON): ON
+--   SDL_DUMMYAUDIO              (Wanted: ON): ON
+--   SDL_DUMMYVIDEO              (Wanted: ON): ON
+--   SDL_ESD                     (Wanted: OFF): OFF
+--   SDL_ESD_SHARED              (Wanted: OFF): OFF
+--   SDL_FOREGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND             (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND_SHARED      (Wanted: OFF): OFF
+--   SDL_GCC_ATOMICS             (Wanted: ON): ON
+--   SDL_HIDAPI                  (Wanted: ON): OFF
+--   SDL_HIDAPI_JOYSTICK         (Wanted: ON): OFF
+--   SDL_HIDAPI_LIBUSB           (Wanted: OFF): OFF
+--   SDL_IBUS                    (Wanted: OFF): OFF
+--   SDL_INSTALL_TESTS           (Wanted: OFF): OFF
+--   SDL_JACK                    (Wanted: OFF): OFF
+--   SDL_JACK_SHARED             (Wanted: OFF): OFF
+--   SDL_KMSDRM                  (Wanted: OFF): OFF
+--   SDL_KMSDRM_SHARED           (Wanted: OFF): OFF
+--   SDL_LASX                    (Wanted: OFF): OFF
+--   SDL_LIBC                    (Wanted: ON): ON
+--   SDL_LIBICONV                (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE           (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE_SHARED    (Wanted: OFF): OFF
+--   SDL_LIBUDEV                 (Wanted: ON): OFF
+--   SDL_LSX                     (Wanted: OFF): OFF
+--   SDL_METAL                   (Wanted: OFF): OFF
+--   SDL_MMX                     (Wanted: OFF): OFF
+--   SDL_NAS                     (Wanted: OFF): OFF
+--   SDL_NAS_SHARED              (Wanted: OFF): OFF
+--   SDL_OFFSCREEN               (Wanted: ON): ON
+--   SDL_OPENGL                  (Wanted: ON): OFF
+--   SDL_OPENGLES                (Wanted: ON): OFF
+--   SDL_OSS                     (Wanted: OFF): OFF
+--   SDL_PIPEWIRE                (Wanted: OFF): OFF
+--   SDL_PIPEWIRE_SHARED         (Wanted: OFF): OFF
+--   SDL_PTHREADS                (Wanted: OFF): OFF
+--   SDL_PTHREADS_SEM            (Wanted: OFF): OFF
+--   SDL_PULSEAUDIO              (Wanted: OFF): OFF
+--   SDL_PULSEAUDIO_SHARED       (Wanted: OFF): OFF
+--   SDL_RENDER_D3D              (Wanted: OFF): OFF
+--   SDL_RENDER_METAL            (Wanted: OFF): OFF
+--   SDL_RPATH                   (Wanted: OFF): OFF
+--   SDL_RPI                     (Wanted: OFF): OFF
+--   SDL_SNDIO                   (Wanted: OFF): OFF
+--   SDL_SNDIO_SHARED            (Wanted: OFF): OFF
+--   SDL_SSE                     (Wanted: OFF): OFF
+--   SDL_SSE2                    (Wanted: OFF): OFF
+--   SDL_SSE3                    (Wanted: OFF): OFF
+--   SDL_SSEMATH                 (Wanted: OFF): OFF
+--   SDL_STATIC_PIC              (Wanted: OFF): OFF
+--   SDL_SYSTEM_ICONV            (Wanted: ON): OFF
+--   SDL_TESTS                   (Wanted: OFF): OFF
+--   SDL_VENDOR_INFO             (Wanted: ): OFF
+--   SDL_VIRTUAL_JOYSTICK        (Wanted: ON): ON
+--   SDL_VIVANTE                 (Wanted: OFF): OFF
+--   SDL_VULKAN                  (Wanted: OFF): OFF
+--   SDL_WASAPI                  (Wanted: OFF): OFF
+--   SDL_WAYLAND                 (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR        (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR_SHARED (Wanted: OFF): OFF
+--   SDL_WAYLAND_QT_TOUCH        (Wanted: OFF): OFF
+--   SDL_WAYLAND_SHARED          (Wanted: OFF): OFF
+--   SDL_X11                     (Wanted: OFF): OFF
+--   SDL_X11_SHARED              (Wanted: OFF): OFF
+--   SDL_X11_XCURSOR             (Wanted: OFF): OFF
+--   SDL_X11_XDBE                (Wanted: OFF): OFF
+--   SDL_X11_XFIXES              (Wanted: OFF): OFF
+--   SDL_X11_XINPUT              (Wanted: OFF): OFF
+--   SDL_X11_XRANDR              (Wanted: OFF): OFF
+--   SDL_X11_XSCRNSAVER          (Wanted: OFF): OFF
+--   SDL_X11_XSHAPE              (Wanted: OFF): OFF
+--   SDL_XINPUT                  (Wanted: OFF): OFF
+-- 
+--  CFLAGS:        -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__ -idirafter "/tmp/ja2w/sdl2/src/video/khronos"
+--  EXTRA_CFLAGS:   -Wall -Wundef -fno-strict-aliasing -Wdeclaration-after-statement -fvisibility=hidden -Wshadow -Wno-unused-local-typedefs -fdiagnostics-color=always
+--  EXTRA_LDFLAGS:  -Wl,--no-undefined
+--  EXTRA_LIBS:    m;ctru -lm
+-- 
+--  Build Shared Library: OFF
+--  Build Static Library: ON
+--  Build Static Library with Position Independent Code: OFF
+-- 
+-- Configuring done (11.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/sdl2/build
+ninja: Entering directory `/tmp/ja2w/sdl2/build'
+[1/240] Generating include/SDL2/SDL_audio.h
+[2/240] Generating include/SDL2/SDL_assert.h
+[3/240] Generating include/SDL2/SDL.h
+[4/240] Generating include/SDL2/SDL_atomic.h
+[5/240] Generating include/SDL2/SDL_bits.h
+[6/240] Generating include/SDL2/SDL_blendmode.h
+[7/240] Generating include/SDL2/SDL_copying.h
+[8/240] Generating include/SDL2/SDL_clipboard.h
+[9/240] Generating include/SDL2/SDL_error.h
+[10/240] Generating include/SDL2/SDL_events.h
+[11/240] Generating include/SDL2/SDL_cpuinfo.h
+[12/240] Generating include/SDL2/SDL_egl.h
+[13/240] Generating include/SDL2/SDL_endian.h
+[14/240] Generating include/SDL2/SDL_gamecontroller.h
+[15/240] Generating include/SDL2/SDL_filesystem.h
+[16/240] Generating include/SDL2/SDL_gesture.h
+[17/240] Generating include/SDL2/SDL_haptic.h
+[18/240] Generating include/SDL2/SDL_guid.h
+[19/240] Generating include/SDL2/SDL_hints.h
+[20/240] Generating include/SDL2/SDL_keyboard.h
+[21/240] Generating include/SDL2/SDL_hidapi.h
+[22/240] Generating include/SDL2/SDL_joystick.h
+[23/240] Generating include/SDL2/SDL_keycode.h
+[24/240] Generating include/SDL2/SDL_loadso.h
+[25/240] Generating include/SDL2/SDL_messagebox.h
+[26/240] Generating include/SDL2/SDL_metal.h
+[27/240] Generating include/SDL2/SDL_main.h
+[28/240] Generating include/SDL2/SDL_locale.h
+[29/240] Generating include/SDL2/SDL_log.h
+[30/240] Generating include/SDL2/SDL_mutex.h
+[31/240] Generating include/SDL2/SDL_mouse.h
+[32/240] Generating include/SDL2/SDL_name.h
+[33/240] Generating include/SDL2/SDL_opengles.h
+[34/240] Generating include/SDL2/SDL_opengles2.h
+[35/240] Generating include/SDL2/SDL_misc.h
+[36/240] Generating include/SDL2/SDL_opengl.h
+[37/240] Generating include/SDL2/SDL_opengl_glext.h
+[38/240] Generating include/SDL2/SDL_opengles2_gl2platform.h
+[39/240] Generating include/SDL2/SDL_pixels.h
+[40/240] Generating include/SDL2/SDL_opengles2_gl2ext.h
+[41/240] Generating include/SDL2/SDL_opengles2_gl2.h
+[42/240] Generating include/SDL2/SDL_opengles2_khrplatform.h
+[43/240] Generating include/SDL2/SDL_platform.h
+[44/240] Generating include/SDL2/SDL_power.h
+[45/240] Generating include/SDL2/SDL_quit.h
+[46/240] Generating include/SDL2/SDL_rect.h
+[47/240] Generating include/SDL2/SDL_render.h
+[48/240] Generating include/SDL2/SDL_rwops.h
+[49/240] Generating include/SDL2/SDL_scancode.h
+[50/240] Generating include/SDL2/SDL_shape.h
+[51/240] Generating include/SDL2/SDL_sensor.h
+[52/240] Generating include/SDL2/SDL_stdinc.h
+[53/240] Generating include/SDL2/SDL_test.h
+[54/240] Generating include/SDL2/SDL_syswm.h
+[55/240] Generating include/SDL2/SDL_surface.h
+[56/240] Generating include/SDL2/SDL_system.h
+[57/240] Generating include/SDL2/SDL_test_assert.h
+[58/240] Generating include/SDL2/SDL_test_common.h
+[59/240] Generating include/SDL2/SDL_test_images.h
+[60/240] Generating include/SDL2/SDL_test_harness.h
+[61/240] Generating include/SDL2/SDL_test_font.h
+[62/240] Generating include/SDL2/SDL_test_compare.h
+[63/240] Generating include/SDL2/SDL_test_crc32.h
+[64/240] Generating include/SDL2/SDL_test_fuzzer.h
+[65/240] Generating include/SDL2/SDL_test_log.h
+[66/240] Generating include/SDL2/SDL_test_md5.h
+[67/240] Generating include/SDL2/SDL_test_memory.h
+[68/240] Generating include/SDL2/SDL_test_random.h
+[69/240] Generating include/SDL2/SDL_types.h
+[70/240] Generating include/SDL2/SDL_version.h
+[71/240] Generating include/SDL2/SDL_video.h
+[72/240] Generating include/SDL2/SDL_thread.h
+[73/240] Generating include/SDL2/SDL_timer.h
+[74/240] Generating include/SDL2/SDL_touch.h
+[75/240] Generating include/SDL2/SDL_vulkan.h
+[76/240] Generating include/SDL2/begin_code.h
+[77/240] Generating include/SDL2/close_code.h
+[78/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_guid.o
+[79/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_error.o
+[80/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_assert.o
+[81/240] Building C object CMakeFiles/SDL2main.dir/src/main/n3ds/SDL_n3ds_main.o
+[82/240] Linking C static library libSDL2main.a
+[83/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_dataqueue.o
+[84/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_list.o
+[85/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_utils.o
+[86/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_hints.o
+[87/240] Building C object CMakeFiles/SDL2-static.dir/src/atomic/SDL_spinlock.o
+[88/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL_log.o
+[89/240] Building C object CMakeFiles/SDL2-static.dir/src/atomic/SDL_atomic.o
+[90/240] Building C object CMakeFiles/SDL2-static.dir/src/SDL.o
+[91/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_audiodev.o
+[92/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_audiotypecvt.o
+[93/240] Building C object CMakeFiles/SDL2-static.dir/src/dynapi/SDL_dynapi.o
+[94/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_mixer.o
+[95/240] Building C object CMakeFiles/SDL2-static.dir/src/cpuinfo/SDL_cpuinfo.o
+[96/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_displayevents.o
+[97/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_clipboardevents.o
+[98/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_dropevents.o
+[99/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_gesture.o
+[100/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_audio.o
+[101/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_keyboard.o
+[102/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_keysym_to_scancode.o
+[103/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_scancode_tables.o
+[104/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_quit.o
+[105/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_events.o
+[106/240] Building C object CMakeFiles/SDL2-static.dir/src/events/imKStoUCS.o
+[107/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_wave.o
+[108/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_windowevents.o
+[109/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_touch.o
+[110/240] Building C object CMakeFiles/SDL2-static.dir/src/file/SDL_rwops.o
+[111/240] Building C object CMakeFiles/SDL2-static.dir/src/hidapi/SDL_hidapi.o
+[112/240] Building C object CMakeFiles/SDL2-static.dir/src/events/SDL_mouse.o
+[113/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/SDL_steam_virtual_gamepad.o
+[114/240] Building C object CMakeFiles/SDL2-static.dir/src/haptic/SDL_haptic.o
+[115/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/controller_type.o
+[116/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/SDL_audiocvt.o
+[117/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_exp.o
+[118/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_atan2.o
+[119/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_log.o
+[120/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_log10.o
+[121/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_fmod.o
+[122/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_pow.o
+[123/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_sqrt.o
+[124/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/e_rem_pio2.o
+[125/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/k_cos.o
+[126/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/k_tan.o
+[127/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/k_sin.o
+[128/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_atan.o
+[129/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_copysign.o
+[130/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_cos.o
+[131/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_fabs.o
+[132/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_floor.o
+[133/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/k_rem_pio2.o
+[134/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_sin.o
+[135/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_scalbn.o
+[136/240] Building C object CMakeFiles/SDL2-static.dir/src/locale/SDL_locale.o
+[137/240] Building C object CMakeFiles/SDL2-static.dir/src/libm/s_tan.o
+[138/240] Building C object CMakeFiles/SDL2-static.dir/src/misc/SDL_url.o
+[139/240] Building C object CMakeFiles/SDL2-static.dir/src/power/SDL_power.o
+[140/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d/SDL_render_d3d.o
+[141/240] Building C object CMakeFiles/SDL2-static.dir/src/render/SDL_d3dmath.o
+[142/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d/SDL_shaders_d3d.o
+[143/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d11/SDL_render_d3d11.o
+[144/240] Building C object CMakeFiles/SDL2-static.dir/src/render/SDL_yuv_sw.o
+[145/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d11/SDL_shaders_d3d11.o
+[146/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d12/SDL_shaders_d3d12.o
+[147/240] Building C object CMakeFiles/SDL2-static.dir/src/render/opengl/SDL_render_gl.o
+[148/240] Building C object CMakeFiles/SDL2-static.dir/src/render/direct3d12/SDL_render_d3d12.o
+[149/240] Building C object CMakeFiles/SDL2-static.dir/src/render/opengl/SDL_shaders_gl.o
+[150/240] Building C object CMakeFiles/SDL2-static.dir/src/render/opengles/SDL_render_gles.o
+[151/240] Building C object CMakeFiles/SDL2-static.dir/src/render/opengles2/SDL_render_gles2.o
+[152/240] Building C object CMakeFiles/SDL2-static.dir/src/render/opengles2/SDL_shaders_gles2.o
+[153/240] Building C object CMakeFiles/SDL2-static.dir/src/render/ps2/SDL_render_ps2.o
+[154/240] Building C object CMakeFiles/SDL2-static.dir/src/render/psp/SDL_render_psp.o
+[155/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/SDL_gamecontroller.o
+[156/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/SDL_joystick.o
+[157/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_drawpoint.o
+[158/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendpoint.o
+[159/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_drawline.o
+[160/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_render_sw.o
+[161/240] Building C object CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm.o
+[162/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_rotate.o
+[163/240] Building C object CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm_memory.o
+[164/240] Building C object CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm_tools.o
+[165/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_crc16.o
+[166/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_crc32.o
+[167/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_getenv.o
+[168/240] Building C object CMakeFiles/SDL2-static.dir/src/sensor/SDL_sensor.o
+[169/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendfillrect.o
+[170/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_mslibc.o
+[171/240] Building C object CMakeFiles/SDL2-static.dir/src/render/SDL_render.o
+[172/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_malloc.o
+[173/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_qsort.o
+[174/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_strtokr.o
+[175/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_iconv.o
+[176/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_stdlib.o
+[177/240] Building C object CMakeFiles/SDL2-static.dir/src/stdlib/SDL_string.o
+[178/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/SDL_thread.o
+[179/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit.o
+[180/240] Building C object CMakeFiles/SDL2-static.dir/src/timer/SDL_timer.o
+[181/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_triangle.o
+[182/240] Building C object CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendline.o
+[183/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_RLEaccel.o
+[184/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_copy.o
+[185/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_1.o
+[186/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_slow.o
+[187/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_clipboard.o
+[188/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_bmp.o
+[189/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_egl.o
+[190/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_fillrect.o
+[191/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_0.o
+[192/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_A.o
+[193/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_rect.o
+[194/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_shape.o
+[195/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_pixels.o
+[196/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_vulkan_utils.o
+[197/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_stretch.o
+[198/240] Building C object CMakeFiles/SDL2-static.dir/src/video/yuv2rgb/yuv_rgb_lsx.o
+[199/240] Building C object CMakeFiles/SDL2-static.dir/src/video/yuv2rgb/yuv_rgb_sse.o
+[200/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_surface.o
+[201/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/dummy/SDL_dummyaudio.o
+[202/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/disk/SDL_diskaudio.o
+[203/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_yuv.o
+[204/240] Building C object CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullevents.o
+[205/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/virtual/SDL_virtualjoystick.o
+[206/240] Building C object CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullframebuffer.o
+[207/240] Building C object CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullvideo.o
+[208/240] Building C object CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenframebuffer.o
+[209/240] Building C object CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenevents.o
+[210/240] Building C object CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenopengles.o
+[211/240] Building C object CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenvideo.o
+[212/240] Building C object CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenwindow.o
+[213/240] Building C object CMakeFiles/SDL2-static.dir/src/filesystem/n3ds/SDL_sysfilesystem.o
+[214/240] Building C object CMakeFiles/SDL2-static.dir/src/audio/n3ds/SDL_n3dsaudio.o
+[215/240] Building C object CMakeFiles/SDL2-static.dir/src/joystick/n3ds/SDL_sysjoystick.o
+[216/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_video.o
+[217/240] Building C object CMakeFiles/SDL2-static.dir/src/power/n3ds/SDL_syspower.o
+[218/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/n3ds/SDL_syscond.o
+[219/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/n3ds/SDL_sysmutex.o
+[220/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/generic/SDL_systls.o
+[221/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/n3ds/SDL_syssem.o
+[222/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/n3ds/SDL_systhread.o
+[223/240] Building C object CMakeFiles/SDL2-static.dir/src/thread/generic/SDL_syscond.o
+[224/240] Building C object CMakeFiles/SDL2-static.dir/src/sensor/n3ds/SDL_n3dssensor.o
+[225/240] Building C object CMakeFiles/SDL2-static.dir/src/timer/n3ds/SDL_systimer.o
+[226/240] Building C object CMakeFiles/SDL2-static.dir/src/video/yuv2rgb/yuv_rgb_std.o
+[227/240] Building C object CMakeFiles/SDL2-static.dir/src/video/n3ds/SDL_n3dsevents.o
+[228/240] Building C object CMakeFiles/SDL2-static.dir/src/video/n3ds/SDL_n3dsswkb.o
+[229/240] Building C object CMakeFiles/SDL2-static.dir/src/video/n3ds/SDL_n3dsvideo.o
+[230/240] Building C object CMakeFiles/SDL2-static.dir/src/video/n3ds/SDL_n3dsframebuffer.o
+[231/240] Building C object CMakeFiles/SDL2-static.dir/src/video/n3ds/SDL_n3dstouch.o
+[232/240] Building C object CMakeFiles/SDL2-static.dir/src/locale/n3ds/SDL_syslocale.o
+[233/240] Building C object CMakeFiles/SDL2-static.dir/src/haptic/dummy/SDL_syshaptic.o
+[234/240] Building C object CMakeFiles/SDL2-static.dir/src/file/n3ds/SDL_rwopsromfs.o
+[235/240] Building C object CMakeFiles/SDL2-static.dir/src/loadso/dummy/SDL_sysloadso.o
+[236/240] Building C object CMakeFiles/SDL2-static.dir/src/misc/dummy/SDL_sysurl.o
+[237/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_auto.o
+[238/240] Building C object CMakeFiles/SDL2-static.dir/src/video/SDL_blit_N.o
+[239/240] Linking C static library libSDL2.a
+[239/240] Install the project...
+-- Install configuration: "Release"
+-- Installing: /tmp/ja2w/prefix/lib/libSDL2main.a
+-- Installing: /tmp/ja2w/prefix/lib/libSDL2.a
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2mainTargets.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2mainTargets-release.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2staticTargets.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2staticTargets-release.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2Config.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/SDL2ConfigVersion.cmake
+-- Installing: /tmp/ja2w/prefix/lib/cmake/SDL2/sdlfind.cmake
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_assert.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_atomic.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_audio.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_bits.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_blendmode.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_clipboard.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_copying.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_cpuinfo.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_egl.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_endian.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_error.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_events.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_filesystem.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_gamecontroller.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_gesture.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_guid.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_haptic.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_hidapi.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_hints.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_joystick.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_keyboard.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_keycode.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_loadso.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_locale.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_log.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_main.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_messagebox.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_metal.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_misc.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_mouse.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_mutex.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_name.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengl.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengl_glext.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles2.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles2_gl2.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles2_gl2ext.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles2_gl2platform.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_opengles2_khrplatform.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_pixels.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_platform.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_power.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_quit.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_rect.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_render.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_rwops.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_scancode.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_sensor.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_shape.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_stdinc.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_surface.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_system.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_syswm.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_assert.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_common.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_compare.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_crc32.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_font.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_fuzzer.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_harness.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_images.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_log.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_md5.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_memory.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_test_random.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_thread.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_timer.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_touch.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_types.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_version.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_video.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_vulkan.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/begin_code.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/close_code.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_revision.h
+-- Installing: /tmp/ja2w/prefix/include/SDL2/SDL_config.h
+-- Installing: /tmp/ja2w/prefix/share/licenses/SDL2/LICENSE.txt
+-- Installing: /tmp/ja2w/prefix/lib/pkgconfig/sdl2.pc
+-- Installing: /tmp/ja2w/prefix/bin/sdl2-config
+-- Installing: /tmp/ja2w/prefix/share/aclocal/sdl2.m4
+Note: switching to '11e9430b67d788b73f7a57d22166e8b500c23dab'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded atty v0.2.14
+  Downloaded ansi_term v0.11.0
+  Downloaded ahash v0.7.8
+  Downloaded anyhow v1.0.69
+  Downloaded lazy_static v1.4.0
+  Downloaded iso8601 v0.4.2
+  Downloaded toml v0.5.9
+  Downloaded ryu v1.0.9
+  Downloaded tempfile v3.3.0
+  Downloaded fluent-uri v0.1.4
+  Downloaded aho-corasick v0.7.18
+  Downloaded tinyvec v1.6.0
+  Downloaded crossbeam-channel v0.5.4
+  Downloaded hashbrown v0.12.3
+  Downloaded nom v7.1.3
+  Downloaded tinyvec_macros v0.1.1
+  Downloaded idna v0.3.0
+  Downloaded unicode-bidi v0.3.10
+  Downloaded bitflags v1.3.2
+  Downloaded bytecount v0.6.3
+  Downloaded crossbeam-deque v0.8.1
+  Downloaded typenum v1.15.0
+  Downloaded crypto-common v0.1.6
+  Downloaded vec_map v0.8.2
+  Downloaded version_check v0.9.4
+  Downloaded unicode-normalization v0.1.19
+  Downloaded digest v0.10.6
+  Downloaded caseless v0.2.1
+  Downloaded unicode-width v0.1.9
+  Downloaded cfg-if v1.0.0
+  Downloaded dirs v4.0.0
+  Downloaded uuid v0.8.2
+  Downloaded unicode-ident v1.0.6
+  Downloaded unsafe-libyaml v0.2.10
+  Downloaded url v2.3.1
+  Downloaded unicode-segmentation v1.10.1
+  Downloaded equivalent v1.0.1
+  Downloaded hex v0.4.3
+  Downloaded num_cpus v1.13.1
+  Downloaded slug v0.1.4
+  Downloaded dunce v1.0.2
+  Downloaded form_urlencoded v1.1.0
+  Downloaded either v1.6.1
+  Downloaded generic-array v0.14.5
+  Downloaded lock_api v0.4.9
+  Downloaded quote v1.0.36
+  Downloaded dirs-sys v0.3.7
+  Downloaded percent-encoding v2.2.0
+  Downloaded itoa v1.0.1
+  Downloaded json-patch v2.0.0
+  Downloaded num-bigint v0.2.6
+  Downloaded num-iter v0.1.46
+  Downloaded proc-macro2 v1.0.86
+  Downloaded time-macros v0.2.4
+  Downloaded smallvec v1.10.0
+  Downloaded indexmap v1.9.2
+  Downloaded crossbeam-epoch v0.9.8
+  Downloaded fancy-regex v0.8.0
+  Downloaded getopts v0.2.21
+  Downloaded serde_yaml v0.9.17
+  Downloaded block-buffer v0.10.3
+  Downloaded rayon-core v1.10.2
+  Downloaded deunicode v0.4.3
+  Downloaded minimal-lexical v0.2.1
+  Downloaded num v0.2.1
+  Downloaded serde_json v1.0.122
+  Downloaded cbindgen v0.20.0
+  Downloaded clap v2.33.4
+  Downloaded syn v2.0.72
+  Downloaded num_threads v0.1.6
+  Downloaded regex-syntax v0.6.28
+  Downloaded memchr v2.4.1
+  Downloaded jsonschema v0.16.0
+  Downloaded parking_lot_core v0.9.7
+  Downloaded json_comments v0.2.1
+  Downloaded jsonptr v0.4.7
+  Downloaded termcolor v1.1.3
+  Downloaded log v0.4.16
+  Downloaded time v0.3.15
+  Downloaded autocfg v1.1.0
+  Downloaded thiserror-impl v1.0.63
+  Downloaded md-5 v0.10.5
+  Downloaded fastrand v1.9.0
+  Downloaded heck v0.3.3
+  Downloaded byteorder v1.4.3
+  Downloaded num-complex v0.2.4
+  Downloaded bit-set v0.5.3
+  Downloaded crossbeam-utils v0.8.8
+  Downloaded num-integer v0.1.47
+  Downloaded num-rational v0.2.4
+  Downloaded thiserror v1.0.63
+  Downloaded memoffset v0.6.5
+  Downloaded once_cell v1.21.4
+  Downloaded getrandom v0.2.12
+  Downloaded parking_lot v0.12.1
+  Downloaded remove_dir_all v0.5.3
+  Downloaded scopeguard v1.1.0
+  Downloaded num-cmp v0.1.0
+  Downloaded base64 v0.13.1
+  Downloaded num-traits v0.2.19
+  Downloaded serde_derive v1.0.204
+  Downloaded strsim v0.8.0
+  Downloaded fraction v0.10.0
+  Downloaded serde v1.0.204
+  Downloaded textwrap v0.11.0
+  Downloaded rayon v1.6.1
+  Downloaded bit-vec v0.6.3
+  Downloaded hashbrown v0.14.5
+  Downloaded indexmap v2.3.0
+  Downloaded syn v1.0.107
+  Downloaded regex v1.7.1
+  Downloaded simplelog v0.12.0
+  Downloaded lru v0.8.1
+  Downloaded libc v0.2.153
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded adler2 v2.0.1
+  Downloaded getopts v0.2.24
+  Downloaded addr2line v0.27.1
+  Downloaded foldhash v0.2.0
+  Downloaded cfg-if v1.0.4
+  Downloaded rustc-literal-escaper v0.0.8
+  Downloaded object v0.39.1
+  Downloaded libc v0.2.191
+  Downloaded rustc-demangle v0.1.28
+  Downloaded miniz_oxide v0.9.1
+  Downloaded memchr v2.8.3
+  Downloaded gimli v0.34.0
+  Downloaded hashbrown v0.17.1
+   Compiling compiler_builtins v0.1.160 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling libc v0.2.191
+   Compiling object v0.39.1
+   Compiling std v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+   Compiling autocfg v1.1.0
+   Compiling libc v0.2.153
+   Compiling proc-macro2 v1.0.86
+   Compiling unicode-ident v1.0.6
+   Compiling memchr v2.4.1
+   Compiling version_check v0.9.4
+   Compiling serde v1.0.204
+   Compiling ahash v0.7.8
+   Compiling cfg-if v1.0.0
+   Compiling quote v1.0.36
+   Compiling syn v2.0.72
+   Compiling serde_json v1.0.122
+   Compiling num-traits v0.2.19
+   Compiling getrandom v0.2.12
+   Compiling once_cell v1.21.4
+   Compiling indexmap v1.9.2
+   Compiling log v0.4.16
+   Compiling itoa v1.0.1
+   Compiling hashbrown v0.14.5
+   Compiling typenum v1.15.0
+   Compiling crossbeam-utils v0.8.8
+   Compiling ryu v1.0.9
+   Compiling equivalent v1.0.1
+   Compiling indexmap v2.3.0
+   Compiling generic-array v0.14.5
+   Compiling memoffset v0.6.5
+   Compiling num-bigint v0.2.6
+   Compiling num-rational v0.2.4
+   Compiling crossbeam-epoch v0.9.8
+   Compiling num-complex v0.2.4
+   Compiling serde_derive v1.0.204
+   Compiling aho-corasick v0.7.18
+   Compiling lock_api v0.4.9
+   Compiling parking_lot_core v0.9.7
+   Compiling syn v1.0.107
+   Compiling unicode-width v0.1.9
+   Compiling regex-syntax v0.6.28
+   Compiling textwrap v0.11.0
+   Compiling atty v0.2.14
+   Compiling rayon-core v1.10.2
+   Compiling cbindgen v0.20.0
+   Compiling strsim v0.8.0
+   Compiling unicode-segmentation v1.10.1
+   Compiling time-macros v0.2.4
+   Compiling regex v1.7.1
+   Compiling anyhow v1.0.69
+   Compiling bitflags v1.3.2
+   Compiling fastrand v1.9.0
+   Compiling remove_dir_all v0.5.3
+   Compiling thiserror v1.0.63
+   Compiling ansi_term v0.11.0
+   Compiling unsafe-libyaml v0.2.10
+   Compiling vec_map v0.8.2
+   Compiling clap v2.33.4
+   Compiling caseless v0.2.1
+   Compiling tempfile v3.3.0
+   Compiling heck v0.3.3
+   Compiling hashbrown v0.12.3
+   Compiling serde_yaml v0.9.17
+   Compiling toml v0.5.9
+   Compiling thiserror-impl v1.0.63
+   Compiling stracciatella v0.1.0 (/tmp/ja2w/strac/rust/stracciatella)
+   Compiling rustc-std-workspace-core v1.99.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)
+   Compiling adler2 v2.0.1
+   Compiling memchr v2.8.3
+   Compiling unwind v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)
+   Compiling rustc-demangle v0.1.28
+   Compiling cfg-if v1.0.4
+   Compiling rustc-literal-escaper v0.0.8
+   Compiling stracciatella_c_api v0.1.0 (/tmp/ja2w/strac/rust/stracciatella_c_api)
+   Compiling rustc-std-workspace-alloc v1.99.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling panic_unwind v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling gimli v0.34.0
+   Compiling miniz_oxide v0.9.1
+   Compiling hashbrown v0.17.1
+   Compiling std_detect v0.1.5 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)
+   Compiling panic_abort v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)
+   Compiling addr2line v0.27.1
+   Compiling proc_macro v0.0.0 (/root/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)
+   Compiling lazy_static v1.4.0
+   Compiling scopeguard v1.1.0
+   Compiling tinyvec_macros v0.1.1
+   Compiling tinyvec v1.6.0
+   Compiling num-integer v0.1.47
+   Compiling unicode-normalization v0.1.19
+   Compiling num-iter v0.1.46
+   Compiling num_threads v0.1.6
+   Compiling bit-vec v0.6.3
+   Compiling minimal-lexical v0.2.1
+   Compiling percent-encoding v2.2.0
+   Compiling unicode-bidi v0.3.10
+   Compiling smallvec v1.10.0
+   Compiling idna v0.3.0
+   Compiling form_urlencoded v1.1.0
+   Compiling nom v7.1.3
+   Compiling bit-set v0.5.3
+   Compiling time v0.3.15
+   Compiling num v0.2.1
+   Compiling crossbeam-deque v0.8.1
+   Compiling block-buffer v0.10.3
+   Compiling crypto-common v0.1.6
+   Compiling crossbeam-channel v0.5.4
+   Compiling num_cpus v1.13.1
+   Compiling parking_lot v0.12.1
+   Compiling digest v0.10.6
+   Compiling fancy-regex v0.8.0
+   Compiling fraction v0.10.0
+   Compiling iso8601 v0.4.2
+   Compiling url v2.3.1
+   Compiling jsonptr v0.4.7
+   Compiling dirs-sys v0.3.7
+   Compiling uuid v0.8.2
+   Compiling either v1.6.1
+   Compiling base64 v0.13.1
+   Compiling num-cmp v0.1.0
+   Compiling deunicode v0.4.3
+   Compiling bytecount v0.6.3
+   Compiling termcolor v1.1.3
+   Compiling getopts v0.2.21
+   Compiling simplelog v0.12.0
+   Compiling jsonschema v0.16.0
+   Compiling slug v0.1.4
+   Compiling rayon v1.6.1
+   Compiling json-patch v2.0.0
+   Compiling dirs v4.0.0
+   Compiling lru v0.8.1
+   Compiling md-5 v0.10.5
+   Compiling json_comments v0.2.1
+   Compiling hex v0.4.3
+   Compiling byteorder v1.4.3
+   Compiling dunce v1.0.2
+warning: use of deprecated constant `std::u32::MAX`: replaced by the `MAX` associated constant on this type
+  --> stracciatella/src/file_formats/stci/color.rs:47:15
+   |
+47 |     std::u32::MAX & mask >> shift
+   |               ^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated constant `std::u32::MAX`: replaced by the `MAX` associated constant on this type
+  --> stracciatella/src/file_formats/stci/color.rs:51:15
+   |
+51 |     std::u32::MAX & mask << shift
+   |               ^^^
+
+warning: use of deprecated constant `std::f64::MAX`: replaced by the `MAX` associated constant on `f64`
+   --> stracciatella/src/guess.rs:197:30
+    |
+197 |             (None, std::f64::MAX),
+    |                              ^^^
+
+warning: fields `0` and `1` are never read
+  --> stracciatella/src/guess.rs:37:25
+   |
+37 |     OnlyExistsInDataDir(Option<Nfc>, Nfc),
+   |     ------------------- ^^^^^^^^^^^  ^^^
+   |     |
+   |     fields in this variant
+   |
+note: `0` and `1` are used in the expansion of the derive macro `Debug`, but this is intentionally ignored during dead code analysis
+  --> stracciatella/src/guess.rs:35:10
+   |
+35 | #[derive(Debug)]
+   |          ^^^^^
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+help: consider changing the fields to be of unit type to suppress this warning while preserving the field numbering, or remove the fields
+   |
+37 -     OnlyExistsInDataDir(Option<Nfc>, Nfc),
+37 +     OnlyExistsInDataDir((), ()),
+   |
+
+warning: fields `0` and `1` are never read
+  --> stracciatella/src/guess.rs:38:22
+   |
+38 |     OnlyExistsInPack(Option<Nfc>, Nfc),
+   |     ---------------- ^^^^^^^^^^^  ^^^
+   |     |
+   |     fields in this variant
+   |
+note: `0` and `1` are used in the expansion of the derive macro `Debug`, but this is intentionally ignored during dead code analysis
+  --> stracciatella/src/guess.rs:35:10
+   |
+35 | #[derive(Debug)]
+   |          ^^^^^
+help: consider changing the fields to be of unit type to suppress this warning while preserving the field numbering, or remove the fields
+   |
+38 -     OnlyExistsInPack(Option<Nfc>, Nfc),
+38 +     OnlyExistsInPack((), ()),
+   |
+
+warning: fields `0`, `1`, and `2` are never read
+  --> stracciatella/src/guess.rs:39:22
+   |
+39 |     FileSizeMismatch(Nfc, Option<i64>, Option<i64>),
+   |     ---------------- ^^^  ^^^^^^^^^^^  ^^^^^^^^^^^
+   |     |
+   |     fields in this variant
+   |
+note: `0`, `1`, and `2` are used in the expansion of the derive macro `Debug`, but this is intentionally ignored during dead code analysis
+  --> stracciatella/src/guess.rs:35:10
+   |
+35 | #[derive(Debug)]
+   |          ^^^^^
+help: consider changing the fields to be of unit type to suppress this warning while preserving the field numbering, or remove the fields
+   |
+39 -     FileSizeMismatch(Nfc, Option<i64>, Option<i64>),
+39 +     FileSizeMismatch((), (), ()),
+   |
+
+warning: fields `0`, `1`, `2`, and `3` are never read
+  --> stracciatella/src/guess.rs:40:18
+   |
+40 |     HashMismatch(Nfc, String, Option<String>, Option<String>),
+   |     ------------ ^^^  ^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+   |     |
+   |     fields in this variant
+   |
+note: `0`, `1`, `2`, and `3` are used in the expansion of the derive macro `Debug`, but this is intentionally ignored during dead code analysis
+  --> stracciatella/src/guess.rs:35:10
+   |
+35 | #[derive(Debug)]
+   |          ^^^^^
+help: consider changing the fields to be of unit type to suppress this warning while preserving the field numbering, or remove the fields
+   |
+40 -     HashMismatch(Nfc, String, Option<String>, Option<String>),
+40 +     HashMismatch((), (), (), ()),
+   |
+
+warning: trait `SeekRead` is never used
+ --> stracciatella/src/vfile.rs:7:7
+  |
+7 | trait SeekRead: Seek + Read {}
+  |       ^^^^^^^^
+
+warning: `stracciatella` (lib) generated 8 warnings
+warning: use of deprecated module `std::u64`: all constants in this module replaced by associated constants on the type
+ --> stracciatella_c_api/src/c/fs/mod.rs:8:10
+  |
+8 | use std::u64;
+  |          ^^^
+  |
+  = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated constant `std::f64::MIN`: replaced by the `MIN` associated constant on `f64`
+   --> stracciatella_c_api/src/c/fs/mod.rs:136:35
+    |
+136 |             *modified_secs = f64::MIN;
+    |                                   ^^^
+
+warning: use of deprecated module `std::u64`: all constants in this module replaced by associated constants on the type
+ --> stracciatella_c_api/src/c/fs/file.rs:6:10
+  |
+6 | use std::u64;
+  |          ^^^
+
+warning: use of deprecated module `std::usize`: all constants in this module replaced by associated constants on the type
+ --> stracciatella_c_api/src/c/fs/file.rs:7:10
+  |
+7 | use std::usize;
+  |          ^^^^^
+
+warning: use of deprecated constant `std::u64::MAX`: replaced by the `MAX` associated constant on this type
+  --> stracciatella_c_api/src/c/fs/file.rs:88:18
+   |
+88 |             u64::MAX
+   |                  ^^^
+
+warning: use of deprecated constant `std::usize::MAX`: replaced by the `MAX` associated constant on this type
+   --> stracciatella_c_api/src/c/fs/file.rs:111:20
+    |
+111 |             usize::MAX
+    |                    ^^^
+
+warning: use of deprecated constant `std::usize::MAX`: replaced by the `MAX` associated constant on this type
+   --> stracciatella_c_api/src/c/fs/file.rs:168:35
+    |
+168 |                     return usize::MAX;
+    |                                   ^^^
+
+warning: use of deprecated constant `std::u64::MAX`: replaced by the `MAX` associated constant on this type
+   --> stracciatella_c_api/src/c/fs/file.rs:205:18
+    |
+205 |             u64::MAX
+    |                  ^^^
+
+warning: use of deprecated constant `std::u64::MAX`: replaced by the `MAX` associated constant on this type
+   --> stracciatella_c_api/src/c/fs/file.rs:223:18
+    |
+223 |             u64::MAX
+    |                  ^^^
+
+warning: use of deprecated constant `std::u64::MAX`: replaced by the `MAX` associated constant on this type
+   --> stracciatella_c_api/src/c/fs/file.rs:241:18
+    |
+241 |             u64::MAX
+    |                  ^^^
+
+warning: use of deprecated module `std::usize`: all constants in this module replaced by associated constants on the type
+ --> stracciatella_c_api/src/c/path.rs:8:10
+  |
+8 | use std::usize;
+  |          ^^^^^
+
+warning: use of deprecated constant `std::usize::MAX`: replaced by the `MAX` associated constant on this type
+  --> stracciatella_c_api/src/c/path.rs:34:20
+   |
+34 |             usize::MAX
+   |                    ^^^
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> stracciatella_c_api/src/any_path.rs:319:25
+    |
+319 | fn percent_split(mut s: &str) -> Result<Vec<PercentSplit>, String> {
+    |                         ^^^^                ^^^^^^^^^^^^ the same lifetime is hidden here
+    |                         |
+    |                         the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: `#[warn(mismatched_lifetime_syntaxes)]` on by default
+help: use `'_` for type paths
+    |
+319 | fn percent_split(mut s: &str) -> Result<Vec<PercentSplit<'_>>, String> {
+    |                                                         ++++
+
+warning: unused return value of `CString::from_raw` that must be used
+  --> stracciatella_c_api/src/c/misc.rs:35:14
+   |
+35 |     unsafe { CString::from_raw(s) };
+   |              ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: call `drop(from_raw(ptr))` if you intend to drop the `CString`
+   = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: if you wish to disregard this recommendation, use `let _ = ...` to ignore the value
+   |
+35 |     unsafe { let _ = CString::from_raw(s); };
+   |              +++++++                     +
+
+warning: `stracciatella_c_api` (lib) generated 14 warnings (run `cargo fix --lib -p stracciatella_c_api` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 43.76s
+fonts written
+18 pages, 13 chapters
+-- The C compiler identification is GNU 16.1.0
+-- The CXX compiler identification is GNU 16.1.0
+-- Detected multilib folder: armv6k/fpu
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found Git: /usr/bin/git (found version "2.39.5")
+-- ja2-stracciatella version: 0.22.1-git+11e9430
+-- Setting directory for libraries to: lib
+<FindSDL2.cmake>
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+</FindSDL2.cmake>
+-- Found SDL2: /tmp/ja2w/prefix/lib/libSDL2main.a;/tmp/ja2w/prefix/lib/libSDL2.a (Required is at least version "2.0.5")
+-- SDL2 Libraries: /tmp/ja2w/prefix/lib/libSDL2main.a;/tmp/ja2w/prefix/lib/libSDL2.a; SDL2 Include Dir: /tmp/ja2w/prefix/include/SDL2
+-- <magic_enum>
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-magic_enum/getter
+[1/9] Creating directories for 'get-magic_enum'
+[2/9] Performing download step (download, verify and extract) for 'get-magic_enum'
+-- Downloading...
+   dst='/tmp/ja2w/build/dependencies/lib-magic_enum/getter/get-magic_enum-prefix/src/v0.8.2.zip'
+   timeout='none'
+   inactivity timeout='none'
+-- Using src='https://github.com/Neargye/magic_enum/archive/v0.8.2.zip'
+-- verifying file...
+       file='/tmp/ja2w/build/dependencies/lib-magic_enum/getter/get-magic_enum-prefix/src/v0.8.2.zip'
+-- Downloading... done
+-- extracting...
+     src='/tmp/ja2w/build/dependencies/lib-magic_enum/getter/get-magic_enum-prefix/src/v0.8.2.zip'
+     dst='/tmp/ja2w/build/lib-magic_enum/src'
+-- extracting... [tar xfz]
+-- extracting... [analysis]
+-- extracting... [rename]
+-- extracting... [clean up]
+-- extracting... done
+[3/9] No update step for 'get-magic_enum'
+[4/9] No patch step for 'get-magic_enum'
+[5/9] No configure step for 'get-magic_enum'
+[6/9] No build step for 'get-magic_enum'
+[7/9] No install step for 'get-magic_enum'
+[8/9] No test step for 'get-magic_enum'
+[9/9] Completed 'get-magic_enum'
+-- Looking for C++ include magic_enum.hpp
+-- Looking for C++ include magic_enum.hpp - found
+-- </magic_enum>
+-- <lua>
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-lua/getter
+[1/9] Creating directories for 'get-lua'
+[2/9] Performing download step (download, verify and extract) for 'get-lua'
+-- Downloading...
+   dst='/tmp/ja2w/build/dependencies/lib-lua/getter/get-lua-prefix/src/lua-5.3.6.tar.gz'
+   timeout='none'
+   inactivity timeout='none'
+-- Using src='https://www.lua.org/ftp/lua-5.3.6.tar.gz'
+-- [download 5% complete]
+-- [download 11% complete]
+-- [download 21% complete]
+-- [download 27% complete]
+-- [download 32% complete]
+-- [download 38% complete]
+-- [download 43% complete]
+-- [download 48% complete]
+-- [download 54% complete]
+-- [download 59% complete]
+-- [download 65% complete]
+-- [download 70% complete]
+-- [download 75% complete]
+-- [download 81% complete]
+-- [download 86% complete]
+-- [download 92% complete]
+-- [download 97% complete]
+-- [download 100% complete]
+-- verifying file...
+       file='/tmp/ja2w/build/dependencies/lib-lua/getter/get-lua-prefix/src/lua-5.3.6.tar.gz'
+-- Downloading... done
+-- extracting...
+     src='/tmp/ja2w/build/dependencies/lib-lua/getter/get-lua-prefix/src/lua-5.3.6.tar.gz'
+     dst='/tmp/ja2w/build/lib-lua/src'
+-- extracting... [tar xfz]
+-- extracting... [analysis]
+-- extracting... [rename]
+-- extracting... [clean up]
+-- extracting... done
+[3/9] No update step for 'get-lua'
+[4/9] No patch step for 'get-lua'
+[5/9] No configure step for 'get-lua'
+[6/9] No build step for 'get-lua'
+[7/9] No install step for 'get-lua'
+[8/9] No test step for 'get-lua'
+[9/9] Completed 'get-lua'
+-- </lua>
+-- <sol2>
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-sol2/getter
+[1/9] Creating directories for 'get-sol2'
+[2/9] Performing download step (download, verify and extract) for 'get-sol2'
+-- Downloading...
+   dst='/tmp/ja2w/build/dependencies/lib-sol2/getter/get-sol2-prefix/src/v3.5.0.zip'
+   timeout='none'
+   inactivity timeout='none'
+-- Using src='https://github.com/ThePhD/sol2/archive/v3.5.0.zip'
+-- verifying file...
+       file='/tmp/ja2w/build/dependencies/lib-sol2/getter/get-sol2-prefix/src/v3.5.0.zip'
+-- Downloading... done
+-- extracting...
+     src='/tmp/ja2w/build/dependencies/lib-sol2/getter/get-sol2-prefix/src/v3.5.0.zip'
+     dst='/tmp/ja2w/build/lib-sol2/src'
+-- extracting... [tar xfz]
+-- extracting... [analysis]
+-- extracting... [rename]
+-- extracting... [clean up]
+-- extracting... done
+[3/9] No update step for 'get-sol2'
+[4/9] Performing patch step for 'get-sol2'
+patching file include/sol/usertype_container.hpp
+patching file include/sol/stack_field.hpp
+[5/9] No configure step for 'get-sol2'
+[6/9] No build step for 'get-sol2'
+[7/9] No install step for 'get-sol2'
+[8/9] No test step for 'get-sol2'
+[9/9] Completed 'get-sol2'
+-- </sol2>
+-- <string_theory>
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-string_theory/builder
+[1/8] Creating directories for 'string_theory'
+[2/8] Performing download step (download, verify and extract) for 'string_theory'
+-- Downloading...
+   dst='/tmp/ja2w/build/dependencies/lib-string_theory/builder/string_theory-prefix/src/3.9.tar.gz'
+   timeout='none'
+   inactivity timeout='none'
+-- Using src='https://github.com/zrax/string_theory/archive/3.9.tar.gz'
+-- verifying file...
+       file='/tmp/ja2w/build/dependencies/lib-string_theory/builder/string_theory-prefix/src/3.9.tar.gz'
+-- Downloading... done
+-- extracting...
+     src='/tmp/ja2w/build/dependencies/lib-string_theory/builder/string_theory-prefix/src/3.9.tar.gz'
+     dst='/tmp/ja2w/build/dependencies/lib-string_theory/builder/string_theory-prefix/src/string_theory'
+-- extracting... [tar xfz]
+-- extracting... [analysis]
+-- extracting... [rename]
+-- extracting... [clean up]
+-- extracting... done
+[3/8] No update step for 'string_theory'
+[4/8] No patch step for 'string_theory'
+[5/8] Performing configure step for 'string_theory'
+loading initial cache file /tmp/ja2w/build/dependencies/lib-string_theory/external-project-cache.cmake
+-- The C compiler identification is GNU 16.1.0
+-- The CXX compiler identification is GNU 16.1.0
+-- Detected multilib folder: armv6k/fpu
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (1.0s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    ANDROID_ABI
+    ANDROID_APP_PLATFORM
+
+
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-string_theory/builder/string_theory-prefix/src/string_theory-build
+[6/8] Performing build step for 'string_theory'
+ninja: no work to do.
+[7/8] Performing install step for 'string_theory'
+[0/1] Install the project...
+-- Install configuration: "RelWithDebInfo"
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_assert.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_charbuffer.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_codecs.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_codecs_priv.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_format.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_format_numeric.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_format_priv.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_formatter.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_iostream.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_stdio.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_string.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_string_priv.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_stringstream.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_utf_conv.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_utf_conv_priv.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/st_config.h
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/assert
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/char_buffer
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/codecs
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/exceptions
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/formatter
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/format
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/iostream
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/stdio
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/string
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/string_stream
+-- Installing: /tmp/ja2w/build/lib-string_theory/include/string_theory/utf_conversion
+-- Installing: /tmp/ja2w/build/lib-string_theory/lib/cmake/string_theory/string_theory-config.cmake
+-- Installing: /tmp/ja2w/build/lib-string_theory/lib/cmake/string_theory/string_theory-config-version.cmake
+-- Installing: /tmp/ja2w/build/lib-string_theory/lib/cmake/string_theory/string_theory-targets.cmake
+[8/8] Completed 'string_theory'
+-- </string_theory>
+-- <miniaudio>
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build/dependencies/lib-miniaudio/getter
+[1/9] Creating directories for 'get-miniaudio'
+[2/9] Performing download step (download, verify and extract) for 'get-miniaudio'
+-- Downloading...
+   dst='/tmp/ja2w/build/dependencies/lib-miniaudio/getter/get-miniaudio-prefix/src/4dfe7c4c31df46e78d9a1cc0d2d6f1aef5a5d58c.zip'
+   timeout='none'
+   inactivity timeout='none'
+-- Using src='https://github.com/mackron/miniaudio/archive/4dfe7c4c31df46e78d9a1cc0d2d6f1aef5a5d58c.zip'
+-- verifying file...
+       file='/tmp/ja2w/build/dependencies/lib-miniaudio/getter/get-miniaudio-prefix/src/4dfe7c4c31df46e78d9a1cc0d2d6f1aef5a5d58c.zip'
+-- Downloading... done
+-- extracting...
+     src='/tmp/ja2w/build/dependencies/lib-miniaudio/getter/get-miniaudio-prefix/src/4dfe7c4c31df46e78d9a1cc0d2d6f1aef5a5d58c.zip'
+     dst='/tmp/ja2w/build/lib-miniaudio/src'
+-- extracting... [tar xfz]
+-- extracting... [analysis]
+-- extracting... [rename]
+-- extracting... [clean up]
+-- extracting... done
+[3/9] No update step for 'get-miniaudio'
+[4/9] No patch step for 'get-miniaudio'
+[5/9] No configure step for 'get-miniaudio'
+[6/9] No build step for 'get-miniaudio'
+[7/9] No install step for 'get-miniaudio'
+[8/9] No test step for 'get-miniaudio'
+[9/9] Completed 'get-miniaudio'
+-- </miniaudio>
+-- Entering src directory
+-- Entering launcher directory
+-- Configuring done (6.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ja2w/build
+ninja: Entering directory `/tmp/ja2w/build'
+[1/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/content/ContentMercs.o
+[2/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/army/PatrolGroupModel.o
+[3/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/army/GarrisonGroupModel.o
+[4/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/content/Dialogs.o
+[5/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/content/NPCQuoteInfo.o
+[6/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/internals/enums.o
+[7/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/json/Json.o
+[8/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/army/ArmyCompositionModel.o
+[9/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/mercs/MercProfileInfo.o
+[10/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/policy/DefaultIMPPolicy.o
+[11/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/policy/DefaultGamePolicy.o
+[12/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/mercs/RPCSmallFaceModel.o
+[13/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/policy/DefaultStrategicAIPolicy.o
+[14/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/mercs/MERCListingModel.o
+[15/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/mercs/MercProfile.o
+[16/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/BloodCatPlacementsModel.o
+[17/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/BloodCatSpawnsModel.o
+[18/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/CacheSectorsModel.o
+[19/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/scripting/FunctionsLibrary.o
+[20/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/FactParamsModel.o
+[21/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/CreatureLairModel.o
+[22/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/MineModel.o
+[23/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/NpcPlacementModel.o
+[24/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/MovementCostsModel.o
+[25/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/SamSiteModel.o
+[26/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/SamSiteAirControlModel.o
+[27/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/SectorLandTypes.o
+[28/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/StrategicMapSecretModel.o
+[29/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/TownModel.o
+[30/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/TraversibilityMapping.o
+[31/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strings/EDT.o
+[32/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strategic/UndergroundSectorModel.o
+[33/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strings/EncryptedString.o
+[34/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strings/ItemStrings.o
+[35/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/tactical/SmokeEffectModel.o
+[36/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/scripting/EnumCodeGen.o
+[37/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/tileset/TilesetTileIndexModel.o
+[38/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/tactical/MapItemReplacementModel.o
+[39/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/tactical/NpcActionParamsModel.o
+[40/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ui/Easings.o
+[41/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/AmmoTypeModel.o
+[42/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ArmourModel.o
+[43/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/DealerInventory.o
+[44/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/CalibreModel.o
+[45/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/DealerModel.o
+[46/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/GraphicModel.o
+[47/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ExplosionAnimationModel.o
+[48/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/InventoryGraphicsModel.o
+[49/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ExplosiveModel.o
+[50/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/strings/Localization.o
+[51/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ExplosiveCalibreModel.o
+[52/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ItemModel.o
+[53/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/JsonUtility.o
+[54/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/RustInterface.o
+[55/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/MagazineModel.o
+[56/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/LoadingScreenModel.o
+[57/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ModPackContentManager.o
+[58/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/ShippingDestinationModel.o
+[59/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/Soldier.o
+[60/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/VehicleModel.o
+[61/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Cursor_Modes.o
+[62/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Edit_Sys.o
+[63/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditScreen.o
+[64/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/WeaponModels.o
+[65/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditorBuildings.o
+[66/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditorMapInfo.o
+[67/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditorItems.o
+[68/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditorTerrain.o
+[69/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Editor_Callbacks.o
+[70/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Editor_Modes.o
+[71/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/EditorMercs.o
+[72/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Editor_Undo.o
+[73/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Editor_Taskbar_Creation.o
+[74/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/DefaultContentManager.o
+[75/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/MessageBox.o
+[76/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Editor_Taskbar_Utils.o
+[77/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/LoadScreen.o
+[78/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Road_Smoothing.o
+[79/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Item_Statistics.o
+[80/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/PopupMenu.o
+[81/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/NewSmooth.o
+[82/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/SmartMethod.o
+[83/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Smooth.o
+[84/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Smoothing_Utils.o
+[85/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/SelectWin.o
+[86/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIM.o
+[87/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMArchives.o
+[88/429] Building CXX object CMakeFiles/ja2.dir/src/game/Editor/Sector_Summary.o
+[89/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMFacialIndex.o
+[90/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMHistory.o
+[91/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMLinks.o
+[92/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRAmmo.o
+[93/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMSort.o
+[94/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMPolicies.o
+[95/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRArmour.o
+[96/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/AIMMembers.o
+[97/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyR.o
+[98/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRMisc.o
+[99/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRUsed.o
+[100/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRShipments.o
+[101/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BrokenLink.o
+[102/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRGuns.o
+[103/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/BobbyRMailOrder.o
+[104/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/CharProfile.o
+[105/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Florist.o
+[106/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Files.o
+[107/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Florist_Cards.o
+[108/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/EMail.o
+[109/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Finances.o
+[110/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Florist_Gallery.o
+[111/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMPVideoObjects.o
+[112/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Funeral.o
+[113/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Florist_Order_Form.o
+[114/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/History.o
+[115/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_AboutUs.o
+[116/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Attribute_Entrance.o
+[117/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Attribute_Finish.o
+[118/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Compile_Character.o
+[119/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Begin_Screen.o
+[120/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Attribute_Selection.o
+[121/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Confirm.o
+[122/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Finish.o
+[123/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_HomePage.o
+[124/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Personality_Entrance.o
+[125/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_MainPage.o
+[126/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Personality_Finish.o
+[127/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Personality_Quiz.o
+[128/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Portraits.o
+[129/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Insurance.o
+[130/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_SkillTraits.o
+[131/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Text_System.o
+[132/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/IMP_Voices.o
+[133/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Insurance_Comments.o
+[134/429] Building CXX object CMakeFiles/ja2.dir/src/externalized/scripting/ScriptingExtensionsLua.o
+[135/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Insurance_Info.o
+[136/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Insurance_Contract.o
+[137/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Mercs.o
+[138/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Mercs_Account.o
+[139/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Mercs_No_Account.o
+[140/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Laptop.o
+[141/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Store_Inventory.o
+[142/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Mercs_Files.o
+[143/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Campaign_Init.o
+[144/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Creature_Spreading.o
+[145/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Game_Event_Hook.o
+[146/429] Building CXX object CMakeFiles/ja2.dir/src/game/Laptop/Personnel.o
+[147/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Game_Clock.o
+[148/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Hourly_Update.o
+[149/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Auto_Resolve.o
+[150/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Game_Init.o
+[151/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/LoadSaveSectorInfo.o
+[152/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Assignments.o
+[153/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Game_Events.o
+[154/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/LoadSaveStrategicMapElement.o
+[155/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/LoadSaveUndergroundSectorInfo.o
+[156/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface_Border.o
+[157/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Helicopter.o
+[158/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface_Bottom.o
+[159/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface.o
+[160/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface_Map.o
+[161/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/MapScreen.o
+[162/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface_TownMine_Info.o
+[163/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Meanwhile.o
+[164/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Map_Screen_Interface_Map_Inventory.o
+[165/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/QuestText.o
+[166/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Player_Command.o
+[167/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Merc_Contract.o
+[168/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Queen_Command.o
+[169/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic.o
+[170/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Scheduling.o
+[171/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/PreBattle_Interface.o
+[172/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Quests.o
+[173/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Quest_Debug_System.o
+/tmp/ja2w/strac/src/game/Strategic/Quest_Debug_System.cc: In function 'void DisplayQuestList()':
+/tmp/ja2w/strac/src/game/Strategic/Quest_Debug_System.cc:1304:26: warning: variable 'usCount' set but not used [-Wunused-but-set-variable=]
+ 1304 |         UINT16  usLoop1, usCount;
+      |                          ^~~~~~~
+[174/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/StrategicMap_Secrets.o
+[175/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Event_Handler.o
+[176/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Movement_Costs.o
+[177/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Mines.o
+[178/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Merc_Handler.o
+[179/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_AI.o
+[180/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/StrategicMap.o
+[181/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Pathing.o
+[182/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Turns.o
+[183/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Status.o
+[184/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Movement.o
+[185/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/SAM_Sites.o
+[186/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Strategic_Town_Loyalty.o
+[187/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Animation_Cache.o
+[188/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Animation_Data.o
+[189/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/ArmsDealerInvInit.o
+[190/429] Building CXX object CMakeFiles/ja2.dir/src/game/Strategic/Town_Militia.o
+[191/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Animation_Control.o
+[192/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Bullets.o
+[193/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Boxing.o
+[194/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Auto_Bandage.o
+[195/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Arms_Dealer_Init.o
+[196/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Dialogue_Control.o
+[197/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Campaign.o
+[198/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/End_Game.o
+[199/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Civ_Quotes.o
+[200/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/DisplayCover.o
+[201/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Drugs_And_Alcohol.o
+[202/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Enemy_Soldier_Save.o
+[203/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/FOV.o
+[204/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Gap.o
+[205/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Faces.o
+[206/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Control.o
+[207/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Cursors.o
+[208/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Handle_Doors.o
+[209/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Handle_Items.o
+[210/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface.o
+[211/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Handle_UI.o
+[212/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Utils.o
+[213/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Inventory_Choosing.o
+[214/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Panels.o
+[215/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Dialogue.o
+[216/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveBasicSoldierCreateStruct.o
+[217/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Keys.o
+[218/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveBullet.o
+[219/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Items.o
+[220/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Interface_Items.o
+[221/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveMercProfile.o
+[222/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveRottingCorpse.o
+[223/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveObjectType.o
+[224/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LOS.o
+[225/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveSoldierCreate.o
+[226/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveVehicleType.o
+[227/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Map_Information.o
+[228/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/LoadSaveSoldierType.o
+[229/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Militia_Control.o
+[230/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Merc_Entering.o
+[231/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Morale.o
+[232/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Merc_Hiring.o
+[233/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/PathAI.o
+[234/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/QArray.o
+[235/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Rotting_Corpses.o
+[236/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Real_Time_Input.o
+[237/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Points.o
+[238/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/SkillCheck.o
+[239/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/OppList.o
+[240/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Overhead.o
+[241/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Add.o
+[242/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/ShopKeeper_Interface.o
+[243/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Find.o
+[244/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Ani.o
+[245/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Init_List.o
+[246/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Profile.o
+[247/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Create.o
+[248/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Spread_Burst.o
+[249/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Tile.o
+[250/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Structure_Wrap.o
+[251/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Squads.o
+[252/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Soldier_Control.o
+[253/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Tactical_Turns.o
+[254/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Strategic_Exit_GUI.o
+[255/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Touch_UI.o
+[256/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Tactical_Save.o
+[257/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/TeamTurns.o
+[258/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/UI_Cursors.o
+[259/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Turn_Based_Input.o
+[260/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Vehicles.o
+[261/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/World_Items.o
+[262/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/AIList.o
+[263/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/AIUtils.o
+[264/429] Building CXX object CMakeFiles/ja2.dir/src/game/Tactical/Weapons.o
+[265/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/AIMain.o
+[266/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/CreatureDecideAction.o
+[267/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/Attacks.o
+[268/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/DecideAction.o
+[269/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/Medical.o
+[270/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/Knowledge.o
+[271/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/Realtime.o
+[272/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/Movement.o
+[273/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/PanicButtons.o
+[274/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/FindLocations.o
+[275/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Ambient_Control.o
+[276/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Environment.o
+[277/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Fog_Of_War.o
+[278/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Buildings.o
+[279/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Isometric_Utils.o
+[280/429] Building CXX object CMakeFiles/ja2.dir/src/game/TacticalAI/NPC.o
+[281/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LightEffects.o
+[282/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Exit_Grids.o
+[283/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Interactive_Tiles.o
+[284/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Explosion_Control.o
+[285/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LoadSaveLightEffect.o
+[286/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LoadSaveExplosionType.o
+[287/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LoadSaveLightSprite.o
+[288/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Phys_Math.o
+[289/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LoadSaveRealObject.o
+[290/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/LoadSaveSmokeEffect.o
+[291/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Lighting.o
+[292/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Pits.o
+[293/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Overhead_Map.o
+[294/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Map_Edgepoints.o
+[295/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Render_Fun.o
+[296/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Render_Dirty.o
+[297/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Radar_Screen.o
+[298/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Simple_Render_Utils.o
+[299/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Physics.o
+[300/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/SaveLoadMap.o
+[301/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Smell.o
+[302/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/SysUtil.o
+[303/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/RenderWorld.o
+[304/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/SmokeEffects.o
+[305/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/TileDat.o
+[306/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Tile_Cache.o
+[307/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Tile_Animation.o
+[308/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/TileDef.o
+[309/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Tile_Surface.o
+[310/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Structure.o
+[311/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/Tactical_Placement_GUI.o
+[312/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/WorldDat.o
+[313/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Animated_ProgressBar.o
+[314/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Cinematics.o
+[315/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Cursors.o
+[316/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Debug_Pages.o
+[317/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/WorldMan.o
+[318/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Font_Control.o
+[319/429] Building CXX object CMakeFiles/ja2.dir/src/game/TileEngine/WorldDef.o
+[320/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/MercTextBox.o
+[321/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Event_Pump.o
+[322/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/MapUtility.o
+[323/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Observable.o
+[324/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Message.o
+[325/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Music_Control.o
+[326/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Quantize.o
+[327/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/PopUpBox.o
+[328/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Sound_Control.o
+[329/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Slider.o
+[330/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/STIConvert.o
+[331/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Timer_Control.o
+[332/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/WordWrap.o
+[333/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Text_Utils.o
+[334/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Text_Input.o
+[335/429] Building CXX object CMakeFiles/ja2.dir/src/game/Utils/Utilities.o
+[336/429] Building CXX object CMakeFiles/ja2.dir/src/game/Fade_Screen.o
+[337/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameMode.o
+[338/429] Building CXX object CMakeFiles/ja2.dir/src/game/UILayout.o
+[339/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameRes.o
+[340/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameVersion.o
+[341/429] Building CXX object CMakeFiles/ja2.dir/src/game/Credits.o
+[342/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameInitOptionsScreen.o
+[343/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameScreen.o
+[344/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameLoop.o
+[345/429] Building CXX object CMakeFiles/ja2.dir/src/game/Intro.o
+[346/429] Building CXX object CMakeFiles/ja2.dir/src/game/JA2_Splash.o
+[347/429] Building CXX object CMakeFiles/ja2.dir/src/game/Init.o
+[348/429] Building CXX object CMakeFiles/ja2.dir/src/game/GameSettings.o
+[349/429] Building CXX object CMakeFiles/ja2.dir/src/game/LoadSaveEMail.o
+[350/429] Building CXX object CMakeFiles/ja2.dir/src/game/HelpScreen.o
+[351/429] Building CXX object CMakeFiles/ja2.dir/src/game/LoadSaveTacticalStatusType.o
+[352/429] Building CXX object CMakeFiles/ja2.dir/src/game/JAScreens.o
+[353/429] Building CXX object CMakeFiles/ja2.dir/src/game/Loading_Screen.o
+[354/429] Building CXX object CMakeFiles/ja2.dir/src/game/MercPortrait.o
+[355/429] Building CXX object CMakeFiles/ja2.dir/src/game/MainMenuScreen.o
+[356/429] Building CXX object CMakeFiles/ja2.dir/src/game/Options_Screen.o
+[357/429] Building CXX object CMakeFiles/ja2.dir/src/game/Screens.o
+[358/429] Building CXX object CMakeFiles/ja2.dir/src/game/MessageBoxScreen.o
+[359/429] Building CXX object CMakeFiles/ja2.dir/src/game/SaveLoadGameStates.o
+[360/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Button_Sound_Control.o
+[361/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/DirFs.o
+[362/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Cursor_Control.o
+[363/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Button_System.o
+[364/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/FileMan.o
+[365/429] Building CXX object CMakeFiles/ja2.dir/src/game/SaveLoadScreen.o
+[366/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Font.o
+[367/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/FPS.o
+[368/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Line.o
+[369/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/HImage.o
+[370/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/ImpTGA.o
+[371/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Input.o
+[372/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/LoadSaveData.o
+[373/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Object_Cache.o
+[374/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/PCX.o
+[375/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Random.o
+[376/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/MouseSystem.o
+[377/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Shading.o
+[378/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/STCI.o
+[379/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/SGPFile.o
+[380/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/SGPStrings.o
+[381/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/SGP.o
+[382/429] Building CXX object CMakeFiles/ja2.dir/src/game/SaveLoadGame.o
+[383/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/VObject.o
+[384/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Types.o
+[385/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/VSurface.o
+[386/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lapi.o
+[387/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/n3ds/N3DS_Dashboard.o
+[388/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lbaselib.o
+[389/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lbitlib.o
+[390/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/Video.o
+[391/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lcorolib.o
+[392/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lauxlib.o
+[393/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lctype.o
+[394/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ldblib.o
+[395/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/n3ds/N3DS_Platform.o
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc: In function 'void {anonymous}::Fill(const Canvas&, int, int, int, int, u16)':
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:237:9: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  237 |         if (x + w > c.w) w = c.w - x; if (y + h > c.h) h = c.h - y;
+      |         ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:237:39: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  237 |         if (x + w > c.w) w = c.w - x; if (y + h > c.h) h = c.h - y;
+      |                                       ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc: In function 'void Bar(const {anonymous}::Canvas&, int, int, int, const char*, int, int)':
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:398:9: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  398 |         if (v < 0) v = 0; if (v > max) v = max;
+      |         ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:398:27: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  398 |         if (v < 0) v = 0; if (v > max) v = max;
+      |                           ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc: In function 'void N3DS_PumpInput()':
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:816:33: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  816 |                                 if (fx < 0) fx = 0; if (fx > 639) fx = 639;
+      |                                 ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:816:53: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  816 |                                 if (fx < 0) fx = 0; if (fx > 639) fx = 639;
+      |                                                     ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:817:33: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  817 |                                 if (fy < 0) fy = 0; if (fy > 479) fy = 479;
+      |                                 ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:817:53: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  817 |                                 if (fy < 0) fy = 0; if (fy > 479) fy = 479;
+      |                                                     ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:864:17: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  864 |                 if (fx < 0) fx = 0; if (fx > 639) fx = 639;
+      |                 ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:864:37: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  864 |                 if (fx < 0) fx = 0; if (fx > 639) fx = 639;
+      |                                     ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:865:17: warning: this 'if' clause does not guard... [-Wmisleading-indentation]
+  865 |                 if (fy < 0) fy = 0; if (fy > 479) fy = 479;
+      |                 ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:865:37: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'
+  865 |                 if (fy < 0) fy = 0; if (fy > 479) fy = 479;
+      |                                     ^~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc: In function 'void N3DS_BootStatus(const char*, ...)':
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:118:42: warning: '%s' directive output may be truncated writing up to 159 bytes into a region of size between 0 and 56 [-Wformat-truncation=]
+  118 |         snprintf(lines[n++], 64, "%6.1fs %s", secs, msg);
+      |                                          ^~         ~~~
+/tmp/ja2w/strac/src/sgp/n3ds/N3DS_Platform.cc:118:17: note: 'snprintf' output between 9 and 474 bytes into a destination of size 64
+  118 |         snprintf(lines[n++], 64, "%6.1fs %s", secs, msg);
+      |         ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[396/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ldebug.o
+[397/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lcode.o
+[398/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lfunc.o
+[399/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ldo.o
+[400/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/linit.o
+[401/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ldump.o
+[402/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lmathlib.o
+[403/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/liolib.o
+[404/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lmem.o
+[405/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lgc.o
+[406/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/llex.o
+[407/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lopcodes.o
+[408/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/loadlib.o
+[409/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/loslib.o
+[410/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/VObject_Blitters.o
+[411/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lobject.o
+[412/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lstate.o
+[413/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lstring.o
+[414/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ltm.o
+[415/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ltablib.o
+[416/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/ltable.o
+[417/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lundump.o
+[418/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lutf8lib.o
+[419/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lparser.o
+[420/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lzio.o
+[421/429] Building C object dependencies/lib-smacker/CMakeFiles/smacker.dir/libsmacker/smk_bitstream.o
+[422/429] Building C object dependencies/lib-smacker/CMakeFiles/smacker.dir/libsmacker/smk_hufftree.o
+[423/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lstrlib.o
+[424/429] Building C object dependencies/lib-smacker/CMakeFiles/smacker.dir/libsmacker/smacker.o
+[425/429] Linking C static library dependencies/lib-smacker/libsmacker.a
+[426/429] Building C object dependencies/lib-lua/CMakeFiles/lua.dir/__/__/lib-lua/src/src/lvm.o
+[427/429] Linking C static library dependencies/lib-lua/liblua.a
+[428/429] Building CXX object CMakeFiles/ja2.dir/src/sgp/SoundMan.o
+[429/429] Linking CXX executable ja2.elf
+/opt/devkitpro/devkitARM/arm-none-eabi/bin/ld: warning: /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o: missing .note.GNU-stack section implies executable stack
+/opt/devkitpro/devkitARM/arm-none-eabi/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker
+built /w/out/ja2.3dsx
