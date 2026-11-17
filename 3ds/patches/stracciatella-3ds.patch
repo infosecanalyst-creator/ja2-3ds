@@ -1041,10 +1041,10 @@ index 0000000..2abfbd0
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..19c31e0
+index 0000000..a21bd24
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,882 @@
+@@ -0,0 +1,915 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1372,6 +1372,16 @@ index 0000000..19c31e0
 +	g_lefty = on;
 +	if (on) { if (FILE* f = fopen(N3DS_DIR "/.lefty", "w")) fclose(f); } else remove(N3DS_DIR "/.lefty");
 +}
++// Magnifier (START menu, off by default: Nov 11 rule "zoom only on a button press"). The game's
++// 640x480 frame is shown at half size on the touch screen, which makes its own text very small;
++// with the magnifier on, the top screen shows a 1:1 window of the frame around the cursor instead
++// of the dashboard (principle, Ryan Nov 17 2026: "everything has to be readable").
++static bool g_mag = false;
++static void SetMag(bool on)
++{
++	g_mag = on;
++	if (on) { if (FILE* f = fopen(N3DS_DIR "/.magnify", "w")) fclose(f); } else remove(N3DS_DIR "/.magnify");
++}
 +static u32 Remap(u32 m) // physical keys -> logical keys the rest of the code uses
 +{
 +	if (!g_lefty) return m;
@@ -1399,6 +1409,7 @@ index 0000000..19c31e0
 +	struct stat sb;
 +	SetSwap(stat(N3DS_DIR "/.swap", &sb) == 0);
 +	SetLefty(stat(N3DS_DIR "/.lefty", &sb) == 0);
++	SetMag(stat(N3DS_DIR "/.magnify", &sb) == 0);
 +	g_ready = true;
 +}
 +
@@ -1433,6 +1444,25 @@ index 0000000..19c31e0
 +			if (u16* p = PxP(c, x, y)) *p = avg565(avg565(r0[sx], r0[sx + 1]), avg565(r1[sx], r1[sx + 1]));
 +		}
 +	}
++}
++
++// Magnifier: a 400x224 window of the frame at 1:1 around the cursor (cx, cy in frame pixels),
++// clamped to the frame, with the house hint strip under it.
++static void DrawGameMagnified(const Canvas& c, SDL_Surface* screen, int cx, int cy)
++{
++	const int spitch = screen->pitch / 2;
++	const u16* src = (const u16*)screen->pixels;
++	const int W = c.w, H = c.h - 16;
++	int x0 = cx - W / 2, y0 = cy - H / 2;
++	if (x0 < 0) x0 = 0; if (x0 > 640 - W) x0 = 640 - W;
++	if (y0 < 0) y0 = 0; if (y0 > 480 - H) y0 = 480 - H;
++	for (int y = 0; y < H; ++y) {
++		const u16* r = src + (y0 + y) * spitch + x0;
++		for (int x = 0; x < W; ++x) if (u16* p = PxP(c, x, y)) *p = r[x];
++	}
++	Fill(c, 0, H, W, 16, kPanel);
++	const char* hint = "Magnifier: the area around the cursor   START menu to turn off";
++	Text(c, (W - std::min(TextW(hint, kFontSans), W - 12)) / 2, H + 1, hint, kTitle, kFontSans, W - 12);
 +}
 +
 +// ---------------------------------------------------------------- dashboard
@@ -1524,7 +1554,8 @@ index 0000000..19c31e0
 +	g_bootDone = true;
 +	if (!g_swap) {
 +		DrawGameHalf(CanvasFor(GFX_BOTTOM), 0, screen);
-+		DrawDashboard(CanvasFor(GFX_TOP), false);
++		if (g_mag) DrawGameMagnified(CanvasFor(GFX_TOP), screen, cx, cy);
++		else DrawDashboard(CanvasFor(GFX_TOP), false);
 +	} else {
 +		DrawGameFill(CanvasFor(GFX_TOP), screen);
 +		DrawDashboard(CanvasFor(GFX_BOTTOM), true);
@@ -1716,9 +1747,9 @@ index 0000000..19c31e0
 +void requestGameExit();
 +static void N3DS_RunPortMenu()
 +{
-+	enum { kResume, kManual, kOptions, kLefty, kExit };
-+	static const int kIds[] = { kResume, kManual, kOptions, kLefty, kExit };
-+	const int n = 5;
++	enum { kResume, kManual, kOptions, kMag, kLefty, kExit };
++	static const int kIds[] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
++	const int n = 6;
 +	int focus = 0, pressed = -1, pressFrames = 0, chosen = -1;
 +	bool confirm = false;
 +	hidSetRepeatParameters(18, 4);
@@ -1728,6 +1759,7 @@ index 0000000..19c31e0
 +			case kManual: return "MANUAL";
 +			case kOptions: return "SAVE / LOAD / OPTIONS";
 +			case kLefty: return g_lefty ? "LEFT HAND: ON" : "LEFT HAND: OFF";
++			case kMag: return g_mag ? "MAGNIFIER: ON" : "MAGNIFIER: OFF";
 +			default: return "EXIT GAME";
 +		}
 +	};
@@ -1788,6 +1820,7 @@ index 0000000..19c31e0
 +			if (!confirm) {
 +				const int id = kIds[pressed];
 +				if (id == kLefty) SetLefty(!g_lefty);
++				else if (id == kMag) SetMag(!g_mag);
 +				else if (id == kExit) { confirm = true; focus = 1; }
 +				else chosen = id;
 +			} else if (pressed == 0) chosen = kExit;

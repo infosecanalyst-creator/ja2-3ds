@@ -54,7 +54,8 @@ ZR                tap: roof level, hold: END TURN
 SELECT            Esc: cancel, close windows,
                   map screen: enter the sector
 START             menu: resume, manual, save /
-                  load / options, left hand, exit
+                  load / options, magnifier,
+                  left hand, exit
 # The two screens
 == 2. THE TWO SCREENS
 BOTTOM (touch): the complete game. Everything
@@ -64,6 +65,12 @@ TOP: the dashboard. It shows the date, time
 and sector, the selected merc's health,
 energy, morale, action points and skills,
 and the controls for the screen you are on.
+
+MAGNIFIER (START menu): the game's own text
+is small at half size. With the magnifier
+on, the top screen shows the area around the
+cursor at full size instead of the
+dashboard. Turn it off in the same menu.
 
 SWAP: press ZL at any time to put the game on
 the top screen and the dashboard on the touch
