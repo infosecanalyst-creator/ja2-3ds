@@ -70,7 +70,8 @@ MAGNIFIER (START menu): the game's own text
 is small at half size. With the magnifier
 on, the top screen shows the area around the
 cursor at full size instead of the
-dashboard. Turn it off in the same menu.
+dashboard (swapped: instead of the whole
+game). Turn it off in the same menu.
 
 SWAP: press ZL at any time to put the game on
 the top screen and the dashboard on the touch
