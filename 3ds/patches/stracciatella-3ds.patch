@@ -880,10 +880,10 @@ index 8f48538..7950173 100644
  	guiDirtyRegionCount = 0;
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.cc b/src/sgp/n3ds/N3DS_Dashboard.cc
 new file mode 100644
-index 0000000..0fd3887
+index 0000000..ad395e0
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.cc
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,56 @@
 +// Top-screen dashboard content for the 3DS port (game side: reads JA2 state)
 +#ifdef JA2_3DS
 +#include "N3DS_Dashboard.h"
@@ -911,6 +911,18 @@ index 0000000..0fd3887
 +{
 +	d = N3DSDash();
 +	d.screen = N3DS_CurrentScreen();
++	switch (guiCurrentScreen) {
++		case OPTIONS_SCREEN:           d.label = "Options"; break;
++		case SAVE_LOAD_SCREEN:
++		case LOADSAVE_SCREEN:          d.label = "Save / Load"; break;
++		case MSG_BOX_SCREEN:           d.label = "Message"; break;
++		case GAME_INIT_OPTIONS_SCREEN: d.label = "New game"; break;
++		case SHOPKEEPER_SCREEN:        d.label = "Shop"; break;
++		case AUTORESOLVE_SCREEN:       d.label = "Autoresolve"; break;
++		case CREDIT_SCREEN:            d.label = "Credits"; break;
++		case INTRO_SCREEN:             d.label = "Loading"; break;
++		default: break;
++	}
 +	d.inGame = d.screen == N3DS_SCR_TACTICAL || d.screen == N3DS_SCR_MAP || d.screen == N3DS_SCR_LAPTOP;
 +	if (!d.inGame) return;
 +	d.time = gswzWorldTimeStr.to_std_string();
@@ -930,16 +942,17 @@ index 0000000..0fd3887
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.h b/src/sgp/n3ds/N3DS_Dashboard.h
 new file mode 100644
-index 0000000..e1d2f98
+index 0000000..463e901
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.h
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,16 @@
 +#pragma once
 +#include <string>
 +// What the top-screen dashboard shows (filled from game state by N3DS_Dashboard.cc)
 +enum N3DSScreen { N3DS_SCR_OTHER, N3DS_SCR_MENU, N3DS_SCR_TACTICAL, N3DS_SCR_MAP, N3DS_SCR_LAPTOP, N3DS_SCR_INTRO };
 +struct N3DSDash {
 +	N3DSScreen screen = N3DS_SCR_OTHER;
++	const char* label = "";   // header label for screens without their own dashboard (options, save/load, messages)
 +	bool inGame = false;
 +	std::string time, sector;
 +	bool hasMerc = false;
@@ -1028,7 +1041,7 @@ index 0000000..2abfbd0
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..655ed9d
+index 0000000..19c31e0
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
 @@ -0,0 +1,882 @@
@@ -1448,7 +1461,7 @@ index 0000000..655ed9d
 +	Fill(c, 0, 0, W, 22, kSel);
 +	Text(c, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
 +	const char* where = d.screen == N3DS_SCR_MENU ? "Main menu" : d.screen == N3DS_SCR_TACTICAL ? "Tactical" :
-+	                    d.screen == N3DS_SCR_MAP ? "Strategic map" : d.screen == N3DS_SCR_LAPTOP ? "Laptop" : "";
++	                    d.screen == N3DS_SCR_MAP ? "Strategic map" : d.screen == N3DS_SCR_LAPTOP ? "Laptop" : d.label;
 +	Text(c, W - 6 - TextW(where, kFontSans), 5, where, kText, kFontSans);
 +	int y = 26;
 +	if (d.inGame) {
