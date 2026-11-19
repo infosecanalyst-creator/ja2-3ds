@@ -571,7 +571,7 @@ index d260c8a..7f61e80 100644
  
  
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..4792ef8 100644
+index add6ddf..6905c0c 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -566,7 +566,7 @@ static void RenderSaveLoadScreen(void)
@@ -592,6 +592,42 @@ index add6ddf..4792ef8 100644
  	auto currentTop = gCurrentScrollTop;
  	auto maxYPos = SLG_SCROLLBAR_INNER_HEIGHT - SLG_SCROLLBAR_INDICATOR_HEIGHT - 2;
  	auto indicatorPosition = int(round(double_t(maxYPos) * double_t(currentTop) / double_t(maxTop)));
+@@ -1517,3 +1517,35 @@ static void StartFadeOutForSaveLoadScreen(void)
+ 	FadeOutNextFrame( );
+ 	gfStartedFadingOut = TRUE;
+ }
++
++
++#ifdef __3DS__
++// 3DS port, rule 17 (never lose progress): EXIT GAME in the START menu quick-saves first,
++// when the game could be quick-saved by hand right now (on a game screen, CanGameBeSaved,
++// not in a conversation). The quick save is the one Load shows as "QuickSave".
++bool N3DS_SuspendSaveOk()
++{
++	if (guiCurrentScreen != GAME_SCREEN && guiCurrentScreen != MAP_SCREEN && guiCurrentScreen != LAPTOP_SCREEN) return false;
++	if (!CanGameBeSaved()) return false;
++	if (gTacticalStatus.uiFlags & ENGAGED_IN_CONV) return false;
++	return true;
++}
++
++bool N3DS_SuspendSave()
++{
++	if (!N3DS_SuspendSaveOk()) return false;
++	try
++	{
++		if (gGameOptions.ubGameSaveMode == DIF_DEAD_IS_DEAD)
++		{
++			DoDeadIsDeadSave();
++			return true;
++		}
++		return SaveGame(GetQuickSaveName(), GetQuickSaveName());
++	}
++	catch (...)
++	{
++		return false;
++	}
++}
++#endif
 diff --git a/src/sgp/CMakeLists.txt b/src/sgp/CMakeLists.txt
 index ef31945..9a57e44 100644
 --- a/src/sgp/CMakeLists.txt
@@ -1057,10 +1093,10 @@ index 0000000..2abfbd0
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..551b15c
+index 0000000..579bcfb
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,957 @@
+@@ -0,0 +1,975 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1799,6 +1835,8 @@ index 0000000..551b15c
 +// options screen, which holds Save, Load and Quit), LEFT HAND and EXIT GAME, which asks first.
 +// Full-width buttons filling the touch screen (rule 11), D-pad + A or a tap, B or START resumes.
 +void requestGameExit();
++bool N3DS_SuspendSaveOk();   // SaveLoadScreen.cc: can EXIT GAME quick-save right now?
++bool N3DS_SuspendSave();     // SaveLoadScreen.cc: quick-save (rule 17)
 +static void N3DS_RunPortMenu()
 +{
 +	enum { kResume, kManual, kOptions, kMag, kLefty, kExit };
@@ -1846,7 +1884,9 @@ index 0000000..551b15c
 +		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
 +		Text(t, t.w - 6 - TextW("PAUSED", kFontSans), 5, "PAUSED", kText, kFontSans);
 +		Text(t, 8, 40, confirm ? "Exit the game?" : "The game is paused.", kText, kFontBold);
-+		Text(t, 8, 62, confirm ? "Anything you have not saved is lost." : "Choose on the touch screen, or with the D-pad and A.", kDim, kFontSans, t.w - 16);
++		const bool canSave = confirm && N3DS_SuspendSaveOk();
++		Text(t, 8, 62, confirm ? (canSave ? "It is quick-saved first (Load: QuickSave)." : "Anything you have not saved is lost.")
++		                       : "Choose on the touch screen, or with the D-pad and A.", kDim, kFontSans, t.w - 16);
 +		Fill(t, 0, t.h - 16, t.w, 16, kPanel);
 +		const char* hint = confirm ? "A choose    B no" : "A choose    B / START resume";
 +		Text(t, (t.w - TextW(hint, kFontSans)) / 2, t.h - 15, hint, kTitle, kFontSans);
@@ -1854,7 +1894,7 @@ index 0000000..551b15c
 +		Fill(b, 0, 0, b.w, b.h, kBg);
 +		Fill(b, 0, 0, b.w, 22, kSel);
 +		Text(b, 6, 4, confirm ? "EXIT GAME" : "MENU", kTitle, kFontBold);
-+		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, "Unsaved progress is lost.", kDim, kFontSans); }
++		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, canSave ? "It is quick-saved first." : "Unsaved progress is lost.", kDim, kFontSans); }
 +		for (int i = 0; i < nb; ++i) {
 +			int x, y, w, h; rectOf(i, x, y, w, h);
 +			const bool pr = pressFrames > 0 && i == pressed;
@@ -1889,7 +1929,21 @@ index 0000000..551b15c
 +	}
 +	if (chosen == kManual) N3DS_RunManual();
 +	else if (chosen == kOptions) { PushKey(SDLK_o, true); PushKey(SDLK_o, false); }
-+	else if (chosen == kExit) requestGameExit();
++	else if (chosen == kExit) {
++		if (N3DS_SuspendSaveOk()) {   // "Saving..." while JA2's (slow) quick save runs
++			for (int k = 0; k < 2; ++k) {
++				Canvas b = CanvasFor(GFX_BOTTOM);
++				Fill(b, 0, 0, b.w, b.h, kBg);
++				Fill(b, 0, 0, b.w, 22, kSel);
++				Text(b, 6, 4, "EXIT GAME", kTitle, kFontBold);
++				Text(b, (b.w - TextW("Saving...", kFontBold)) / 2, 110, "Saving...", kText, kFontBold);
++				gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++			}
++			const bool ok = N3DS_SuspendSave();
++			printf("[3ds] suspend save on exit: %s\n", ok ? "ok" : "failed"); fflush(stdout);
++		}
++		requestGameExit();
++	}
 +}
 +
 +extern int gN3DSCursorX, gN3DSCursorY; // kept in sync by Video.cc
