@@ -227,6 +227,7 @@ static void st_finish(const char* why) {
 // returns to the agent when the game does not quit within 15 s of the script's
 // end, when frames stop for 60 s (a hang), or after 30 minutes in all.
 static volatile u64 st_beat;
+static volatile u32 st_hangSec = 60;   // the script's "hang N" line (seconds), 60 by default
 static void st_watchdog(void* arg) {
     (void)arg;
     u64 last = 0, still = 0, doneAt = 0, start = osGetTime();
@@ -242,7 +243,7 @@ static void st_watchdog(void* arg) {
             why = "";
         } else {
             if (st_beat != last) { last = st_beat; still = now; }
-            else if (now - still > 60000) why = "watchdog: no frames for 60 s (the game hung)";
+            else if (now - still > (u64)st_hangSec * 1000) why = "watchdog: no frames for the hang limit (the game hung)";
             if (now - start > 30 * 60 * 1000) why = "watchdog: the test ran longer than 30 minutes";
         }
         if (why) {
@@ -355,7 +356,11 @@ static void st_step(void) {
             st_waitCol = strtol(col, NULL, 16); st_waitMax = mx; st_waitDone = 0;
             return;
         }
-        if (!strcmp(cmd, "hang")) continue;   // the emulator suite checks hangs; here the agent times out
+        if (!strcmp(cmd, "hang")) {   // hang N: seconds without frames before the watchdog acts (N >= 60)
+            int n = atoi(a1);
+            if (n >= 60) st_hangSec = (u32)n;
+            continue;
+        }
         if (!strcmp(cmd, "end")) break;
     }
     st_finish("end of script");
