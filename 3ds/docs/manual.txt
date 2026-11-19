@@ -60,7 +60,7 @@ START             menu: resume, manual, save /
                   load / options, magnifier,
                   left hand, exit
 # The two screens
-== 2. THE TWO SCREENS
+== 2. THE TWO SCREENS  (1/2)
 BOTTOM (touch): the complete game. Everything
 you click is here; the stylus is the mouse.
 
@@ -76,7 +76,7 @@ pointer; a tap still lands where you touch.
 C-Stick down shows the whole game again.
 Enemies outside the zoomed view can still
 act: zoom out to look around.
-
+== 2. THE TWO SCREENS  (2/2)
 MAGNIFIER (START menu): the game's own text
 is small at half size. With the magnifier
 on, the top screen shows the area around the
