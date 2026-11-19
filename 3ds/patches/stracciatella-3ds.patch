@@ -1046,18 +1046,19 @@ index 0000000..4f73fa6
 \ No newline at end of file
 diff --git a/src/sgp/n3ds/N3DS_Manual.h b/src/sgp/n3ds/N3DS_Manual.h
 new file mode 100644
-index 0000000..2abfbd0
+index 0000000..22b970b
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Manual.h
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,42 @@
 +// Generated from docs/manual.txt by tools/gen_manual.py -- edit the .txt
 +#pragma once
 +struct N3DSManualPage { const char* title; int n; const char* lines[25]; };
 +static const N3DSManualPage kN3DSManual[] = {
-+  { "CONTENTS", 22, { "Jagged Alliance 2 - New 3DS edition", "Engine: JA2 Stracciatella. Data: your JA2 Gold.", "", " 1  Controls", " 2  The two screens", " 3  Getting started", " 4  Hiring mercenaries", " 5  Tactical combat", " 6  Shooting and aiming", " 7  The strategic map", " 8  Jobs and militia", " 9  Money and mines", "10  Inventory and items", "11  Saving and options", "12  Tips for a first campaign", "", "In this manual:", "  Circle Pad / C-Stick   scroll the text", "  D-Pad                  move between sections", "  L / R                  previous / next section", "  Tap a section on the touch screen to jump.", "  B or START closes the manual." } },
++  { "CONTENTS", 23, { "Jagged Alliance 2 - New 3DS edition", "Engine: JA2 Stracciatella. Data: your JA2 Gold.", "", " 1  Controls", " 2  The two screens", " 3  Getting started", " 4  Hiring mercenaries", " 5  Tactical combat", " 6  Shooting and aiming", " 7  The strategic map", " 8  Jobs and militia", " 9  Money and mines", "10  Inventory and items", "11  Saving and options", "12  Tips for a first campaign", "", "In this manual:", "  Circle Pad / C-Stick   scroll the text", "  Drag the stylus        scroll the text too", "  D-Pad                  move between sections", "  L / R                  previous / next section", "  Tap a section on the touch screen to jump.", "  B or START closes the manual." } },
 +  { "1. CONTROLS  (1/2): STYLUS", 15, { "The touch screen is the whole game. The stylus", "is the mouse: tap = left click, drag = drag.", "For a right click, press B (it clicks at the", "cursor, i.e. where you last touched).", "", "In battle, a tap does not act at once. JA2's", "touch buttons pop up beside the target:", "  Do     confirm the move / shot / action", "  Run    move at a run          (moves)", "  Item   use the item in hand   (moves)", "  Aim    add an aim click       (shots)", "  Mode   single / burst fire    (shots)", "  X      cancel", "You can also steer the cursor with the Circle", "Pad and click with A / B." } },
-+  { "1. CONTROLS  (2/2): BUTTONS", 15, { "Circle Pad / C    move the cursor", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "SELECT            Esc: cancel, close windows,", "                  map screen: enter the sector", "START             menu: resume, manual, save /", "                  load / options, left hand, exit" } },
-+  { "2. THE TWO SCREENS", 17, { "BOTTOM (touch): the complete game. Everything", "you click is here; the stylus is the mouse.", "", "TOP: the dashboard. It shows the date, time", "and sector, the selected merc's health,", "energy, morale, action points and skills,", "and the controls for the screen you are on.", "", "SWAP: press ZL at any time to put the game on", "the top screen and the dashboard on the touch", "screen. Press ZL again (or tap the button at", "the foot of the touch screen) to swap back.", "The choice is saved. The game then fills the", "whole top screen, and the touch screen is a", "touchpad: slide to move the pointer, tap to", "click where it points (B is still the right", "click). The 3D slider is not used." } },
++  { "1. CONTROLS  (2/2): BUTTONS", 19, { "Circle Pad        move the cursor", "C-Stick up        ZOOM: the touch screen at", "                  full size (readable text)", "C-Stick down      back to the whole view", "A                 left click at the cursor", "B                 right click at the cursor", "D-pad             scroll the map", "X                 next merc (Space)", "                  map screen: pause / resume time", "Y                 strategic map  (M)", "L                 stance down (crouch / prone)", "R                 stance up / climb onto a roof", "ZL                swap the screens", "ZR                tap: roof level, hold: END TURN", "SELECT            Esc: cancel, close windows,", "                  map screen: enter the sector", "START             menu: resume, manual, save /", "                  load / options, magnifier,", "                  left hand, exit" } },
++  { "2. THE TWO SCREENS  (1/2)", 15, { "BOTTOM (touch): the complete game. Everything", "you click is here; the stylus is the mouse.", "", "TOP: the dashboard. It shows the date, time", "and sector, the selected merc's health,", "energy, morale, action points and skills,", "and the controls for the screen you are on.", "", "ZOOM (C-Stick up): the touch screen shows a", "quarter of the game at full size, so its", "text is easy to read. The view follows the", "pointer; a tap still lands where you touch.", "C-Stick down shows the whole game again.", "Enemies outside the zoomed view can still", "act: zoom out to look around." } },
++  { "2. THE TWO SCREENS  (2/2)", 16, { "MAGNIFIER (START menu): the game's own text", "is small at half size. With the magnifier", "on, the top screen shows the area around the", "cursor at full size instead of the", "dashboard (swapped: instead of the whole", "game). Turn it off in the same menu.", "", "SWAP: press ZL at any time to put the game on", "the top screen and the dashboard on the touch", "screen. Press ZL again (or tap the button at", "the foot of the touch screen) to swap back.", "The choice is saved. The game then fills the", "whole top screen, and the touch screen is a", "touchpad: slide to move the pointer, tap to", "click where it points (B is still the right", "click). The 3D slider is not used." } },
 +  { "3. GETTING STARTED  (1/2)", 11, { "The tiny nation of Arulco is ruled by Queen", "Deidranna. Her exiled husband Enrico", "Chivaldori pays you to free it, town by town.", "", "New game: choose difficulty (Novice is a fair", "first try), game style (Realistic, or Sci-Fi", "with creatures) and Save Anytime / Iron Man.", "", "You start in the laptop, in your office. The", "clock does not run until your first team has", "landed, so take your time here." } },
 +  { "3. GETTING STARTED  (2/2)", 12, { "First steps:", " 1. Read Enrico's e-mail (Mail button).", " 2. Hire 3 - 6 mercs on the A.I.M. site, or", "    make your own on I.M.P. (chapter 4).", " 3. Close the laptop. On the map, your team", "    is in the helicopter heading for Omerta.", " 4. Press SELECT (Esc) or tap Omerta to land.", " 5. In Omerta, find the rebels and speak to", "    Fatima, then Dimitri - they give you the", "    next lead. Drassen (to the east) has an", "    airport: taking it lets new mercs fly in", "    closer to the front." } },
 +  { "4. HIRING MERCENARIES  (1/2)", 13, { "A.I.M. (laptop > A.I.M.): the elite agency.", "  Members > tap a face for stats and price.", "  Contracts are 1 day, 1 week or 2 weeks;", "  longer is cheaper per day. Mercs with", "  high Leadership and Wisdom are good early;", "  a medic (Medical skill) is essential.", "  Some mercs refuse to work with people they", "  dislike, or until you prove yourself.", "M.E.R.C. (Speck's site) opens a few days in:", "  cheaper, paid daily, a mixed bag.", "I.M.P.: create your own merc ($3000). A", "  personality quiz decides skills and stats.", "  Typing a name opens the 3DS keyboard." } },
@@ -1073,30 +1074,30 @@ index 0000000..2abfbd0
 +  { "11. SAVING AND OPTIONS", 14, { "Options screen: from the map screen tap the", "\"Options\" button, or in tactical open the", "system menu. It holds Save, Load and Quit.", "Use the button below to open it from here.", "", "Saves go to sdmc:/3ds/ja2/SavedGames/.", "Save often - before every attack.", "Iron Man games only save between battles.", "", "Quitting: Options > Quit, or the HOME button", "(the game is then closed).", "", "Settings file: sdmc:/3ds/ja2/ja2.json", "Game data:     sdmc:/3ds/ja2/gamedata/Data" } },
 +  { "12. TIPS FOR A FIRST CAMPAIGN", 12, { "- Hire a medic and at least one good shot.", "- Fight crouched or prone, behind walls.", "- Let enemies come to you; overwatch from", "  cover rather than charging.", "- Save before entering any sector.", "- Take Drassen and its mine early.", "- Train militia in every town you hold.", "- Renew contracts before they expire - mercs", "  leave mid-mission otherwise.", "- Night attacks are stronger with good", "  equipment, deadlier without it.", "- When in doubt, retreat and heal." } },
 +};
-+static const int kN3DSManualPages = 18;
++static const int kN3DSManualPages = 19;
 +struct N3DSManualChapter { const char* name; int page; };
 +static const N3DSManualChapter kN3DSManualChapters[] = {
 +  { "Contents", 0 },
 +  { "Controls", 1 },
 +  { "The two screens", 3 },
-+  { "Getting started", 4 },
-+  { "Hiring mercenaries", 6 },
-+  { "Tactical combat", 8 },
-+  { "Shooting and aiming", 10 },
-+  { "The strategic map", 11 },
-+  { "Jobs and militia", 13 },
-+  { "Money and mines", 14 },
-+  { "Inventory and items", 15 },
-+  { "Saving and options", 16 },
-+  { "Tips", 17 },
++  { "Getting started", 5 },
++  { "Hiring mercenaries", 7 },
++  { "Tactical combat", 9 },
++  { "Shooting and aiming", 11 },
++  { "The strategic map", 12 },
++  { "Jobs and militia", 14 },
++  { "Money and mines", 15 },
++  { "Inventory and items", 16 },
++  { "Saving and options", 17 },
++  { "Tips", 18 },
 +};
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..579bcfb
+index 0000000..2104815
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,975 @@
+@@ -0,0 +1,998 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1810,10 +1811,33 @@ index 0000000..579bcfb
 +		if (down & KEY_R) { if (ch < kN3DSManualChapterCount - 1) go(ch + 1); }
 +		if (down & KEY_L) { if (ch > 0) go(ch - 1); }
 +		if (down & KEY_A) { press(sel); if (sel == kBtnOpts) action = 1; else if (sel == kBtnSwap) action = 2; else if (sel == kBtnLefty) SetLefty(!g_lefty); }
-+		if (down & KEY_TOUCH) {
-+			touchPosition tp; hidTouchRead(&tp);
-+			if (tp.py >= kManBtnY - 2) { const int id = tp.px < 106 ? kBtnSwap : tp.px < 208 ? kBtnLefty : kBtnOpts; press(id); if (id == kBtnLefty) SetLefty(!g_lefty); else action = id == kBtnOpts ? 1 : 2; }
-+			else { const int i = ManSectionAt(tp.px, tp.py); if (i >= 0) { press(i); go(i); } }
++		// Touch: a tap (lifted within 6 px) presses the button where it went down; a touch that
++		// moves further drags the text (rule 13), a line per kManLineH px, with a little momentum.
++		{
++			static int tx0, ty0, tyLast, tState, tAcc; // tState: 0 none, 1 maybe a tap, 2 dragging
++			static float mom;
++			const u32 held = hidKeysHeld();
++			bool tap = false;
++			if (down & KEY_TOUCH) {
++				touchPosition tp; hidTouchRead(&tp);
++				tx0 = tp.px; ty0 = tp.py; tyLast = tp.py; tState = 1; tAcc = 0; mom = 0;
++			} else if (tState && (held & KEY_TOUCH)) {
++				touchPosition tp; hidTouchRead(&tp);
++				if (tState == 1 && (abs(tp.px - tx0) > 6 || abs(tp.py - ty0) > 6)) tState = 2;
++				if (tState == 2) { tAcc += tyLast - tp.py; mom = (float)(tyLast - tp.py); }
++				tyLast = tp.py;
++			} else if (tState) {
++				tap = tState == 1;
++				tState = 0;
++			} else if (mom > 0.5f || mom < -0.5f) {
++				tAcc += (int)(mom * 2.0f); mom *= 0.88f;
++			}
++			while (tAcc >= kManLineH) { if (scroll < maxScroll) ++scroll; tAcc -= kManLineH; }
++			while (tAcc <= -kManLineH) { if (scroll > 0) --scroll; tAcc += kManLineH; }
++			if (tap && !pressFrames) {
++				if (ty0 >= kManBtnY - 2) { const int id = tx0 < 106 ? kBtnSwap : tx0 < 208 ? kBtnLefty : kBtnOpts; press(id); if (id == kBtnLefty) SetLefty(!g_lefty); else action = id == kBtnOpts ? 1 : 2; }
++				else { const int i = ManSectionAt(tx0, ty0); if (i >= 0) { press(i); go(i); } }
++			}
 +		}
 +		DrawManualTop(scroll, lines);
 +		DrawManualBottom(ch, sel, pressFrames > 0 ? pressed : -1);

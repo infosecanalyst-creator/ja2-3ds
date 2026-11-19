@@ -18,6 +18,7 @@ Engine: JA2 Stracciatella. Data: your JA2 Gold.
 
 In this manual:
   Circle Pad / C-Stick   scroll the text
+  Drag the stylus        scroll the text too
   D-Pad                  move between sections
   L / R                  previous / next section
   Tap a section on the touch screen to jump.
