@@ -40,7 +40,10 @@ touch buttons pop up beside the target:
 You can also steer the cursor with the Circle
 Pad and click with A / B.
 == 1. CONTROLS  (2/2): BUTTONS
-Circle Pad / C    move the cursor
+Circle Pad        move the cursor
+C-Stick up        ZOOM: the touch screen at
+                  full size (readable text)
+C-Stick down      back to the whole view
 A                 left click at the cursor
 B                 right click at the cursor
 D-pad             scroll the map
@@ -65,6 +68,14 @@ TOP: the dashboard. It shows the date, time
 and sector, the selected merc's health,
 energy, morale, action points and skills,
 and the controls for the screen you are on.
+
+ZOOM (C-Stick up): the touch screen shows a
+quarter of the game at full size, so its
+text is easy to read. The view follows the
+pointer; a tap still lands where you touch.
+C-Stick down shows the whole game again.
+Enemies outside the zoomed view can still
+act: zoom out to look around.
 
 MAGNIFIER (START menu): the game's own text
 is small at half size. With the magnifier
