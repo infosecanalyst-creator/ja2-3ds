@@ -29,7 +29,10 @@ python3 $HERE/tools/gen_manual.py $HERE/docs/manual.txt $W/strac/src/sgp/n3ds/N3
 # agent starts the game with --selftest=<script>. Linked as one object with --wrap.
 arm-none-eabi-gcc -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -D__3DS__ \
   -I$DEVKITPRO/libctru/include -c $HERE/selftest/selftest.c -o $W/selftest.o
-SELFTEST_LD="$W/selftest.o"
+# Always-on crash restart (3ds-test-suite hwtest/restartguard): a crash restarts the console by itself.
+arm-none-eabi-gcc -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -D__3DS__ \
+  -I$DEVKITPRO/libctru/include -c $HERE/selftest/restartguard.c -o $W/restartguard.o
+SELFTEST_LD="$W/selftest.o $W/restartguard.o"
 for f in hidScanInput hidKeysHeld hidKeysDown hidKeysDownRepeat hidKeysUp hidTouchRead hidCircleRead irrstCstickRead aptMainLoop; do
   SELFTEST_LD="$SELFTEST_LD -Wl,--wrap=$f"
 done
