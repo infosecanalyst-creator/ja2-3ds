@@ -1094,7 +1094,7 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..22ae27a
+index 0000000..d0872af
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
 @@ -0,0 +1,1061 @@
@@ -1861,7 +1861,7 @@ index 0000000..22ae27a
 +void requestGameExit();
 +bool N3DS_SuspendSaveOk();   // SaveLoadScreen.cc: can EXIT GAME quick-save right now?
 +bool N3DS_SuspendSave();     // SaveLoadScreen.cc: quick-save (rule 17)
-+static // The exit quick-save failed (SD card full or locked?): never quit on top of that
++// The exit quick-save failed (SD card full or locked?): never quit on top of that
 +// without asking. Returns true to exit anyway; focus starts on NO (house style).
 +static bool N3DS_AskExitAnyway()
 +{
@@ -1923,7 +1923,7 @@ index 0000000..22ae27a
 +	return answer == 0;
 +}
 +
-+void N3DS_RunPortMenu()
++static void N3DS_RunPortMenu()
 +{
 +	enum { kResume, kManual, kOptions, kMag, kLefty, kExit };
 +	static const int kIds[] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
