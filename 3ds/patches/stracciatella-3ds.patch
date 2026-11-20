@@ -647,6 +647,33 @@ index ef31945..9a57e44 100644
  if (WITH_UNITTESTS)
      set(LOCAL_JA2_SOURCES
          ${LOCAL_JA2_SOURCES}
+diff --git a/src/sgp/FileMan.cc b/src/sgp/FileMan.cc
+index c4a503a..b51b493 100644
+--- a/src/sgp/FileMan.cc
++++ b/src/sgp/FileMan.cc
+@@ -1,3 +1,4 @@
++#include <cstdio>
+ #include "Debug.h"
+ #include "FileMan.h"
+ #include "Logger.h"
+@@ -323,6 +324,17 @@ void FileMan::moveFile(const ST::string& from, const ST::string& to)
+ {
+ 	if (!Fs_rename(from.c_str(), to.c_str()))
+ 	{
++#ifdef __3DS__
++		// The 3DS SD card refuses to rename over an existing file (every save over
++		// an existing slot failed). Keep the old file as .bak, move the new one in,
++		// and put the old one back if that fails too.
++		RustPointer<char> first{getRustError()};
++		ST::string bak = to + ".bak";
++		std::remove(bak.c_str());
++		const bool had = std::rename(to.c_str(), bak.c_str()) == 0;
++		if (Fs_rename(from.c_str(), to.c_str())) return;
++		if (had) std::rename(bak.c_str(), to.c_str());
++#endif
+ 		RustPointer<char> err{getRustError()};
+ 		throw IoException(ST::format("FileMan::moveFile('{}', '{}') failed: {}", from, to, err.get()));
+ 	}
 diff --git a/src/sgp/Input.cc b/src/sgp/Input.cc
 index d276eef..2ab0dbe 100644
 --- a/src/sgp/Input.cc
