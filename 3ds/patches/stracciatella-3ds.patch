@@ -688,7 +688,7 @@ index d276eef..2ab0dbe 100644
  
  // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
 diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..a2ccc77 100644
+index afb5d46..2be7e30 100644
 --- a/src/sgp/SGP.cc
 +++ b/src/sgp/SGP.cc
 @@ -1,3 +1,6 @@
@@ -698,8 +698,14 @@ index afb5d46..a2ccc77 100644
  #include "Button_System.h"
  #include "FPS.h"
  #include "GameLoop.h"
-@@ -89,9 +92,31 @@ static void shutdownGame()
+@@ -87,11 +90,37 @@ static void shutdownGame()
+ 
+ 	SLOGD("Shutting Down SDL");
  	SDL_Quit();
++#ifdef JA2_3DS
++	extern void N3DS_AudioExit();
++	N3DS_AudioExit();   // last ndsp reference: the DSP thread must stop before exit() frees the heap
++#endif
  }
  
 +#ifdef JA2_3DS
@@ -730,7 +736,7 @@ index afb5d46..a2ccc77 100644
  	SLOGD("Deinitializing Game");
  	// If we are in Dead is Dead mode, save before exit
  	// Does this code also fire on crash? Let's hope not!
-@@ -107,6 +132,10 @@ static void deinitGameAndExit()
+@@ -107,6 +136,10 @@ static void deinitGameAndExit()
   * Call this function if you want to exit the game. */
  void requestGameExit()
  {
@@ -741,7 +747,7 @@ index afb5d46..a2ccc77 100644
  	SDL_Event event;
  	event.type = SDL_QUIT;
  	SDL_PushEvent(&event);
-@@ -122,6 +151,9 @@ static void MainLoop()
+@@ -122,6 +155,9 @@ static void MainLoop()
  		extern void UpdateJA2Clock();
  		UpdateJA2Clock();
  
@@ -751,7 +757,7 @@ index afb5d46..a2ccc77 100644
  		SDL_Event event;
  		if (SDL_PollEvent(&event))
  		{
-@@ -156,9 +188,15 @@ static void MainLoop()
+@@ -156,9 +192,15 @@ static void MainLoop()
  
  				case SDL_MOUSEWHEEL: MouseWheelScroll(&event.wheel); break;
  
@@ -767,7 +773,7 @@ index afb5d46..a2ccc77 100644
  
  				case SDL_QUIT: deinitGameAndExit(); break;
  			}
-@@ -266,7 +304,13 @@ std::vector<ST::string> InitGlobalLocale()
+@@ -266,7 +308,13 @@ std::vector<ST::string> InitGlobalLocale()
  	return problems;
  }
  
@@ -781,7 +787,7 @@ index afb5d46..a2ccc77 100644
  {
      try {
  		#ifdef __ANDROID__
-@@ -357,6 +401,9 @@ int main(int argc, char* argv[])
+@@ -357,6 +405,9 @@ int main(int argc, char* argv[])
  		////////////////////////////////////////////////////////////
  
  		SDL_Init(SDL_INIT_VIDEO);
@@ -791,7 +797,7 @@ index afb5d46..a2ccc77 100644
  
  		// restore output to the console (on windows when built with MINGW)
  	#ifdef __MINGW32__
-@@ -379,6 +426,9 @@ int main(int argc, char* argv[])
+@@ -379,6 +430,9 @@ int main(int argc, char* argv[])
  		}
  
  		cm->logConfiguration();
@@ -801,7 +807,7 @@ index afb5d46..a2ccc77 100644
  
  		if (!cm->loadGameData())
  		{
-@@ -386,11 +436,17 @@ int main(int argc, char* argv[])
+@@ -386,11 +440,17 @@ int main(int argc, char* argv[])
  		}
  
  		GCM = cm;
@@ -819,7 +825,7 @@ index afb5d46..a2ccc77 100644
  		VideoSetBrightness(brightness);
  
  		SLOGD("Initializing Video Object Manager");
-@@ -403,6 +459,9 @@ int main(int argc, char* argv[])
+@@ -403,6 +463,9 @@ int main(int argc, char* argv[])
  
  		SLOGD("Initializing Sound Manager");
  		InitializeSoundManager();
@@ -829,7 +835,7 @@ index afb5d46..a2ccc77 100644
  
  		SLOGD("Initializing Random");
  		// Initialize random number generator
-@@ -411,6 +470,10 @@ int main(int argc, char* argv[])
+@@ -411,6 +474,10 @@ int main(int argc, char* argv[])
  		SLOGD("Initializing Game Manager");
  		// Initialize the Game
  		InitializeGame();
@@ -840,7 +846,7 @@ index afb5d46..a2ccc77 100644
  
  		gfGameInitialized = TRUE;
  
-@@ -431,6 +494,9 @@ int main(int argc, char* argv[])
+@@ -431,6 +498,9 @@ int main(int argc, char* argv[])
  
  		return EXIT_SUCCESS;
  	} catch (...) {
@@ -1148,10 +1154,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..d0872af
+index 0000000..6928400
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1061 @@
+@@ -0,0 +1,1073 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1452,6 +1458,18 @@ index 0000000..d0872af
 +	memset(&g_clickWave, 0, sizeof g_clickWave);
 +	g_clickWave.data_vaddr = g_clickBuf; g_clickWave.nsamples = n;
 +	g_clickReady = true;
++}
++// Exit: the click holds its own ndsp reference (ndspInit is ref-counted), so SDL_Quit closing the
++// SDL audio device does not stop the DSP thread. If exit() then frees the heap that thread's stack
++// lives in, the thread faults in ndspiReadChnState (JA2 599b529 exit test, Nov 20 2026; the same
++// crash OpenXcom showed). Drop our reference so the thread is gone before the heap is.
++void N3DS_AudioExit()
++{
++	if (!g_clickReady) return;
++	ndspChnWaveBufClear(kClickCh);
++	ndspChnReset(kClickCh);
++	g_clickReady = false;
++	ndspExit();
 +}
 +static void Click()
 +{
