@@ -1094,10 +1094,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..2104815
+index 0000000..22ae27a
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,998 @@
+@@ -0,0 +1,1061 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1861,7 +1861,69 @@ index 0000000..2104815
 +void requestGameExit();
 +bool N3DS_SuspendSaveOk();   // SaveLoadScreen.cc: can EXIT GAME quick-save right now?
 +bool N3DS_SuspendSave();     // SaveLoadScreen.cc: quick-save (rule 17)
-+static void N3DS_RunPortMenu()
++static // The exit quick-save failed (SD card full or locked?): never quit on top of that
++// without asking. Returns true to exit anyway; focus starts on NO (house style).
++static bool N3DS_AskExitAnyway()
++{
++	int focus = 1, pressed = -1, pressFrames = 0, answer = -1;
++	auto rectOf = [](int i, int& x, int& y, int& w, int& h) { x = i == 0 ? 6 : 164; y = 120; w = 150; h = 112; };
++	while (aptMainLoop() && answer < 0) {
++		hidScanInput();
++		const u32 down = Remap(hidKeysDown()), rep = Remap(hidKeysDownRepeat());
++		int hit = -1;
++		if (!pressFrames) {
++			if (rep & (KEY_DUP | KEY_DLEFT | KEY_DDOWN | KEY_DRIGHT)) focus = 1 - focus;
++			if (down & KEY_A) hit = focus;
++			if (down & KEY_TOUCH) {
++				touchPosition tp; hidTouchRead(&tp);
++				for (int i = 0; i < 2; ++i) { int x, y, w, h; rectOf(i, x, y, w, h); if (tp.px >= x && tp.px < x + w && tp.py >= y && tp.py < y + h) hit = i; }
++			}
++			if (down & (KEY_B | KEY_START)) hit = 1;
++		}
++		if (hit >= 0) { Click(); pressed = hit; pressFrames = 6; focus = hit; }
++		Canvas t = CanvasFor(GFX_TOP);
++		Fill(t, 0, 0, t.w, t.h, kBg);
++		Fill(t, 0, 0, t.w, 22, kSel);
++		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
++		Text(t, 8, 40, "! The quick save failed.", kText, kFontBold);
++		Text(t, 8, 62, "Is the SD card full or locked?", kDim, kFontSans, t.w - 16);
++		Text(t, 8, 80, "If you exit now, anything since your", kDim, kFontSans, t.w - 16);
++		Text(t, 8, 98, "last save is lost.", kDim, kFontSans, t.w - 16);
++		Fill(t, 0, t.h - 16, t.w, 16, kPanel);
++		const char* hint = g_lefty ? "D-Right choose    D-Down back" : "A choose    B back";
++		Text(t, (t.w - TextW(hint, kFontSans)) / 2, t.h - 15, hint, kTitle, kFontSans);
++		Canvas b = CanvasFor(GFX_BOTTOM);
++		Fill(b, 0, 0, b.w, b.h, kBg);
++		Fill(b, 0, 0, b.w, 22, kSel);
++		Text(b, 6, 4, "SAVE FAILED", kTitle, kFontBold);
++		Text(b, 8, 40, "Exit without saving?", kText, kFontBold);
++		Text(b, 8, 62, "NO goes back to the game.", kDim, kFontSans);
++		for (int i = 0; i < 2; ++i) {
++			int x, y, w, h; rectOf(i, x, y, w, h);
++			const bool pr = pressFrames > 0 && i == pressed;
++			const char* l = i == 0 ? "EXIT ANYWAY" : "NO";
++			Fill(b, x, y, w, h, kEdge);
++			Fill(b, x + 1, y + 1, w - 2, h - 2, pr ? kTitle : kBtn);
++			if (!pr) Fill(b, x + 1, y + h - 2, w - 2, 1, kPanel);
++			const int tw = std::min(TextW(l, kFontSans), w - 8);
++			Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + (h - 14) / 2 + (pr ? 1 : 0), l, pr ? kBg : kText, kFontSans, w - 8);
++			if (i == focus && !pr) {
++				Fill(b, x - 2, y - 2, w + 4, 2, kTitle); Fill(b, x - 2, y + h, w + 4, 2, kTitle);
++				Fill(b, x - 2, y, 2, h, kTitle); Fill(b, x + w, y, 2, h, kTitle);
++			}
++		}
++		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		if (pressFrames > 0 && --pressFrames == 0) { answer = pressed; pressed = -1; }
++	}
++	while (aptMainLoop()) {   // don't let the closing press leak into the game
++		hidScanInput();
++		if (!(hidKeysHeld() & (KEY_B | KEY_START | KEY_TOUCH | KEY_A))) break;
++		gspWaitForVBlank();
++	}
++	return answer == 0;
++}
++
++void N3DS_RunPortMenu()
 +{
 +	enum { kResume, kManual, kOptions, kMag, kLefty, kExit };
 +	static const int kIds[] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
@@ -1965,6 +2027,7 @@ index 0000000..2104815
 +			}
 +			const bool ok = N3DS_SuspendSave();
 +			printf("[3ds] suspend save on exit: %s\n", ok ? "ok" : "failed"); fflush(stdout);
++			if (!ok && !N3DS_AskExitAnyway()) return;   // JA-01: never quit after a failed save without asking
 +		}
 +		requestGameExit();
 +	}
