@@ -1177,10 +1177,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..a9174ed
+index 0000000..7a756da
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1097 @@
+@@ -0,0 +1,1101 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1322,7 +1322,10 @@ index 0000000..a9174ed
 +	// rare lines (start, boot steps, exit, saves on exit, errors), written at once.
 +	{ struct stat ds; g_debugLog = stat(N3DS_DIR "/debug.txt", &ds) == 0; }
 +	const char* logPath = N3DS_DIR "/console.txt";
-+	freopen(logPath, "w", stdout);
++	// Both streams append: stdout opened with "w" kept its own position and wrote over
++	// stderr's lines in the shared file. Empty the file once, then open both for append.
++	if (FILE* t = fopen(logPath, "w")) fclose(t);
++	freopen(logPath, "a", stdout);
 +	freopen(logPath, "a", stderr);
 +	if (g_debugLog) setvbuf(stdout, nullptr, _IOFBF, 16384);   // flushed every 3 s by N3DS_PumpInput
 +	else setvbuf(stdout, nullptr, _IONBF, 0);
@@ -2151,7 +2154,8 @@ index 0000000..a9174ed
 +			if (ftell(stdout) > 1024 * 1024) {   // roll over at 1 MB: console.txt -> console.old.txt
 +				remove(N3DS_DIR "/console.old.txt");
 +				rename(N3DS_DIR "/console.txt", N3DS_DIR "/console.old.txt");
-+				freopen(N3DS_DIR "/console.txt", "w", stdout);
++				freopen(N3DS_DIR "/console.txt", "w", stdout);   // empties the new file
++				freopen(N3DS_DIR "/console.txt", "a", stdout);   // then append, like stderr
 +				freopen(N3DS_DIR "/console.txt", "a", stderr);
 +				setvbuf(stdout, nullptr, _IOFBF, 16384);
 +				setvbuf(stderr, nullptr, _IONBF, 0);
