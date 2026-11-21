@@ -609,6 +609,28 @@ index d260c8a..7f61e80 100644
  }
  
  
+diff --git a/src/game/MainMenuScreen.cc b/src/game/MainMenuScreen.cc
+index b548d0c..fddba5e 100644
+--- a/src/game/MainMenuScreen.cc
++++ b/src/game/MainMenuScreen.cc
+@@ -183,6 +183,17 @@ static void HandleMainMenuScreen(void)
+ }
+ 
+ 
++#ifdef __3DS__
++// START menu > CONTINUE (LAST EXIT): leave to the Load screen with "load upon entry" set, as
++// ALT + Continue Saved Game does (SaveLoadScreen.cc picks the ExitSave).
++void N3DS_MainMenuLoadUponEntry()
++{
++	gfLoadGameUponEntry = TRUE;
++	gbHandledMainMenu   = LOAD_GAME;
++}
++#endif
++
++
+ static void CreateDestroyMainMenuButtons(BOOLEAN fCreate);
+ 
+ 
 diff --git a/src/game/SaveLoadGame.cc b/src/game/SaveLoadGame.cc
 index f153f86..23e65ac 100644
 --- a/src/game/SaveLoadGame.cc
@@ -658,10 +680,26 @@ index f153f86..23e65ac 100644
  		GCM->tempFiles()->deleteFile(savegameTempPath);
  	}
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..312a7d9 100644
+index add6ddf..dff5d9d 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
-@@ -566,7 +566,7 @@ static void RenderSaveLoadScreen(void)
+@@ -383,7 +383,14 @@ static void EnterSaveLoadScreen()
+ 	if (gfLoadGameUponEntry)
+ 	{
+ 		// Make sure the save is valid
+-		INT8 const last_slot = gGameSettings.bLastSavedGameSlot;
++		INT8 last_slot = gGameSettings.bLastSavedGameSlot;
++#ifdef __3DS__
++		// CONTINUE (LAST EXIT) from the main menu: the ExitSave, not the last slot saved to
++		extern bool gfN3DSLoadExitSaveUponEntry;
++		INT8 N3DS_ExitSaveIndex();
++		if (gfN3DSLoadExitSaveUponEntry) last_slot = N3DS_ExitSaveIndex();
++		gfN3DSLoadExitSaveUponEntry = false;
++#endif
+ 		if (last_slot != -1 && gSavedGamesList.begin() + last_slot < gSavedGamesList.end())
+ 		{
+ 			gbSelectedSaveLocation = last_slot;
+@@ -566,7 +573,7 @@ static void RenderSaveLoadScreen(void)
  }
  
  static int32_t ScrollPositionTopMax() {
@@ -670,7 +708,7 @@ index add6ddf..312a7d9 100644
  }
  
  static void RenderScrollBar(void) {
-@@ -581,7 +581,7 @@ static void RenderScrollBar(void) {
+@@ -581,7 +588,7 @@ static void RenderScrollBar(void) {
  	}
  	SetClippingRect(previousClippingRect);
  
@@ -679,7 +717,7 @@ index add6ddf..312a7d9 100644
  	auto currentTop = gCurrentScrollTop;
  	auto maxYPos = SLG_SCROLLBAR_INNER_HEIGHT - SLG_SCROLLBAR_INDICATOR_HEIGHT - 2;
  	auto indicatorPosition = int(round(double_t(maxYPos) * double_t(currentTop) / double_t(maxTop)));
-@@ -784,12 +784,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
+@@ -784,12 +791,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
  	return validSaves;
  }
  
@@ -701,7 +739,7 @@ index add6ddf..312a7d9 100644
  		if (gfSaveGame && (IsAutoSaveName((*i).name()) || IsQuickSaveName((*i).name()))) {
  			// Dont display quick- and autosaves when saving game
  			continue;
-@@ -1517,3 +1526,66 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1533,85 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -754,14 +792,33 @@ index add6ddf..312a7d9 100644
 +	return false;
 +}
 +
-+// CONTINUE (main menu, START menu): load the ExitSave the same way DoQuickLoad loads the QuickSave.
++// The ExitSave's place in gSavedGamesList (InitSaveGameArray has run), -1 none.
++bool gfN3DSLoadExitSaveUponEntry = false;
++INT8 N3DS_ExitSaveIndex()
++{
++	for (auto i = gSavedGamesList.begin(); i < gSavedGamesList.end(); i++)
++		if (IsExitSaveName((*i).name())) return (INT8)std::distance(gSavedGamesList.begin(), i);
++	return -1;
++}
++
++// CONTINUE (START menu on the main menu): load the ExitSave.
++// The main menu screen runs no fade (it has no HandleBeginFadeOut), so DoQuickLoad's way
++// (StartFadeOutForSaveLoadScreen) never started there and nothing was loaded. From the main menu
++// it now goes the game's own way for "load upon entry" (ALT + Continue Saved Game): the main menu
++// leaves to the Load screen, which loads the chosen slot at once, here the ExitSave.
++void N3DS_MainMenuLoadUponEntry();   // MainMenuScreen.cc
 +bool N3DS_ContinueExitSave()
 +{
++	if (!N3DS_ExitSaveExists()) return false;
++	if (guiCurrentScreen == MAINMENU_SCREEN)
++	{
++		gfN3DSLoadExitSaveUponEntry = true;
++		N3DS_MainMenuLoadUponEntry();
++		return true;
++	}
 +	gfSaveGame = FALSE;
 +	InitSaveGameArray();
-+	gbSelectedSaveLocation = -1;
-+	for (auto i = gSavedGamesList.begin(); i < gSavedGamesList.end(); i++)
-+		if (IsExitSaveName((*i).name())) gbSelectedSaveLocation = std::distance(gSavedGamesList.begin(), i);
++	gbSelectedSaveLocation = N3DS_ExitSaveIndex();
 +	if (gbSelectedSaveLocation == -1) return false;
 +	StartFadeOutForSaveLoadScreen();
 +	gfDoingQuickLoad = TRUE;
