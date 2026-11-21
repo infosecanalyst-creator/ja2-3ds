@@ -680,7 +680,7 @@ index f153f86..23e65ac 100644
  		GCM->tempFiles()->deleteFile(savegameTempPath);
  	}
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..dff5d9d 100644
+index add6ddf..b121e79 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -383,7 +383,14 @@ static void EnterSaveLoadScreen()
@@ -739,7 +739,7 @@ index add6ddf..dff5d9d 100644
  		if (gfSaveGame && (IsAutoSaveName((*i).name()) || IsQuickSaveName((*i).name()))) {
  			// Dont display quick- and autosaves when saving game
  			continue;
-@@ -1517,3 +1533,85 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1533,95 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -768,7 +768,17 @@ index add6ddf..dff5d9d 100644
 +			DoDeadIsDeadSave();
 +			return true;
 +		}
-+		return SaveGame(kExitSaveName, kExitSaveName);
++		// A save records guiPreviousOptionScreen as the screen to open after loading; the game sets
++		// it before its own saves. Left as it was, the ExitSave opened in whatever options screen
++		// was used last (a new game: the game's Options). The screen in use now is recorded: the
++		// tactical screen, else the map (the laptop is reached from the map), as DoDeadIsDeadSave.
++		const ScreenID before = guiPreviousOptionScreen;
++		guiPreviousOptionScreen = guiCurrentScreen == GAME_SCREEN ? GAME_SCREEN : MAP_SCREEN;
++		BOOLEAN ok = FALSE;
++		try { ok = SaveGame(kExitSaveName, kExitSaveName); }
++		catch (...) { guiPreviousOptionScreen = before; throw; }
++		guiPreviousOptionScreen = before;
++		return ok;
 +	}
 +	catch (...)
 +	{

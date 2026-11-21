@@ -2,6 +2,7 @@
 
 ## 2026-11-21
 
+- A game saved by EXIT GAME / HOME > Close opens on the tactical or map screen when loaded (before, it could open on the game's Options screen).
 - CONTINUE (LAST EXIT) in the START menu now really loads the exit save from the main menu (before, nothing happened: the main menu never ran the fade the load was waiting for).
 - New CONTINUE (LAST EXIT) button on the main menu's START menu: loads the game that EXIT GAME or HOME > Close saved.
 - EXIT GAME and HOME > Close now save into their own slot, "ExitSave", so they no longer overwrite your own QuickSave. If that save fails you are asked EXIT ANYWAY or NO instead of losing progress.
