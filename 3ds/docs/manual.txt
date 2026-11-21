@@ -60,7 +60,8 @@ SELECT            Esc: cancel, close windows,
                   map screen: enter the sector
 START             menu: resume, manual, save /
                   load / options, magnifier,
-                  left hand, exit
+                  left hand, exit. On the main
+                  menu it also has CONTINUE.
 # The two screens
 == 2. THE TWO SCREENS  (1/2)
 BOTTOM (touch): the complete game. Everything
@@ -283,7 +284,7 @@ Weight: heavy loads cost AP and energy.
 The top screen is the easiest way to read
 item names and stats - point at them.
 # Saving and options
-== 11. SAVING AND OPTIONS
+== 11. SAVING AND OPTIONS  (1/3)
 Options screen: from the map screen tap the
 "Options" button, or in tactical open the
 system menu. It holds Save, Load and Quit.
@@ -292,12 +293,43 @@ Use the button below to open it from here.
 Saves go to sdmc:/3ds/ja2/SavedGames/.
 Save often - before every attack.
 Iron Man games only save between battles.
+Saving over an old slot keeps the old file as
+a backup until the new one is written, so a
+failed save does not cost you the old one.
 
-Quitting: Options > Quit, or the HOME button
-(the game is then closed).
+Quitting: Options > Quit, or EXIT GAME in the
+START menu, or the HOME button (the game is
+then closed).
+== 11. SAVING AND OPTIONS  (2/3)
+EXIT GAME asks first, then saves the game
+into its own slot, "ExitSave", and quits.
+HOME > Close does the same while a game is
+running. ExitSave never replaces your own
+QuickSave and is not offered as a slot to
+save over.
 
-Settings file: sdmc:/3ds/ja2/ja2.json
-Game data:     sdmc:/3ds/ja2/gamedata/Data
+CONTINUE: on the main menu, START shows
+CONTINUE (LAST EXIT), which loads the
+ExitSave and picks up where you left.
+
+If the exit save fails (SD card full or
+locked?) the game says so and asks: EXIT
+ANYWAY or NO. It never quits after a failed
+save without asking.
+== 11. SAVING AND OPTIONS  (3/3)
+Program:   sdmc:/3ds/ja2.3dsx
+Data:      sdmc:/3ds/ja2/ (ja2.json,
+           externalized/, gamedata/Data)
+Saves:     sdmc:/3ds/ja2/SavedGames/
+Log:       sdmc:/3ds/ja2/console.txt holds
+           the start, exit, save-on-exit and
+           error lines.
+Debug:     make an empty file called
+           sdmc:/3ds/ja2/debug.txt for the
+           full log (slower; it rolls over at
+           1 MB). Delete it to turn it off.
+If the game hits an error while a game is
+running, it tries an emergency save first.
 # Tips
 == 12. TIPS FOR A FIRST CAMPAIGN
 - Hire a medic and at least one good shot.

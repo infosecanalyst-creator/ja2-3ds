@@ -18,6 +18,9 @@ engine (v0.22.1), patched for the New 3DS (`armv6k-nintendo-3ds`).
 - **ZL swaps the screens** at any time. **Manual** on SELECT: Circle Pad / C-Stick scroll, D-Pad moves between sections,
   L/R previous/next section, tap a section, B or START closes.
 - Quiet click and press animation on the manual's touch buttons; any button skips the intro.
+- **START menu:** RESUME, MANUAL, SAVE / LOAD / OPTIONS, MAGNIFIER, LEFT HAND and EXIT GAME; on the main menu also **CONTINUE (LAST EXIT)**.
+- **EXIT GAME** asks first, then saves into its own slot, `ExitSave`, and quits; HOME > Close does the same while a game is running. If that save fails the game says so and asks EXIT ANYWAY / NO. `ExitSave` never replaces your own QuickSave. CONTINUE loads it.
+- Logs: `sdmc:/3ds/ja2/console.txt` (start, exit, errors); an empty `sdmc:/3ds/ja2/debug.txt` switches on the full log.
 
 What the patch (`3ds/patches/stracciatella-3ds.patch`) changes, in short:
 
