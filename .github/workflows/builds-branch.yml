@@ -5,6 +5,11 @@ on:
   push:
     branches: ["**", "!builds"]
   workflow_dispatch:
+# One run at a time: an older run that finishes last must not overwrite the builds branch
+# (seen Nov 20: builds held an older commit). Queued runs wait; only the newest pending one is kept.
+concurrency:
+  group: builds-branch
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
