@@ -75,6 +75,10 @@ In short:
   build.
 - No warranty and no liability, as set out in sections 7 and 8 of the agreement.
 
+The licence is also in [`LICENSE`](LICENSE). [`NOTICE.txt`](NOTICE.txt) is the change notice and
+lists the third-party code in the 3DS build, including **libsmacker** (c) Greg Kennedy, which the
+game uses for its videos under the Creative Commons Attribution Non-Commercial 2.0 licence.
+
 `brick/patches/sdl3-fbdev.patch` modifies SDL3 and is offered under SDL's zlib licence.
 The JA2 Stracciatella project releases its own changes to the public domain; see its README.
 

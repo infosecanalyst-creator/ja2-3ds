@@ -1,0 +1,34 @@
+ja2-3ds: notices
+================
+
+Change notice (SFI Source Code License Agreement)
+-------------------------------------------------
+The 3DS build (ja2.3dsx) is a MODIFIED version of JA2 Stracciatella v0.22.1
+(https://github.com/ja2-stracciatella/ja2-stracciatella), which derives from the
+Jagged Alliance 2 source code released by Strategy First Inc. It was changed by
+the ja2-3ds authors from 2026-10 onward; every change is in
+3ds/patches/stracciatella-3ds.patch (plus Cargo.lock.3ds) and the git history of
+this repository. The brick/ build modifies 1vibe13 (JA2 v1.13) in the same way.
+
+Use is non-commercial only, under the Strategy First Inc. Source Code License
+Agreement (LICENSE, also "SFI Source Code license agreement.txt"). No warranty.
+No game data is included.
+
+Third-party code in the 3DS build
+---------------------------------
+- libsmacker (Smacker video decoder), (c) 2012-2013 Greg Kennedy,
+  http://libsmacker.sourceforge.net. This project uses libsmacker. It is
+  licensed under the Creative Commons Attribution Non-Commercial License 2.0
+  (https://creativecommons.org/licenses/by-nc/2.0/), with modifications by the
+  JA2 Stracciatella project (loading .smk files from memory buffers). It may
+  not be used in any commercial project. The build ships its licence file as
+  libsmacker-LICENSE.txt.
+- SDL 2 (release-2.30.9), (c) Sam Lantinga and contributors: zlib License.
+- Libraries the Stracciatella build pulls in: Lua (MIT), sol2 (MIT),
+  string_theory (MIT), magic_enum (MIT), miniaudio (public domain / MIT No
+  Attribution), and the Rust crates in 3ds/patches/Cargo.lock.3ds (each under
+  its own licence, mostly MIT and/or Apache-2.0).
+- libctru (devkitPro): zlib License. devkitARM runtime (newlib: BSD-style;
+  libstdc++/libgcc: GPLv3 with the GCC Runtime Library Exception).
+- JA2 Stracciatella's own changes are released to the public domain by that
+  project.
