@@ -265,7 +265,7 @@ run out!), militia training, Bobby Ray's
 orders and medical care.
 The financial report (laptop > Finances)
 shows daily income and expenses.
-# Inventory and items
+# Inventory
 == 10. INVENTORY AND ITEMS
 Tap a merc's face (or the inventory switch on
 the panel) to open their inventory. On the

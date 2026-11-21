@@ -1471,7 +1471,7 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..cec5bbb
+index 0000000..0c8e87e
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
 @@ -0,0 +1,1255 @@
@@ -2296,7 +2296,7 @@ index 0000000..cec5bbb
 +		Fill(t, t.w - 6, 2 + barH * scroll / (int)lines.size(), 4, thumb < 8 ? 8 : thumb, kDim);
 +	}
 +	Fill(t, 0, t.h - 18, t.w, 18, kSel);
-+	Text(t, 8, t.h - 16, g_lefty ? "Stick: scroll   A/B/X/Y or L/R: section   D-Pad down: close" : "Stick: scroll    D-Pad / L / R: section    B: close", kText, kFontSans, t.w - 16);
++	Text(t, 8, t.h - 16, g_lefty ? "Sticks: scroll   A/B/X/Y, L / R: section   D-Down / START: close" : "Sticks: scroll   D-Pad, L / R: section   B / START: close", kText, kFontSans, t.w - 16);
 +}
 +// Section buttons: two columns of 24 px rows (UI rule 11: targets >= 24 px, >= 4 px apart, >= 6 px from the edges).
 +static const int kManColX0 = 6, kManColW = 152, kManColGap = 4, kManRowY0 = 6, kManRowH = 24, kManRowGap = 4;
