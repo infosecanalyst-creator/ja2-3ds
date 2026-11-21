@@ -526,23 +526,50 @@ index 55bcd51..325e660 100644
  		JsonValue(bool value) : m_value(RustPointer<RJsonValue>(RJsonValue_fromBool(value))) {}
  		JsonValue(const ST::string& value) : m_value(RustPointer<RJsonValue>(RJsonValue_fromString(value.c_str()))) {}
 diff --git a/src/game/GameLoop.cc b/src/game/GameLoop.cc
-index 36bbf40..d0a3e6e 100644
+index 36bbf40..f524481 100644
 --- a/src/game/GameLoop.cc
 +++ b/src/game/GameLoop.cc
-@@ -228,7 +228,13 @@ catch (std::exception const& e)
+@@ -33,6 +33,10 @@
+ 
+ #include <stdexcept>
+ 
++#ifdef JA2_3DS
++bool N3DS_EmergencySaveOk();   // SaveLoadScreen.cc (JA-06)
++#endif
++
+ 
+ ScreenID guiCurrentScreen = ERROR_SCREEN; // XXX TODO001A had no explicit initialisation
+ ScreenID guiPendingScreen = NO_PENDING_SCREEN;
+@@ -228,7 +232,15 @@ catch (std::exception const& e)
  	ST::string success = "failed";
  	char const* attach = "";
  
 +	SLOGE("Game loop exception: {}", e.what());
 +#ifdef JA2_3DS
-+	// the emergency save itself crashes on the 3DS when no squad exists yet; just report the error
-+	if (false)
++	// JA-06: the emergency save is back, but only where a game is running (it crashed on the 3DS
++	// when no squad existed yet, e.g. an error during a new game's start), and a failure inside it
++	// is caught. It is an ordinary save (temp file, then moved over), so it can't leave a broken file.
++	if (guiCurrentScreen != MAINMENU_SCREEN && N3DS_EmergencySaveOk())
 +#else
  	if (guiCurrentScreen != MAINMENU_SCREEN)
 +#endif
  	{
  		if (gfEditMode && GameMode::getInstance()->isEditorMode())
  		{
+@@ -243,7 +255,13 @@ catch (std::exception const& e)
+ 		{
+ 			what = "savegame";
+ 			auto saveName = GetErrorSaveName();
++#ifdef JA2_3DS
++			bool saved = false;
++			try { saved = SaveGame(saveName, "error savegame"); } catch (...) { SLOGE("Emergency save failed"); }
++			if (saved)
++#else
+ 			if (SaveGame(saveName, "error savegame"))
++#endif
+ 			{
+ 				success = ST::format("succeeded ({}.sav)", saveName);
+ 				attach = " Do not forget to attach the savegame.";
 diff --git a/src/game/Intro.cc b/src/game/Intro.cc
 index a751166..bf57847 100644
 --- a/src/game/Intro.cc
@@ -571,7 +598,7 @@ index d260c8a..7f61e80 100644
  
  
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..6905c0c 100644
+index add6ddf..312a7d9 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -566,7 +566,7 @@ static void RenderSaveLoadScreen(void)
@@ -592,7 +619,29 @@ index add6ddf..6905c0c 100644
  	auto currentTop = gCurrentScrollTop;
  	auto maxYPos = SLG_SCROLLBAR_INNER_HEIGHT - SLG_SCROLLBAR_INDICATOR_HEIGHT - 2;
  	auto indicatorPosition = int(round(double_t(maxYPos) * double_t(currentTop) / double_t(maxTop)));
-@@ -1517,3 +1517,35 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -784,12 +784,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
+ 	return validSaves;
+ }
+ 
++#ifdef __3DS__
++// JA-09: EXIT GAME / HOME > Close save into their own slot, not over the player's QuickSave.
++static const char* const kExitSaveName = "ExitSave";
++static bool IsExitSaveName(const ST::string& n) { return n.compare(kExitSaveName, ST::case_insensitive) == 0; }
++#endif
++
+ static void InitSaveGameArray(void)
+ {
+ 	auto validSaveGames = GetValidSaveGames();
+ 
+ 	gSavedGamesList.clear();
+ 	for (auto i = validSaveGames.begin(); i < validSaveGames.end(); i++) {
++#ifdef __3DS__
++		if (gfSaveGame && IsExitSaveName((*i).name())) continue;   // not offered as a slot to save over
++#endif
+ 		if (gfSaveGame && (IsAutoSaveName((*i).name()) || IsQuickSaveName((*i).name()))) {
+ 			// Dont display quick- and autosaves when saving game
+ 			continue;
+@@ -1517,3 +1526,66 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -601,7 +650,8 @@ index add6ddf..6905c0c 100644
 +#ifdef __3DS__
 +// 3DS port, rule 17 (never lose progress): EXIT GAME in the START menu quick-saves first,
 +// when the game could be quick-saved by hand right now (on a game screen, CanGameBeSaved,
-+// not in a conversation). The quick save is the one Load shows as "QuickSave".
++// not in a conversation). JA-09: it is written to its own slot, "ExitSave" (the Load screen shows
++// it by that name), so it never replaces the QuickSave the player made by hand.
 +bool N3DS_SuspendSaveOk()
 +{
 +	if (guiCurrentScreen != GAME_SCREEN && guiCurrentScreen != MAP_SCREEN && guiCurrentScreen != LAPTOP_SCREEN) return false;
@@ -620,12 +670,42 @@ index add6ddf..6905c0c 100644
 +			DoDeadIsDeadSave();
 +			return true;
 +		}
-+		return SaveGame(GetQuickSaveName(), GetQuickSaveName());
++		return SaveGame(kExitSaveName, kExitSaveName);
 +	}
 +	catch (...)
 +	{
 +		return false;
 +	}
++}
++
++// JA-06: may the error handler make an emergency save? Only with a game running: a game screen, a
++// started game, and not in the first moments of a new game (no squad yet crashed the save).
++bool N3DS_EmergencySaveOk()
++{
++	if (guiCurrentScreen != GAME_SCREEN && guiCurrentScreen != MAP_SCREEN && guiCurrentScreen != LAPTOP_SCREEN) return false;
++	return gTacticalStatus.fHasAGameBeenStarted && !gTacticalStatus.fDidGameJustStart;
++}
++
++// Is there an ExitSave to continue from?
++bool N3DS_ExitSaveExists()
++{
++	for (auto const& sg : GetValidSaveGames())
++		if (IsExitSaveName(sg.name())) return true;
++	return false;
++}
++
++// CONTINUE (main menu, START menu): load the ExitSave the same way DoQuickLoad loads the QuickSave.
++bool N3DS_ContinueExitSave()
++{
++	gfSaveGame = FALSE;
++	InitSaveGameArray();
++	gbSelectedSaveLocation = -1;
++	for (auto i = gSavedGamesList.begin(); i < gSavedGamesList.end(); i++)
++		if (IsExitSaveName((*i).name())) gbSelectedSaveLocation = std::distance(gSavedGamesList.begin(), i);
++	if (gbSelectedSaveLocation == -1) return false;
++	StartFadeOutForSaveLoadScreen();
++	gfDoingQuickLoad = TRUE;
++	return true;
 +}
 +#endif
 diff --git a/src/sgp/CMakeLists.txt b/src/sgp/CMakeLists.txt
@@ -1177,10 +1257,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..7a756da
+index 0000000..2c3d754
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1101 @@
+@@ -0,0 +1,1110 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1967,7 +2047,9 @@ index 0000000..7a756da
 +// Full-width buttons filling the touch screen (rule 11), D-pad + A or a tap, B or START resumes.
 +void requestGameExit();
 +bool N3DS_SuspendSaveOk();   // SaveLoadScreen.cc: can EXIT GAME quick-save right now?
-+bool N3DS_SuspendSave();     // SaveLoadScreen.cc: quick-save (rule 17)
++bool N3DS_SuspendSave();     // SaveLoadScreen.cc: save into the ExitSave slot (rule 17, JA-09)
++bool N3DS_ExitSaveExists();  // SaveLoadScreen.cc: CONTINUE has something to load
++bool N3DS_ContinueExitSave();// SaveLoadScreen.cc: load it
 +// The exit quick-save failed (SD card full or locked?): never quit on top of that
 +// without asking. Returns true to exit anyway; focus starts on NO (house style).
 +static bool N3DS_AskExitAnyway()
@@ -2032,14 +2114,18 @@ index 0000000..7a756da
 +
 +static void N3DS_RunPortMenu()
 +{
-+	enum { kResume, kManual, kOptions, kMag, kLefty, kExit };
-+	static const int kIds[] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
-+	const int n = 6;
++	enum { kResume, kManual, kOptions, kMag, kLefty, kExit, kContinue };
++	// JA-09: on the main menu, CONTINUE loads the ExitSave (what EXIT GAME / HOME > Close saved)
++	const bool canContinue = N3DS_CurrentScreen() == N3DS_SCR_MENU && N3DS_ExitSaveExists();
++	int kIds[7] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
++	int n = 6;
++	if (canContinue) { for (int k = 6; k > 0; --k) kIds[k] = kIds[k - 1]; kIds[0] = kContinue; n = 7; }
 +	int focus = 0, pressed = -1, pressFrames = 0, chosen = -1;
 +	bool confirm = false;
 +	hidSetRepeatParameters(18, 4);
 +	auto label = [&](int id) -> const char* {
 +		switch (id) {
++			case kContinue: return "CONTINUE (LAST EXIT)";
 +			case kResume: return "RESUME";
 +			case kManual: return "MANUAL";
 +			case kOptions: return "SAVE / LOAD / OPTIONS";
@@ -2078,16 +2164,18 @@ index 0000000..7a756da
 +		Text(t, t.w - 6 - TextW("PAUSED", kFontSans), 5, "PAUSED", kText, kFontSans);
 +		Text(t, 8, 40, confirm ? "Exit the game?" : "The game is paused.", kText, kFontBold);
 +		const bool canSave = confirm && N3DS_SuspendSaveOk();
-+		Text(t, 8, 62, confirm ? (canSave ? "It is quick-saved first (Load: QuickSave)." : "Anything you have not saved is lost.")
-+		                       : "Choose on the touch screen, or with the D-pad and A.", kDim, kFontSans, t.w - 16);
++		Text(t, 8, 62, confirm ? (canSave ? "It is saved first (Continue loads it)." : "Anything you have not saved is lost.")
++		                       : (g_lefty ? "Choose on the touch screen, or with A/B/X/Y and D-Right." : "Choose on the touch screen, or with the D-pad and A."), kDim, kFontSans, t.w - 16);
 +		Fill(t, 0, t.h - 16, t.w, 16, kPanel);
-+		const char* hint = confirm ? "A choose    B no" : "A choose    B / START resume";
++		// JA-08: the hints follow the left-hand setting (A/B/X/Y and the D-pad swap jobs)
++		const char* hint = g_lefty ? (confirm ? "D-Right choose    D-Down no" : "D-Right choose    D-Down / START resume")
++		                           : (confirm ? "A choose    B no" : "A choose    B / START resume");
 +		Text(t, (t.w - TextW(hint, kFontSans)) / 2, t.h - 15, hint, kTitle, kFontSans);
 +		Canvas b = CanvasFor(GFX_BOTTOM);
 +		Fill(b, 0, 0, b.w, b.h, kBg);
 +		Fill(b, 0, 0, b.w, 22, kSel);
 +		Text(b, 6, 4, confirm ? "EXIT GAME" : "MENU", kTitle, kFontBold);
-+		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, canSave ? "It is quick-saved first." : "Unsaved progress is lost.", kDim, kFontSans); }
++		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, canSave ? "It is saved first." : "Unsaved progress is lost.", kDim, kFontSans); }
 +		for (int i = 0; i < nb; ++i) {
 +			int x, y, w, h; rectOf(i, x, y, w, h);
 +			const bool pr = pressFrames > 0 && i == pressed;
@@ -2120,7 +2208,8 @@ index 0000000..7a756da
 +		if (!(hidKeysHeld() & (KEY_B | KEY_START | KEY_TOUCH | KEY_A))) break;
 +		gspWaitForVBlank();
 +	}
-+	if (chosen == kManual) N3DS_RunManual();
++	if (chosen == kContinue) { if (!N3DS_ContinueExitSave()) printf("[3ds] continue: no ExitSave\n"); }
++	else if (chosen == kManual) N3DS_RunManual();
 +	else if (chosen == kOptions) { PushKey(SDLK_o, true); PushKey(SDLK_o, false); }
 +	else if (chosen == kExit) {
 +		if (N3DS_SuspendSaveOk()) {   // "Saving..." while JA2's (slow) quick save runs
