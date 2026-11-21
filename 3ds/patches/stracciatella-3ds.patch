@@ -382,6 +382,18 @@ index 68d7c9d..f061002 100644
 +        Ok(())
      }
  }
+diff --git a/rust/stracciatella_c_api/src/c/fs/file.rs b/rust/stracciatella_c_api/src/c/fs/file.rs
+index dceb6e0..408a40b 100644
+--- a/rust/stracciatella_c_api/src/c/fs/file.rs
++++ b/rust/stracciatella_c_api/src/c/fs/file.rs
+@@ -186,6 +186,7 @@ pub extern "C" fn File_writeAll(file: *mut VFile, buf: *const u8, buf_len: usize
+             continue;
+         }
+         remember_rust_error(format!("File_writeAll {}: {}", buf_len, err));
++        break; // 3DS port (JA-05): a lasting error (SD card full) looped here for ever
+     }
+     no_rust_error()
+ }
 diff --git a/rust/stracciatella_c_api/src/c/mod.rs b/rust/stracciatella_c_api/src/c/mod.rs
 index 8aaa1d5..171c182 100644
 --- a/rust/stracciatella_c_api/src/c/mod.rs
@@ -597,6 +609,54 @@ index d260c8a..7f61e80 100644
  }
  
  
+diff --git a/src/game/SaveLoadGame.cc b/src/game/SaveLoadGame.cc
+index f153f86..23e65ac 100644
+--- a/src/game/SaveLoadGame.cc
++++ b/src/game/SaveLoadGame.cc
+@@ -1,4 +1,10 @@
+ #include "AI.h"
++#ifdef JA2_3DS
++#include "SGPFile.h"
++#include "n3ds/N3DS_Platform.h"
++#include <chrono>
++#include <cstdio>
++#endif
+ #include "Ambient_Control.h"
+ #include "Animated_ProgressBar.h"
+ #include "Animation_Data.h"
+@@ -317,6 +323,10 @@ BOOLEAN SaveGame(const ST::string& saveName, const ST::string& gameDesc)
+ 	ST::string savegamePath = GetSaveGamePath(saveName);
+ 	ST::string savegameTempPath = FileMan::joinPaths("save", savegamePath);
+ 
++#ifdef JA2_3DS
++	gSGPFileDeferredWriteError = false;   // JA-05: checked before the save replaces the old one
++	const auto saveStart = std::chrono::steady_clock::now();
++#endif
+ 	try
+ 	{
+ 		//Save the current sectors open temp files to the disk
+@@ -483,9 +493,21 @@ BOOLEAN SaveGame(const ST::string& saveName, const ST::string& gameDesc)
+ 		SaveHeader(*f, header);
+ 
+ 		// Close the file.
++#ifdef JA2_3DS
++		f->flush();   // JA-05: the gathered writes, checked (a failure throws, as a failed write did)
++#endif
+ 		f.Deallocate();
+ 
++#ifdef JA2_3DS
++		// JA-05: a file written during this save whose last writes failed as it closed
++		if (gSGPFileDeferredWriteError) throw std::runtime_error("a save file's last writes failed (SD card full?)");
++#endif
+ 		FileMan::moveFile(GCM->tempFiles()->absolutePath(savegameTempPath), GCM->saveGameFiles()->absolutePath(savegamePath));
++#ifdef JA2_3DS
++		if (N3DS_DebugLogOn())
++			printf("save: %s written in %lld ms\n", savegamePath.c_str(),
++			       (long long)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - saveStart).count());
++#endif
+ 
+ 		GCM->tempFiles()->deleteFile(savegameTempPath);
+ 	}
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
 index add6ddf..312a7d9 100644
 --- a/src/game/SaveLoadScreen.cc
@@ -959,6 +1019,159 @@ index afb5d46..c68bb0b 100644
  		try {
  			TerminationHandler();
  		} catch (...) {
+diff --git a/src/sgp/SGPFile.cc b/src/sgp/SGPFile.cc
+index 3a845ce..5af74f2 100644
+--- a/src/sgp/SGPFile.cc
++++ b/src/sgp/SGPFile.cc
+@@ -93,13 +93,41 @@ SGPFile::SGPFile(VFile *f, ST::string && filename) :
+ }
+ 
+ 
++#ifdef JA2_3DS
++bool gSGPFileDeferredWriteError = false;
++static const size_t kSGPWriteBuf = 64 * 1024;
++
++void SGPFile::flushWrites() const
++{
++    if (wbuf.empty()) return;
++    const bool success = File_writeAll(this->file, wbuf.data(), wbuf.size());
++    wbuf.clear();
++    if (!success)
++    {
++        RustPointer<char> err{getRustError()};
++        throw SGPFileException("write failed", name, err);
++    }
++}
++#endif
++
+ SGPFile::~SGPFile()
+ {
++#ifdef JA2_3DS
++    try { flushWrites(); }
++    catch (std::exception const& e)
++    {
++        gSGPFileDeferredWriteError = true;
++        SLOGE("{}", e.what());
++    }
++#endif
+     File_close(this->file);
+ }
+ 
+ void SGPFile::read(void *const pDest, size_t const uiBytesToRead)
+ {
++#ifdef JA2_3DS
++    flushWrites();
++#endif
+     bool success = File_readExact(this->file, reinterpret_cast<uint8_t *>(pDest), uiBytesToRead);
+ 
+     if (!success)
+@@ -111,6 +139,9 @@ void SGPFile::read(void *const pDest, size_t const uiBytesToRead)
+ 
+ std::vector<uint8_t> SGPFile::readToEnd()
+ {
++#ifdef JA2_3DS
++    flushWrites();
++#endif
+     RustPointer<VecU8> vec;
+     vec.reset(File_readToEnd(this->file));
+ 
+@@ -126,6 +157,9 @@ std::vector<uint8_t> SGPFile::readToEnd()
+ 
+ size_t SGPFile::readAtMost(void *const pDest, size_t const uiBytesToRead)
+ {
++#ifdef JA2_3DS
++    flushWrites();
++#endif
+     size_t bytesRead = File_read(this->file, reinterpret_cast<uint8_t *>(pDest), uiBytesToRead);
+ 
+     if (bytesRead == SIZE_MAX)
+@@ -154,6 +188,16 @@ ST::string SGPFile::readStringToEnd()
+ 
+ void SGPFile::write(void const *const pDest, size_t const uiBytesToWrite)
+ {
++#ifdef JA2_3DS
++    if (wbuf.size() + uiBytesToWrite > kSGPWriteBuf) flushWrites();
++    if (uiBytesToWrite < kSGPWriteBuf)
++    {
++        if (wbuf.capacity() < kSGPWriteBuf) wbuf.reserve(kSGPWriteBuf);
++        const uint8_t *p = reinterpret_cast<const uint8_t *>(pDest);
++        wbuf.insert(wbuf.end(), p, p + uiBytesToWrite);
++        return;
++    }
++#endif
+     bool success = File_writeAll(this->file, reinterpret_cast<const uint8_t *>(pDest), uiBytesToWrite);
+ 
+     if (!success)
+@@ -165,6 +209,9 @@ void SGPFile::write(void const *const pDest, size_t const uiBytesToWrite)
+ 
+ void SGPFile::seek(INT32 distance, FileSeekMode const how)
+ {
++#ifdef JA2_3DS
++    flushWrites();
++#endif
+     bool success;
+     switch (how)
+     {
+@@ -190,6 +237,9 @@ INT32 SGPFile::pos() const
+ {
+     uint64_t position = File_seekFromCurrent(this->file, 0);
+     bool success = position != UINT64_MAX;
++#ifdef JA2_3DS
++    if (success) position += wbuf.size();   // the gathered writes follow the file's position
++#endif
+ 
+     if (!success)
+     {
+@@ -206,6 +256,9 @@ INT32 SGPFile::pos() const
+ 
+ UINT32 SGPFile::size() const
+ {
++#ifdef JA2_3DS
++    flushWrites();
++#endif
+ 
+     uint64_t len = File_len(this->file);
+     bool success = len != UINT64_MAX;
+diff --git a/src/sgp/SGPFile.h b/src/sgp/SGPFile.h
+index 5155f09..5d797e0 100644
+--- a/src/sgp/SGPFile.h
++++ b/src/sgp/SGPFile.h
+@@ -6,6 +6,7 @@
+ #include "Types.h"
+ #include <string_theory/string>
+ #include <SDL_rwops.h>
++#include <vector>
+ 
+ enum FileSeekMode
+ {
+@@ -21,6 +22,17 @@ class SGPFile
+ private:
+ 	VFile *file;
+ 	ST::string name;
++#ifdef JA2_3DS
++	/* JA-05: writes are gathered here and go to the SD card in 64 KB pieces (a save was
++	 * thousands of small writes, each its own SD card access). Written out before any read,
++	 * seek or size, and when the file closes; SGPFile.cc. */
++	mutable std::vector<uint8_t> wbuf;
++	void flushWrites() const;
++public:
++	/** 3DS: write out the gathered writes now (throws on failure). */
++	void flush() { flushWrites(); }
++private:
++#endif
+ 
+ public:
+ 	/** Create a SGP file from a file on disk. */
+@@ -68,3 +80,9 @@ public:
+ void DeleteSGPFile(SGPFile *file);
+ 
+ typedef SGP::AutoObj<SGPFile, DeleteSGPFile> AutoSGPFile;
++
++#ifdef JA2_3DS
++/* JA-05: set when a file's last gathered writes failed as it closed (a destructor can't throw);
++ * SaveGame clears it first and checks it before the finished save replaces the old one. */
++extern bool gSGPFileDeferredWriteError;
++#endif
 diff --git a/src/sgp/SoundMan.cc b/src/sgp/SoundMan.cc
 index 7104055..fea9d8c 100644
 --- a/src/sgp/SoundMan.cc
@@ -1006,7 +1219,7 @@ index a4ead1b..dd5b468 100644
  // integers
  typedef uint8_t         UINT8;
 diff --git a/src/sgp/Video.cc b/src/sgp/Video.cc
-index 8f48538..7950173 100644
+index 8f48538..16737a3 100644
 --- a/src/sgp/Video.cc
 +++ b/src/sgp/Video.cc
 @@ -49,6 +49,11 @@ static SDL_Rect DirtyRegionsEx[MAX_DIRTY_REGIONS];
@@ -1072,20 +1285,21 @@ index 8f48538..7950173 100644
  
  	const BOOLEAN scrolling = (gsScrollXIncrement != 0 || gsScrollYIncrement != 0);
  
-@@ -531,6 +548,12 @@ void RefreshScreen(void)
+@@ -531,6 +548,13 @@ void RefreshScreen(void)
  	ScreenTextureUpdateRect += dst;
  	MouseBackground = dst;
  
 +#ifdef JA2_3DS
 +	gN3DSCursorX = cursorPos.iX;
 +	gN3DSCursorY = cursorPos.iY;
++	// JA-04: only what changed is drawn again (the rectangle the PC build uploads)
++	N3DS_SetUpdateRect(ScreenTextureUpdateRect.x, ScreenTextureUpdateRect.y, ScreenTextureUpdateRect.w, ScreenTextureUpdateRect.h);
 +	N3DS_Present(ScreenBuffer, cursorPos.iX, cursorPos.iY);
-+	(void)ScreenTextureUpdateRect;
 +#else
  	uint8_t const * SrcPixels = static_cast<uint8_t *>(ScreenBuffer->pixels)
  		+ ScreenTextureUpdateRect.y * ScreenBuffer->pitch
  		+ ScreenTextureUpdateRect.x * ScreenBuffer->format->BytesPerPixel;
-@@ -551,6 +574,7 @@ void RefreshScreen(void)
+@@ -551,6 +575,7 @@ void RefreshScreen(void)
  	}
  
  	FPS::RenderPresentPtr(GameRenderer);
@@ -1257,10 +1471,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..2c3d754
+index 0000000..cec5bbb
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1110 @@
+@@ -0,0 +1,1255 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1754,10 +1968,12 @@ index 0000000..2c3d754
 +	char num[16]; snprintf(num, sizeof num, "%d/%d", v, max);
 +	Text(c, bx + bw + 6, y, num, kText, kFontSans, 56);
 +}
++static u64 g_dashLast = 0;            // when the dashboard's data was last read (every 0.25 s)
++static bool DashboardDue() { return g_dashLast == 0 || svcGetSystemTick() - g_dashLast > SYSCLOCK_ARM11 / 4; }
 +static void DrawDashboard(const Canvas& c, bool withSwapButton)
 +{
 +	static N3DSDash d;
-+	static u64 last = 0;
++	u64& last = g_dashLast;
 +	const u64 now = svcGetSystemTick();
 +	if (now - last > SYSCLOCK_ARM11 / 4 || last == 0) { N3DS_GetDashboard(d); last = now; }
 +	const int W = c.w;
@@ -1824,10 +2040,151 @@ index 0000000..2c3d754
 +	}
 +}
 +
++static unsigned g_statDrawn = 0;       // screens drawn (bottom 1, top 2) since the last line
++static void PresentStat(u64 t0)
++{
++	static unsigned n = 0;
++	static u64 sum = 0, mx = 0;
++	if (!g_debugLog) return;
++	const u64 d = svcGetSystemTick() - t0;
++	sum += d; if (d > mx) mx = d;
++	if (++n < 300) return;
++	const double tpm = SYSCLOCK_ARM11 / 1000.0;
++	printf("frame: %u presents, present avg %.2f ms, max %.2f ms, screens drawn %u (bottom 1, top 2 each)\n",
++	       n, sum / tpm / n, mx / tpm, g_statDrawn);
++	n = 0; sum = mx = 0; g_statDrawn = 0;
++}
++
++// ---------------------------------------------------------------- JA-04: present what changed
++// Every RefreshScreen used to rebuild both screens: the whole 640x480 frame halved onto the touch
++// screen and the whole dashboard (text and all) on the top screen, 60 times a second, even on a
++// still frame. In the normal layout (no swap, zoom or magnifier) now:
++// - touch screen: RefreshScreen passes the rectangle it changed (N3DS_SetUpdateRect, what the PC
++//   build uploads); that part is compared with the last frame shown, and only a real change is
++//   halved again, into each of the two framebuffers in turn (each remembers what it missed), and
++//   only a screen that changed is swapped.
++// - top screen: the dashboard is drawn off screen when its data is read again (every 0.25 s) and
++//   copied up only when it came out different.
++// Same pixels as before. A layout change, a gap of over 0.2 s (HOME Menu, a menu or the manual
++// drawing on the screens) or the first frame redraws everything. debug.txt: a "frame:" line in
++// console.txt every 300 presents (time per present, avg / longest; screens drawn).
++static bool g_presentForce = true;     // the next present redraws both screens in full
++static int g_updX = 0, g_updY = 0, g_updW = 640, g_updH = 480;
++static bool g_updSet = false;
++void N3DS_SetUpdateRect(int x, int y, int w, int h)
++{
++	if (x < 0) { w += x; x = 0; } if (y < 0) { h += y; y = 0; }
++	if (x + w > 640) w = 640 - x; if (y + h > 480) h = 480 - y;
++	g_updX = x; g_updY = y; g_updW = w > 0 ? w : 0; g_updH = h > 0 ? h : 0;
++	g_updSet = true;
++}
++
++struct PRect { int x0, y0, x1, y1; bool empty() const { return x1 <= x0 || y1 <= y0; } };
++static void Grow(PRect& a, const PRect& b)
++{
++	if (b.empty()) return;
++	if (a.empty()) { a = b; return; }
++	a.x0 = std::min(a.x0, b.x0); a.y0 = std::min(a.y0, b.y0); a.x1 = std::max(a.x1, b.x1); a.y1 = std::max(a.y1, b.y1);
++}
++// which of a screen's two framebuffers this pointer is (0 / 1)
++static int BufIndex(u16* fb, u16* (&seen)[2])
++{
++	if (fb == seen[0]) return 0;
++	if (fb == seen[1]) return 1;
++	if (!seen[0]) { seen[0] = fb; return 0; }
++	if (!seen[1]) { seen[1] = fb; return 1; }
++	seen[0] = fb; seen[1] = nullptr;      // new framebuffers (screen set up again): start over
++	return 0;
++}
++// DrawGameHalf for the output rectangle r (touch-screen pixels) only
++static void DrawGameHalfRect(const Canvas& c, SDL_Surface* screen, const PRect& r)
++{
++	const int spitch = screen->pitch / 2;
++	const u16* src = (const u16*)screen->pixels;
++	for (int y = r.y0; y < r.y1; ++y) {
++		const u16* r0 = src + (y * 2) * spitch;
++		const u16* r1 = r0 + spitch;
++		for (int x = r.x0; x < r.x1; ++x) {
++			const int sx = x * 2;
++			if (u16* p = PxP(c, x, y)) *p = avg565(avg565(r0[sx], r0[sx + 1]), avg565(r1[sx], r1[sx + 1]));
++		}
++	}
++}
++
++static void PresentPlain(SDL_Surface* screen, bool force)
++{
++	static std::vector<u16> shadow;        // the 640x480 frame as last shown
++	static u16* botSeen[2] = { nullptr, nullptr };
++	static u16* topSeen[2] = { nullptr, nullptr };
++	static PRect botStale[2], topStale[2];
++	static std::vector<u16> dash, dashPrev;
++	const PRect full = { 0, 0, 320, 240 };
++	if (shadow.size() != 640u * 480u) { shadow.assign(640u * 480u, 0); force = true; }
++	const int spitch = screen->pitch / 2;
++	const u16* src = (const u16*)screen->pixels;
++	// touch screen: what changed in the frame
++	PRect chg = { 0, 0, 0, 0 };
++	{
++		// every 30th present the whole frame is compared (cheap): a change drawn without being
++		// marked still shows within half a second, as it did when every frame was redrawn
++		static unsigned nth = 0;
++		const bool whole = force || ++nth % 30 == 0;
++		int x = whole ? 0 : g_updX, y = whole ? 0 : g_updY, w = whole ? 640 : g_updW, h = whole ? 480 : g_updH;
++		bool diff = force;
++		for (int j = y; j < y + h && !diff; ++j)
++			diff = memcmp(&shadow[j * 640 + x], src + j * spitch + x, (size_t)w * 2) != 0;
++		if (diff && w > 0 && h > 0) {
++			for (int j = y; j < y + h; ++j) memcpy(&shadow[j * 640 + x], src + j * spitch + x, (size_t)w * 2);
++			chg = { x / 2, y / 2, (x + w + 1) / 2, (y + h + 1) / 2 };
++		}
++	}
++	if (force) chg = full;
++	for (int i = 0; i < 2; ++i) Grow(botStale[i], chg);
++	// top screen: the dashboard, drawn off screen when its data is read again
++	bool dashChanged = false;
++	Canvas top = CanvasFor(GFX_TOP);
++	const size_t topN = (size_t)top.w * top.h;
++	if (force || DashboardDue() || dash.size() != topN) {
++		if (dash.size() != topN) { dash.assign(topN, 0); dashPrev.assign(topN, 1); }
++		Canvas off = { dash.data(), top.w, top.h };
++		DrawDashboard(off, false);
++		dashChanged = force || memcmp(dash.data(), dashPrev.data(), topN * 2) != 0;
++		if (dashChanged) dashPrev = dash;
++	}
++	if (dashChanged) for (int i = 0; i < 2; ++i) topStale[i] = full;
++	// draw into the back buffers what they missed; swap only the screens that changed
++	Canvas bot = CanvasFor(GFX_BOTTOM);
++	const int bi = BufIndex(bot.fb, botSeen), ti = BufIndex(top.fb, topSeen);
++	const bool drawBot = !botStale[bi].empty(), drawTop = !topStale[ti].empty();
++	if (drawBot) { DrawGameHalfRect(bot, screen, botStale[bi]); botStale[bi] = { 0, 0, 0, 0 }; }
++	if (drawTop) { memcpy(top.fb, dashPrev.data(), topN * 2); topStale[ti] = { 0, 0, 0, 0 }; }
++	if (drawBot || drawTop) gfxFlushBuffers();
++	if (drawBot) gfxScreenSwapBuffers(GFX_BOTTOM, true);
++	if (drawTop) gfxScreenSwapBuffers(GFX_TOP, true);
++	g_statDrawn += (drawBot ? 1 : 0) + (drawTop ? 2 : 0);
++}
++
 +void N3DS_Present(SDL_Surface* screen, int cx, int cy)
 +{
 +	if (!g_ready || !screen) return;
 +	g_bootDone = true;
++	const u64 t0 = svcGetSystemTick();
++	{
++		static int lastMode = -1;
++		static u64 lastAt = 0;
++		const int mode = (g_swap ? 1 : 0) | (g_zoom ? 2 : 0) | (g_mag ? 4 : 0) | (g_lefty ? 8 : 0);
++		const bool plain = !g_swap && !g_zoom && !g_mag;
++		const bool force = g_presentForce || mode != lastMode || !g_updSet || lastAt == 0 || t0 - lastAt > SYSCLOCK_ARM11 / 5;
++		lastMode = mode; lastAt = t0;
++		g_updSet = false;
++		if (plain) {
++			g_presentForce = false;
++			PresentPlain(screen, force);
++			PresentStat(t0);
++			return;
++		}
++		g_presentForce = true;              // the other layouts draw everything; back to plain redraws in full
++	}
 +	if (!g_swap) {
 +		if (g_zoom) { ZoomFollow(cx, cy); DrawGameZoom(CanvasFor(GFX_BOTTOM), screen); }
 +		else DrawGameHalf(CanvasFor(GFX_BOTTOM), 0, screen);
@@ -1840,6 +2197,8 @@ index 0000000..2c3d754
 +	}
 +	gfxFlushBuffers();
 +	gfxSwapBuffers();
++	g_statDrawn += 3;
++	PresentStat(t0);
 +}
 +
 +// ---------------------------------------------------------------- boot + error screens
@@ -1861,7 +2220,7 @@ index 0000000..2c3d754
 +		Fill(b, 0, 0, b.w, b.h, kBg);
 +		const char* m = "Loading game data from the SD card";
 +		Text(b, (b.w - TextW(m, kFontSans)) / 2, 112, m, kDim, kFontSans);
-+		gfxFlushBuffers(); gfxSwapBuffers();
++		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true;
 +	}
 +}
 +
@@ -1900,7 +2259,7 @@ index 0000000..2c3d754
 +		Text(b, 12, 80, "JA2 3DS port - stopped", kTitle, kFontBold);
 +		Text(b, 12, 104, "Log: sdmc:/3ds/ja2/console.txt", kText, kFontSans);
 +		Text(b, 12, 124, "Press START to exit.", kText, kFontSans);
-+		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +	}
 +	gfxExit();
 +}
@@ -2028,7 +2387,7 @@ index 0000000..2c3d754
 +		}
 +		DrawManualTop(scroll, lines);
 +		DrawManualBottom(ch, sel, pressFrames > 0 ? pressed : -1);
-+		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +		if (pressFrames > 0 && --pressFrames == 0 && action) break;
 +	}
 +	while (aptMainLoop()) { // don't let the closing press leak into the game
@@ -2101,7 +2460,7 @@ index 0000000..2c3d754
 +				Fill(b, x - 2, y, 2, h, kTitle); Fill(b, x + w, y, 2, h, kTitle);
 +			}
 +		}
-+		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +		if (pressFrames > 0 && --pressFrames == 0) { answer = pressed; pressed = -1; }
 +	}
 +	while (aptMainLoop()) {   // don't let the closing press leak into the game
@@ -2190,7 +2549,7 @@ index 0000000..2c3d754
 +				Fill(b, x - 2, y, 2, h, kTitle); Fill(b, x + w, y, 2, h, kTitle);
 +			}
 +		}
-+		gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +		if (pressFrames > 0 && --pressFrames == 0) {
 +			if (!confirm) {
 +				const int id = kIds[pressed];
@@ -2219,7 +2578,7 @@ index 0000000..2c3d754
 +				Fill(b, 0, 0, b.w, 22, kSel);
 +				Text(b, 6, 4, "EXIT GAME", kTitle, kFontBold);
 +				Text(b, (b.w - TextW("Saving...", kFontBold)) / 2, 110, "Saving...", kText, kFontBold);
-+				gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
++				gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +			}
 +			const bool ok = N3DS_SuspendSave();
 +			printf("[3ds] suspend save on exit: %s\n", ok ? "ok" : "failed"); fflush(stdout);
@@ -2373,10 +2732,10 @@ index 0000000..2c3d754
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Platform.h b/src/sgp/n3ds/N3DS_Platform.h
 new file mode 100644
-index 0000000..24faf32
+index 0000000..ba9af5b
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.h
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,14 @@
 +#pragma once
 +// Nintendo 3DS platform layer for JA2 Stracciatella
 +#ifdef JA2_3DS
@@ -2384,6 +2743,7 @@ index 0000000..24faf32
 +
 +void N3DS_Init();                    // CPU speedup, screen formats
 +void N3DS_Present(SDL_Surface* screen, int cursorX, int cursorY); // draw both screens
++void N3DS_SetUpdateRect(int x, int y, int w, int h);   // JA-04: what RefreshScreen changed (before N3DS_Present)
 +void N3DS_MapFinger(SDL_TouchFingerEvent* f);   // zoomed: touch -> the zoom window's game coordinates
 +void N3DS_PumpInput();
 +void N3DS_LogMem(const char* tag);
