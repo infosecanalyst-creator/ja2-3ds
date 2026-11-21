@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """docs/manual.txt -> src/sgp/n3ds/N3DS_Manual.h   ('# Chapter' starts a chapter, '== Title' a page)"""
-import sys, json
+import sys, json, os
 src, dst = sys.argv[1], sys.argv[2]
 pages, chapters, cur = [], [], None
-for raw in open(src, encoding='utf-8').read().splitlines():
+# @PORT_VERSION@: the port's git describe (build-3ds.sh sets PORT_VERSION)
+text = open(src, encoding='utf-8').read().replace('@PORT_VERSION@', os.environ.get('PORT_VERSION', 'unknown'))
+for raw in text.splitlines():
     if raw.startswith('# '):
         chapters.append([raw[2:].strip(), len(pages)]); continue
     if raw.startswith('== '):

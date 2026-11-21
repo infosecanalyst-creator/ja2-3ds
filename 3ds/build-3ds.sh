@@ -1,8 +1,11 @@
 #!/bin/bash
 # Rebuild ja2.3dsx (JA2 Stracciatella v0.22.1, New 3DS port). Linux x86_64 shell.
 # Needs: devkitARM + libctru (DEVKITPRO), Rust nightly with rust-src, cmake, ninja, python3+PIL.
+# RUST_TOOLCHAIN picks the nightly (CI pins one, e.g. nightly-2026-11-21; default: nightly).
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd); W=${WORK:-$HOME/ja2-3ds-work}; mkdir -p $W
+# Port version for the manual's contents page, taken before anything is built.
+export PORT_VERSION=$(git -c safe.directory='*' -C "$HERE" describe --always --dirty 2>/dev/null || echo unknown)
 : "${DEVKITPRO:?set DEVKITPRO}"; export DEVKITARM=$DEVKITPRO/devkitARM PATH=$DEVKITARM/bin:$DEVKITPRO/tools/bin:$PATH
 # 1. SDL2 for 3DS
 [ -d $W/sdl2 ] || git clone -q --depth 1 --branch release-2.30.9 https://github.com/libsdl-org/SDL.git $W/sdl2
@@ -18,7 +21,7 @@ export CC_armv6k_nintendo_3ds=arm-none-eabi-gcc AR_armv6k_nintendo_3ds=arm-none-
 export CFLAGS_armv6k_nintendo_3ds="-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -D__3DS__ -I$DEVKITPRO/libctru/include"
 mkdir -p $W/prefix/strac/include $W/prefix/strac/lib
 (cd $W/strac/rust && HEADER_LOCATION=$W/prefix/strac/include/stracciatella.h CARGO_TARGET_DIR=$W/ctarget \
-  cargo +nightly build -Z build-std=std,panic_abort --target armv6k-nintendo-3ds --release -p stracciatella_c_api)
+  cargo +${RUST_TOOLCHAIN:-nightly} build -Z build-std=std,panic_abort --target armv6k-nintendo-3ds --release -p stracciatella_c_api)
 cp $W/ctarget/armv6k-nintendo-3ds/release/libstracciatella_c_api.a $W/prefix/strac/lib/
 # 4. Game
 # Generated headers first: the game is compiled with them (they used to be written
@@ -57,5 +60,12 @@ cp -r $W/strac/assets/externalized $OUT/
 cp "$W/strac/SFI Source Code license agreement.txt" $OUT/
 printf '%s\n' "ja2.3dsx is a MODIFIED build of JA2 Stracciatella v0.22.1 (changed by the ja2-3ds" \
   "authors, 2026-10; see 3ds/patches/stracciatella-3ds.patch). Non-commercial use only, under" \
-  "the Strategy First Inc. Source Code License Agreement in this folder. No warranty; no game data." > $OUT/NOTICE.txt
+  "the Strategy First Inc. Source Code License Agreement in this folder. No warranty; no game data." \
+  "" \
+  "This build uses libsmacker, (c) 2012-2013 Greg Kennedy (http://libsmacker.sourceforge.net)," \
+  "under the Creative Commons Attribution Non-Commercial License 2.0 (libsmacker-LICENSE.txt)," \
+  "as modified by JA2 Stracciatella. Other third-party code (SDL2: zlib; Lua, sol2, string_theory," \
+  "magic_enum: MIT; miniaudio: public domain/MIT-0; Rust crates; libctru: zlib) is listed in" \
+  "NOTICE.txt in the ja2-3ds repository." > $OUT/NOTICE.txt
+cp "$W/strac/dependencies/lib-smacker/LICENSE.txt" $OUT/libsmacker-LICENSE.txt
 echo "built $APP (engine files in $OUT)"

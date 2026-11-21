@@ -14,9 +14,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Container build
         run: |
-          docker run --rm -v "$PWD:/w" -w /w -e OUT=/w/out -e WORK=/tmp/ja2w devkitpro/devkitarm bash -ec '
+          # JA-10: pinned toolchains, bumped deliberately. devkitarm:20260610 is what :latest was when this
+          # was pinned; nightly-2026-11-21 (rustc 1.102.0-nightly c7d5ba59d) built ja2.3dsx green then.
+          docker run --rm -v "$PWD:/w" -w /w -e OUT=/w/out -e WORK=/tmp/ja2w -e RUST_TOOLCHAIN=nightly-2026-11-21 devkitpro/devkitarm:20260610 bash -ec '
             apt-get update -qq && apt-get install -y -qq git cmake ninja-build python3 python3-pil fonts-dejavu-core curl ca-certificates build-essential libclang-dev >/dev/null
-            curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain nightly -c rust-src
+            curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain "$RUST_TOOLCHAIN" -c rust-src
             export PATH=$HOME/.cargo/bin:$PATH
             bash 3ds/build-3ds.sh' 2>&1 | tee build.log
           test -f out/ja2.3dsx

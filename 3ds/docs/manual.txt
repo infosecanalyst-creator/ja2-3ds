@@ -2,6 +2,7 @@
 == CONTENTS
 Jagged Alliance 2 - New 3DS edition
 Engine: JA2 Stracciatella. Data: your JA2 Gold.
+Build: @PORT_VERSION@
 
  1  Controls
  2  The two screens
