@@ -28,6 +28,7 @@ What the patch (`3ds/patches/stracciatella-3ds.patch`) changes, in short:
 | Runtime | `__syscall_tls_*` (pthread TLS keys) and `getrandom()` implemented for libctru |
 | Video/input | direct RGB565 framebuffer output, dashboard, swap, buttons/Circle Pad mapping |
 | Startup | loading progress on screen; errors shown on screen and in `sdmc:/3ds/ja2/console.txt` |
+| Debug log | off by default (only start, exit, save-on-exit and error lines); an empty `sdmc:/3ds/ja2/debug.txt` turns on the full log (memory trace, engine info lines), buffered, rolled over at 1 MB |
 
 ### Build
 

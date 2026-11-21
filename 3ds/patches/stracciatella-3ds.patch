@@ -688,17 +688,19 @@ index d276eef..2ab0dbe 100644
  
  // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
 diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..2be7e30 100644
+index afb5d46..c68bb0b 100644
 --- a/src/sgp/SGP.cc
 +++ b/src/sgp/SGP.cc
-@@ -1,3 +1,6 @@
+@@ -1,3 +1,8 @@
 +#ifdef JA2_3DS
 +#include "n3ds/N3DS_Platform.h"
++#include <sys/stat.h>
++#include <stdio.h>
 +#endif
  #include "Button_System.h"
  #include "FPS.h"
  #include "GameLoop.h"
-@@ -87,11 +90,37 @@ static void shutdownGame()
+@@ -87,11 +92,47 @@ static void shutdownGame()
  
  	SLOGD("Shutting Down SDL");
  	SDL_Quit();
@@ -706,13 +708,23 @@ index afb5d46..2be7e30 100644
 +	extern void N3DS_AudioExit();
 +	N3DS_AudioExit();   // last ndsp reference: the DSP thread must stop before exit() frees the heap
 +#endif
- }
- 
++}
++
 +#ifdef JA2_3DS
 +// Set when the game itself asks to quit (EXIT GAME, main menu): its own save already ran.
 +static bool g_exitRequestedByGame = false;
-+#endif
 +
++// debug.txt mode: the engine's ja2.log is capped at about 1 MB; past that only errors are logged.
++void N3DS_CapEngineLog()
++{
++	struct stat ls;
++	if (Logger_getLevel() > LogLevel::Error && stat("sdmc:/3ds/ja2/ja2.log", &ls) == 0 && ls.st_size > 1024 * 1024) {
++		Logger_setLevel(LogLevel::Error);
++		printf("[3ds] ja2.log reached 1 MB: errors only from now on\n");
++	}
+ }
++#endif
+ 
  /** Deinitialize the game an exit. */
  static void deinitGameAndExit()
  {
@@ -736,7 +748,7 @@ index afb5d46..2be7e30 100644
  	SLOGD("Deinitializing Game");
  	// If we are in Dead is Dead mode, save before exit
  	// Does this code also fire on crash? Let's hope not!
-@@ -107,6 +136,10 @@ static void deinitGameAndExit()
+@@ -107,6 +148,10 @@ static void deinitGameAndExit()
   * Call this function if you want to exit the game. */
  void requestGameExit()
  {
@@ -747,7 +759,7 @@ index afb5d46..2be7e30 100644
  	SDL_Event event;
  	event.type = SDL_QUIT;
  	SDL_PushEvent(&event);
-@@ -122,6 +155,9 @@ static void MainLoop()
+@@ -122,6 +167,9 @@ static void MainLoop()
  		extern void UpdateJA2Clock();
  		UpdateJA2Clock();
  
@@ -757,7 +769,7 @@ index afb5d46..2be7e30 100644
  		SDL_Event event;
  		if (SDL_PollEvent(&event))
  		{
-@@ -156,9 +192,15 @@ static void MainLoop()
+@@ -156,9 +204,15 @@ static void MainLoop()
  
  				case SDL_MOUSEWHEEL: MouseWheelScroll(&event.wheel); break;
  
@@ -773,7 +785,7 @@ index afb5d46..2be7e30 100644
  
  				case SDL_QUIT: deinitGameAndExit(); break;
  			}
-@@ -266,7 +308,13 @@ std::vector<ST::string> InitGlobalLocale()
+@@ -266,7 +320,13 @@ std::vector<ST::string> InitGlobalLocale()
  	return problems;
  }
  
@@ -787,7 +799,18 @@ index afb5d46..2be7e30 100644
  {
      try {
  		#ifdef __ANDROID__
-@@ -357,6 +405,9 @@ int main(int argc, char* argv[])
+@@ -285,6 +345,10 @@ int main(int argc, char* argv[])
+ 		{
+ 			std::vector<ST::string> problems = InitGlobalLocale();
+ 			Logger_initialize("ja2.log");
++#ifdef JA2_3DS
++			// JA-03: info lines went to the SD card unbuffered; without debug.txt only errors
++			if (!N3DS_DebugLogOn()) Logger_setLevel(LogLevel::Error);
++#endif
+ 			for (const ST::string& msg : problems)
+ 			{
+ 				SLOGW("{}", msg);
+@@ -357,6 +421,9 @@ int main(int argc, char* argv[])
  		////////////////////////////////////////////////////////////
  
  		SDL_Init(SDL_INIT_VIDEO);
@@ -797,7 +820,7 @@ index afb5d46..2be7e30 100644
  
  		// restore output to the console (on windows when built with MINGW)
  	#ifdef __MINGW32__
-@@ -379,6 +430,9 @@ int main(int argc, char* argv[])
+@@ -379,6 +446,9 @@ int main(int argc, char* argv[])
  		}
  
  		cm->logConfiguration();
@@ -807,7 +830,7 @@ index afb5d46..2be7e30 100644
  
  		if (!cm->loadGameData())
  		{
-@@ -386,11 +440,17 @@ int main(int argc, char* argv[])
+@@ -386,11 +456,17 @@ int main(int argc, char* argv[])
  		}
  
  		GCM = cm;
@@ -825,7 +848,7 @@ index afb5d46..2be7e30 100644
  		VideoSetBrightness(brightness);
  
  		SLOGD("Initializing Video Object Manager");
-@@ -403,6 +463,9 @@ int main(int argc, char* argv[])
+@@ -403,6 +479,9 @@ int main(int argc, char* argv[])
  
  		SLOGD("Initializing Sound Manager");
  		InitializeSoundManager();
@@ -835,7 +858,7 @@ index afb5d46..2be7e30 100644
  
  		SLOGD("Initializing Random");
  		// Initialize random number generator
-@@ -411,6 +474,10 @@ int main(int argc, char* argv[])
+@@ -411,6 +490,10 @@ int main(int argc, char* argv[])
  		SLOGD("Initializing Game Manager");
  		// Initialize the Game
  		InitializeGame();
@@ -846,7 +869,7 @@ index afb5d46..2be7e30 100644
  
  		gfGameInitialized = TRUE;
  
-@@ -431,6 +498,9 @@ int main(int argc, char* argv[])
+@@ -431,6 +514,9 @@ int main(int argc, char* argv[])
  
  		return EXIT_SUCCESS;
  	} catch (...) {
@@ -1154,10 +1177,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..6928400
+index 0000000..a9174ed
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1073 @@
+@@ -0,0 +1,1097 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1265,6 +1288,9 @@ index 0000000..6928400
 +}
 +static void N3DS_NewHandler() { N3DS_LogMem("operator new FAILED"); throw std::bad_alloc(); }
 +
++static bool g_debugLog = false;
++bool N3DS_DebugLogOn() { return g_debugLog; }
++
 +void N3DS_BootStatus(const char* fmt, ...)
 +{
 +	char msg[160];
@@ -1291,13 +1317,19 @@ index 0000000..6928400
 +	osSetSpeedupEnable(true); // 804 MHz from the very start (loading is CPU bound)
 +	mkdir(N3DS_DIR, 0777);
 +	chdir(N3DS_DIR);
++	// JA-03: verbose logging (memory trace, engine info lines, start-up probes) only when
++	// sdmc:/3ds/ja2/debug.txt exists, checked once here. Without it console.txt only gets the
++	// rare lines (start, boot steps, exit, saves on exit, errors), written at once.
++	{ struct stat ds; g_debugLog = stat(N3DS_DIR "/debug.txt", &ds) == 0; }
 +	const char* logPath = N3DS_DIR "/console.txt";
 +	freopen(logPath, "w", stdout);
 +	freopen(logPath, "a", stderr);
-+	setvbuf(stdout, nullptr, _IONBF, 0);
++	if (g_debugLog) setvbuf(stdout, nullptr, _IOFBF, 16384);   // flushed every 3 s by N3DS_PumpInput
++	else setvbuf(stdout, nullptr, _IONBF, 0);
 +	setvbuf(stderr, nullptr, _IONBF, 0);
-+	printf("[3ds] JA2 Stracciatella 3DS port starting, argc=%d argv0=%s\n", argc, argc > 0 ? argv[0] : "?");
-+	{ // probe: what does stat() report on this system?
++	printf("[3ds] JA2 Stracciatella 3DS port starting, argc=%d argv0=%s%s\n", argc, argc > 0 ? argv[0] : "?",
++	       g_debugLog ? " (debug log on: debug.txt)" : "");
++	if (g_debugLog) { // probe: what does stat() report on this system?
 +		const char* probes[] = { "/3ds/ja2/gamedata", "/3ds/ja2/gamedata/Data", "/3ds/ja2/gamedata/data", "/3ds/ja2/gamedata/Data/Sounds.slf", "/3ds/ja2/gamedata/Data/sounds.slf" };
 +		for (const char* p : probes) {
 +			struct stat sb; memset(&sb, 0, sizeof sb);
@@ -1319,7 +1351,7 @@ index 0000000..6928400
 +	} catch (...) {
 +		why = "Unknown exception";
 +	}
-+	printf("[3ds] exit: rc=%d %s\n", rc, why.c_str());
++	printf("[3ds] exit: rc=%d %s\n", rc, why.c_str()); fflush(stdout);
 +	if (rc != 0) {
 +		struct stat sb;
 +		const char* gameLog = N3DS_DIR "/ja2.log";
@@ -2109,10 +2141,25 @@ index 0000000..6928400
 +
 +void N3DS_PumpInput()
 +{
-+	{ // memory trace every 3 s (console.txt) so a silent exit still leaves the last heap numbers behind
++	if (g_debugLog) { // debug.txt: memory trace every 3 s (console.txt) so a silent exit still leaves the last heap numbers behind
 +		static u64 lastLog = 0;
 +		const u64 now = svcGetSystemTick();
-+		if (now - lastLog > 3ull * SYSCLOCK_ARM11) { lastLog = now; N3DS_LogMem("tick"); }
++		if (now - lastLog > 3ull * SYSCLOCK_ARM11) {
++			lastLog = now;
++			N3DS_LogMem("tick");
++			fflush(stdout);
++			if (ftell(stdout) > 1024 * 1024) {   // roll over at 1 MB: console.txt -> console.old.txt
++				remove(N3DS_DIR "/console.old.txt");
++				rename(N3DS_DIR "/console.txt", N3DS_DIR "/console.old.txt");
++				freopen(N3DS_DIR "/console.txt", "w", stdout);
++				freopen(N3DS_DIR "/console.txt", "a", stderr);
++				setvbuf(stdout, nullptr, _IOFBF, 16384);
++				setvbuf(stderr, nullptr, _IONBF, 0);
++				printf("[3ds] console.txt rolled over (previous part in console.old.txt)\n");
++			}
++			extern void N3DS_CapEngineLog();   // SGP.cc: ja2.log past 1 MB keeps only errors
++			N3DS_CapEngineLog();
++		}
 +	}
 +	static u32 prev = 0;
 +	static float fx = -1, fy = -1;
@@ -2233,10 +2280,10 @@ index 0000000..6928400
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Platform.h b/src/sgp/n3ds/N3DS_Platform.h
 new file mode 100644
-index 0000000..2ad7372
+index 0000000..24faf32
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.h
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,13 @@
 +#pragma once
 +// Nintendo 3DS platform layer for JA2 Stracciatella
 +#ifdef JA2_3DS
@@ -2247,5 +2294,6 @@ index 0000000..2ad7372
 +void N3DS_MapFinger(SDL_TouchFingerEvent* f);   // zoomed: touch -> the zoom window's game coordinates
 +void N3DS_PumpInput();
 +void N3DS_LogMem(const char* tag);
++bool N3DS_DebugLogOn();   // sdmc:/3ds/ja2/debug.txt existed at start-up
 +void N3DS_BootStatus(const char* fmt, ...); // startup progress on screen + console.txt               // buttons / circle pad -> SDL events
 +#endif
