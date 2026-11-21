@@ -45,8 +45,12 @@ ninja -C $W/build
 # 5. Package into the one SD-CARD location
 python3 -c "from PIL import Image; Image.open('$W/strac/assets/icons/logo.png').convert('RGBA').resize((48,48)).save('$W/icon48.png')"
 smdhtool --create "Stracciatella 3DS" "Plays your own JA2 Gold data (non-commercial)" "ja2-3ds (unofficial)" $W/icon48.png $W/ja2.smdh
-OUT=${OUT:-$HERE/../../SD-CARD/3ds/ja2}; mkdir -p $OUT   # override with OUT=...
-3dsxtool $W/build/ja2.elf $OUT/ja2.3dsx --smdh=$W/ja2.smdh
+# The .3dsx lives directly in /3ds on the SD card (sdmc:/3ds/ja2.3dsx); everything else in
+# /3ds/ja2/. With OUT=... (CI) everything, the .3dsx included, goes into that one folder.
+if [ -z "${OUT:-}" ]; then OUT=$HERE/../../SD-CARD/3ds/ja2; APP=${APP:-$HERE/../../SD-CARD/3ds/ja2.3dsx}
+else APP=${APP:-$OUT/ja2.3dsx}; fi
+mkdir -p $OUT "$(dirname "$APP")"
+3dsxtool $W/build/ja2.elf "$APP" --smdh=$W/ja2.smdh
 arm-none-eabi-nm -C -n $W/build/ja2.elf | gzip -9 > $OUT/ja2.sym.gz   # symbol map for crash analysis (3dsx base 0x100000)
 cp -r $W/strac/assets/externalized $OUT/
 # SFI-SCLA: a build is a derivative work, so it travels with the licence and the change notice
@@ -54,4 +58,4 @@ cp "$W/strac/SFI Source Code license agreement.txt" $OUT/
 printf '%s\n' "ja2.3dsx is a MODIFIED build of JA2 Stracciatella v0.22.1 (changed by the ja2-3ds" \
   "authors, 2026-10; see 3ds/patches/stracciatella-3ds.patch). Non-commercial use only, under" \
   "the Strategy First Inc. Source Code License Agreement in this folder. No warranty; no game data." > $OUT/NOTICE.txt
-echo "built $OUT/ja2.3dsx"
+echo "built $APP (engine files in $OUT)"

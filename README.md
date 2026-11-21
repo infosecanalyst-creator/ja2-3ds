@@ -35,14 +35,14 @@ Linux x86_64 with devkitARM + libctru (`DEVKITPRO` set), Rust nightly with `rust
 cmake, ninja, python3 + Pillow, DejaVu fonts:
 
 ```
-cd 3ds && ./build-3ds.sh          # writes ../../SD-CARD/3ds/ja2/ja2.3dsx (override with OUT=...)
+cd 3ds && ./build-3ds.sh          # writes ../../SD-CARD/3ds/ja2.3dsx + ../../SD-CARD/3ds/ja2/ (override with OUT=...)
 ```
 
 ### Install
 
-Copy to the SD card (or FTP via ftpd): `sdmc:/3ds/ja2/ja2.3dsx`, `ja2.json`,
-`externalized/` (from the Stracciatella source), and your JA2 Gold `Data` folder as
-`sdmc:/3ds/ja2/gamedata/Data`. `send-to-3ds.ps1` does it over Wi-Fi.
+Copy to the SD card (or FTP via ftpd): `ja2.3dsx` directly in `/3ds` as `sdmc:/3ds/ja2.3dsx`,
+then `ja2.json` and `externalized/` (from the Stracciatella source) into `sdmc:/3ds/ja2/`,
+and your JA2 Gold `Data` folder as `sdmc:/3ds/ja2/gamedata/Data`. `send-to-3ds.ps1` does it over Wi-Fi.
 
 ## TrimUI Brick, JA2 v1.13 (`brick/`)
 
