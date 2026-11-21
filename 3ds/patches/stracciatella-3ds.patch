@@ -1538,10 +1538,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..0c8e87e
+index 0000000..c504d88
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1255 @@
+@@ -0,0 +1,1259 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -2064,15 +2064,19 @@ index 0000000..0c8e87e
 +		const int lw = TextW(lvl, kFontSans);
 +		Text(c, 6, y, d.name.c_str(), kText, kFontBig, W - 24 - lw);
 +		Text(c, W - 6 - lw, y + 5, lvl, kDim, kFontSans);
-+		y += 26;
-+		Bar(c, 6, y, W - 12, "Health", d.life, d.lifeMax); y += 17;
-+		Bar(c, 6, y, W - 12, "Energy", d.breath, d.breathMax); y += 17;
-+		Bar(c, 6, y, W - 12, "Morale", d.morale, 100); y += 19;
-+		if (d.ap >= 0) { char ap[32]; snprintf(ap, sizeof ap, "Action points: %d", d.ap); Text(c, 6, y, ap, kTitle, kFontBold); y += 18; }
++		// As the touchpad (game swapped to the top) the page loses 36 px to the swap button: the
++		// rows sit closer so the second row of stats ends above the "Slide here" line (it was
++		// drawn over it).
++		const int k = withSwapButton ? 1 : 0;
++		y += 26 - 2 * k;
++		Bar(c, 6, y, W - 12, "Health", d.life, d.lifeMax); y += 17 - 2 * k;
++		Bar(c, 6, y, W - 12, "Energy", d.breath, d.breathMax); y += 17 - 2 * k;
++		Bar(c, 6, y, W - 12, "Morale", d.morale, 100); y += 19 - 3 * k;
++		if (d.ap >= 0) { char ap[32]; snprintf(ap, sizeof ap, "Action points: %d", d.ap); Text(c, 6, y, ap, kTitle, kFontBold); y += 18 - 3 * k; }
 +		const int colw = (W - 12) / 4;
 +		for (int i = 0; i < 8; ++i) {
 +			char st[16]; snprintf(st, sizeof st, "%s %d", kStatNames[i], d.stats[i]);
-+			Text(c, 6 + (i % 4) * colw, y + (i / 4) * 15, st, kText, kFontMono, colw - 4);
++			Text(c, 6 + (i % 4) * colw, y + (i / 4) * (15 - 2 * k), st, kText, kFontMono, colw - 4);
 +		}
 +		y += 32;
 +	} else if (d.screen == N3DS_SCR_MENU || !d.inGame) {
