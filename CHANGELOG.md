@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-21 (night: audit fixes)
+
+- Message boxes get big answer buttons at the foot of the touch screen (the game's own YES / NO are about 22 x 9 pixels there), and the message is shown in a readable size on the top screen. The gold ring starts on No. Tap, or D-pad and A.
+- The "Surrender?" box seen right after CONTINUE is the game's own: with one to three mercs against at least three times as many enemies, an enemy offers surrender. It is not a loading fault. It can now be answered with the big buttons, and the enemy's words are listed on the dashboard. The manual explains it.
+- Main menu: big buttons for NEW GAME, LOAD GAME, PREFERENCES, CREDITS and QUIT (QUIT asks first), plus CONTINUE (LAST EXIT) when there is an exit save. The top screen says how to choose, how to read small text and how to carry on.
+- Options page: big SAVE, LOAD, QUIT and DONE buttons.
+- START menu: new QUICK SAVE and QUICK LOAD (QUICK LOAD asks first, focus on NO), END TURN on your turn in combat, and a SETTINGS page holding MAGNIFIER and LEFT HAND. Buttons that cannot be used are grey.
+- Dashboard: with no merc selected and on the map it shows money, turn or time state, the number of mercs and the newest game messages in a readable size. The main menu page is no longer nearly empty.
+- Loading: the top screen shows "Loading..." with the percentage for the whole load.
+- The game's own help windows are off: they name keyboard keys and close with a 9-pixel X.
+- EXIT GAME shows the same sentence on both screens.
+- Manual: Close button (in place of Save/Load/Quit, which is in the START menu); the highlighted section has the gold ring.
+- Hint lines use one style: "Button: what it does".
+- Settings that cannot be written to the SD card are reported (log line and a line on the SETTINGS page). The log of the run before is kept as console.old.txt.
+
 ## 2026-11-21
 
 - CONTINUE (LAST EXIT) now loads the exit save itself. On the console it loaded another save from the list (the QuickSave), because the Load screen chose its own entry again after CONTINUE had picked the exit save.

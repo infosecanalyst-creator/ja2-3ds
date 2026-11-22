@@ -582,6 +582,35 @@ index 36bbf40..f524481 100644
  			{
  				success = ST::format("succeeded ({}.sav)", saveName);
  				attach = " Do not forget to attach the savegame.";
+diff --git a/src/game/GameSettings.cc b/src/game/GameSettings.cc
+index d34d502..292dfd9 100644
+--- a/src/game/GameSettings.cc
++++ b/src/game/GameSettings.cc
+@@ -62,6 +62,12 @@ void LoadGameSettings(void)
+ 		EXTR_U32( d, settings_version)
+ 		EXTR_U32( d, g.uiMeanwhileScenesSeenFlags)
+ 		EXTR_BOOL(d, g.fHideHelpInAllScreens)
++#ifdef JA2_3DS
++		// JA2-X2: the game's help windows name keyboard keys ("press H", "F1-F6", "ALT key"), cover
++		// the map on first entry and close with a 9-pixel X. On the 3DS they stay off; the port's
++		// manual (START > MANUAL) explains the same things with the 3DS buttons.
++		g.fHideHelpInAllScreens = TRUE;
++#endif
+ 		EXTR_SKIP(d, 1)
+ 		EXTR_U8(  d, g.ubSizeOfDisplayCover)
+ 		EXTR_U8(  d, g.ubSizeOfLOS)
+@@ -166,7 +172,11 @@ static void InitGameSettings(void)
+ 	g.fOptions[TOPTION_HIDE_BULLETS]              = FALSE;
+ 	g.fOptions[TOPTION_TRACKING_MODE]             = TRUE;
+ 	g.uiMeanwhileScenesSeenFlags                  = 0;
++#ifdef JA2_3DS
++	g.fHideHelpInAllScreens                       = TRUE;    // JA2-X2: see LoadGameSettings
++#else
+ 	g.fHideHelpInAllScreens                       = FALSE;
++#endif
+ 	g.ubSizeOfDisplayCover                        = 4;
+ 	g.ubSizeOfLOS                                 = 4;
+ 
 diff --git a/src/game/Intro.cc b/src/game/Intro.cc
 index a751166..bf57847 100644
 --- a/src/game/Intro.cc
@@ -610,10 +639,39 @@ index d260c8a..7f61e80 100644
  
  
 diff --git a/src/game/MainMenuScreen.cc b/src/game/MainMenuScreen.cc
-index b548d0c..fddba5e 100644
+index b548d0c..e7a3062 100644
 --- a/src/game/MainMenuScreen.cc
 +++ b/src/game/MainMenuScreen.cc
-@@ -183,6 +183,17 @@ static void HandleMainMenuScreen(void)
+@@ -59,6 +59,10 @@ cache_key_t const guiJa2LogoImage{ LOADSCREENSDIR "/ja2logo.sti" };
+ 
+ static INT8    gbHandledMainMenu = 0;
+ static BOOLEAN fInitialRender    = FALSE;
++#ifdef __3DS__
++static bool gfN3DSMainMenuUp      = false;   // the menu is drawn and takes input (not the splash, not while leaving)
++static bool gfN3DSMainMenuCanLoad = false;   // there are saved games (the game's own Load line is enabled)
++#endif
+ 
+ static BOOLEAN gfMainMenuScreenEntry = FALSE;
+ static BOOLEAN gfMainMenuScreenExit = FALSE;
+@@ -130,11 +134,17 @@ ScreenID MainMenuScreenHandle(void)
+ 
+ 	RenderButtons();
+ 
++#ifdef __3DS__
++	gfN3DSMainMenuUp = !gfMainMenuScreenExit;
++#endif
+ 	HandleMainMenuInput();
+ 	HandleMainMenuScreen();
+ 
+ 	if (gfMainMenuScreenExit)
+ 	{
++#ifdef __3DS__
++		gfN3DSMainMenuUp = false;
++#endif
+ 		ExitMainMenu();
+ 		gfMainMenuScreenExit  = FALSE;
+ 		gfMainMenuScreenEntry = TRUE;
+@@ -183,6 +193,38 @@ static void HandleMainMenuScreen(void)
  }
  
  
@@ -625,10 +683,140 @@ index b548d0c..fddba5e 100644
 +	gfLoadGameUponEntry = TRUE;
 +	gbHandledMainMenu   = LOAD_GAME;
 +}
++
++// JA2-U2: the main menu's lines are 10 pixels tall on the touch screen, so the port shows them as
++// big buttons. N3DS_MainMenuState: 0 the menu is not up, 1 it is, 2 it is and there are saved
++// games. N3DS_MainMenuChoose does what a click on that line does (0 new game, 1 load, 2
++// preferences, 3 credits). Quit is not here: the port's EXIT GAME asks first.
++int N3DS_MainMenuState()
++{
++	if (!gfN3DSMainMenuUp || guiCurrentScreen != MAINMENU_SCREEN || gfMainMenuScreenExit || guiMainMenuExitScreen != MAINMENU_SCREEN) return 0;
++	return gfN3DSMainMenuCanLoad ? 2 : 1;
++}
++void N3DS_MainMenuChoose(int item)
++{
++	if (!N3DS_MainMenuState()) return;
++	switch (item)
++	{
++		case NEW_GAME:    gbHandledMainMenu = NEW_GAME; SetMainMenuExitScreen(GAME_INIT_OPTIONS_SCREEN); break;
++		case LOAD_GAME:   if (gfN3DSMainMenuCanLoad) gbHandledMainMenu = LOAD_GAME; break;
++		case PREFERENCES: gbHandledMainMenu = PREFERENCES; break;
++		case CREDITS:     gbHandledMainMenu = CREDITS; break;
++	}
++}
 +#endif
 +
 +
  static void CreateDestroyMainMenuButtons(BOOLEAN fCreate);
+ 
+ 
+@@ -191,7 +233,12 @@ void InitMainMenu(void)
+ 	CreateDestroyMainMenuButtons(TRUE);
+ 
+ 	// If there are no saved games, disable the button
++#ifdef __3DS__
++	gfN3DSMainMenuCanLoad = AreThereAnySavedGameFiles();
++	if (!gfN3DSMainMenuCanLoad) DisableButton(iMenuButtons[LOAD_GAME]);
++#else
+ 	if (!AreThereAnySavedGameFiles()) DisableButton(iMenuButtons[LOAD_GAME]);
++#endif
+ 
+ 	gbHandledMainMenu = 0;
+ 	fInitialRender    = TRUE;
+diff --git a/src/game/MessageBoxScreen.cc b/src/game/MessageBoxScreen.cc
+index d32c7ce..2f8743d 100644
+--- a/src/game/MessageBoxScreen.cc
++++ b/src/game/MessageBoxScreen.cc
+@@ -59,6 +59,28 @@ BOOLEAN            gfDontOverRideSaveBuffer = TRUE;	//this variable can be unset
+ ST::string gzUserDefinedButton1;
+ ST::string gzUserDefinedButton2;
+ 
++#ifdef JA2_3DS
++// 3DS port (JA2-U2): the box's text and its answers, for the port's big touch buttons. The box's
++// own buttons are about 22 x 9 pixels on the touch screen. N3DS_MsgBoxGet returns the number of
++// answers (0: no box is up); N3DS_MsgBoxAnswer answers the box as a click on that button does.
++#include <string>
++static std::string gN3DSMsgText, gN3DSMsgLabel[4];
++static int gN3DSMsgValue[4], gN3DSMsgCount = 0;
++int N3DS_MsgBoxGet(const char** text, const char* labels[4], int values[4])
++{
++	if (!gfInMsgBox || gMsgBox.bHandled != MSG_BOX_RETURN_NONE || !(gMsgBox.BackRegion.uiFlags & MSYS_REGION_EXISTS)) return 0;
++	if (text) *text = gN3DSMsgText.c_str();
++	for (int i = 0; i < gN3DSMsgCount; ++i) { if (labels) labels[i] = gN3DSMsgLabel[i].c_str(); if (values) values[i] = gN3DSMsgValue[i]; }
++	return gN3DSMsgCount;
++}
++void N3DS_MsgBoxAnswer(int value)
++{
++	if (!gfInMsgBox || gMsgBox.bHandled != MSG_BOX_RETURN_NONE) return;
++	for (int i = 0; i < gN3DSMsgCount; ++i)
++		if (gN3DSMsgValue[i] == value) { gMsgBox.bHandled = static_cast<MessageBoxReturnValue>(value); return; }
++}
++#endif
++
+ 
+ struct MessageBoxStyle
+ {
+@@ -105,6 +127,10 @@ void DoMessageBox(MessageBoxStyleID ubStyle, const ST::string& str, ScreenID uiE
+ 	gMsgBox.ExitCallback = ReturnCallback;
+ 	gMsgBox.fRenderBox   = TRUE;
+ 	gMsgBox.bHandled     = MSG_BOX_RETURN_NONE;
++#ifdef JA2_3DS
++	gN3DSMsgText  = str.to_std_string();
++	gN3DSMsgCount = 0;
++#endif
+ 
+ 	// Init message box
+ 	UINT16 usTextBoxWidth;
+@@ -198,6 +224,14 @@ void DoMessageBox(MessageBoxStyleID ubStyle, const ST::string& str, ScreenID uiE
+ 
+ 		btn->SetCursor(style.cursor);
+ 		ForceButtonUnDirty(btn);
++#ifdef JA2_3DS
++		if (gN3DSMsgCount < 4)
++		{
++			gN3DSMsgLabel[gN3DSMsgCount] = text.to_std_string();
++			gN3DSMsgValue[gN3DSMsgCount] = returnValue;
++			++gN3DSMsgCount;
++		}
++#endif
+ 		return btn;
+ 	}};
+ 
+diff --git a/src/game/Options_Screen.cc b/src/game/Options_Screen.cc
+index da7499c..80e1b0a 100644
+--- a/src/game/Options_Screen.cc
++++ b/src/game/Options_Screen.cc
+@@ -581,6 +581,32 @@ static void BtnDoneCallback(GUI_BUTTON* btn, UINT32 reason)
+ }
+ 
+ 
++#ifdef JA2_3DS
++#include "JAScreens.h"
++// JA2-U2: the Options page's own buttons (Save Game, Load Game, Main Menu, Done) are about
++// 40 x 10 pixels on the touch screen, so the port shows them as big buttons.
++// N3DS_OptionsState: 0 the page is not up, 1 it is, 2 it is and the game can be saved.
++// N3DS_OptionsDo does what a click on that button does (0 save, 1 load, 2 main menu, 3 done).
++int N3DS_OptionsState()
++{
++	if (guiCurrentScreen != OPTIONS_SCREEN || gfOptionsScreenEntry || gfOptionsScreenExit || guiOptionsScreen != OPTIONS_SCREEN) return 0;
++	return guiOptGotoSaveGameBtn->Enabled() ? 2 : 1;
++}
++void N3DS_OptionsDo(int what)
++{
++	const int state = N3DS_OptionsState();
++	if (!state) return;
++	switch (what)
++	{
++		case 0: if (state == 2) { SetOptionsExitScreen(SAVE_LOAD_SCREEN); gfSaveGame = TRUE; } break;
++		case 1: SetOptionsExitScreen(SAVE_LOAD_SCREEN); gfSaveGame = FALSE; break;
++		case 2: DoOptionsMessageBox(zOptionsText[OPT_RETURN_TO_MAIN], OPTIONS_SCREEN, MSG_BOX_FLAG_YESNO, ConfirmQuitToMainMenuMessageBoxCallBack); break;
++		case 3: SetOptionsExitScreen(guiPreviousOptionScreen); break;
++	}
++}
++#endif
++
++
+ static void HandleOptionToggle(UINT8 button_id, bool state, bool down, bool play_sound);
  
  
 diff --git a/src/game/SaveLoadGame.cc b/src/game/SaveLoadGame.cc
@@ -698,7 +886,7 @@ index f153f86..6812267 100644
  	EXTR_U8(   d, ubMusicModeToPlay)
  	gMusicModeToPlay = (MusicMode)ubMusicModeToPlay;
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..786c063 100644
+index add6ddf..6727915 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -1,3 +1,4 @@
@@ -798,7 +986,7 @@ index add6ddf..786c063 100644
  
  		gFadeInDoneCallback = DoneFadeInForSaveLoadScreen;
  
-@@ -1517,3 +1556,96 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1556,159 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -861,6 +1049,69 @@ index add6ddf..786c063 100644
 +	return false;
 +}
 +
++#include "Map_Screen_Interface_Bottom.h"
++#include "Interface_Panels.h"
++// JA2-X3: QUICK SAVE and QUICK LOAD in the START menu (the game's ALT+S and ALT+L, which no 3DS
++// button sends). Offered where the game itself lets you reach saving: on the tactical screen on
++// your own turn or in real time, with the panel buttons unlocked, not in a conversation; on the
++// map only when the map may be left; CanGameBeSaved for the save. The QuickSave slot is the game's own; the ExitSave
++// (EXIT GAME, HOME > Close) is a different file, so neither ever replaces the other.
++// N3DS_SaveFlags: bit 0 an ExitSave exists, bit 1 a QuickSave exists (one pass over the saves).
++int N3DS_SaveFlags()
++{
++	int flags = 0;
++	for (auto const& sg : GetValidSaveGames())
++	{
++		if (IsExitSaveName(sg.name())) flags |= 1;
++		if (IsQuickSaveName(sg.name())) flags |= 2;
++	}
++	return flags;
++}
++
++static bool N3DS_QuickSlotScreenOk(bool save)
++{
++	if (gGameOptions.ubGameSaveMode == DIF_DEAD_IS_DEAD) return false;   // Dead is Dead keeps its one save itself
++	if (gTacticalStatus.uiFlags & ENGAGED_IN_CONV) return false;
++	if (guiCurrentScreen == GAME_SCREEN)
++	{
++		// as the game's own way to its Options page (the O key): not while the tactical buttons are
++		// locked (the enemy's turn, an action running), a battle is starting or a "meanwhile" plays
++		if (gfDisableTacticalPanelButtons || fDisableMapInterfaceDueToBattle || gfInMeanwhile) return false;
++		if ((gTacticalStatus.uiFlags & INCOMBAT) && gTacticalStatus.ubCurrentTeam != OUR_TEAM) return false;
++		return true;
++	}
++	if (guiCurrentScreen == MAP_SCREEN) return AllowedToExitFromMapscreenTo(save ? MAP_EXIT_TO_SAVE : MAP_EXIT_TO_LOAD);
++	return false;
++}
++
++bool N3DS_QuickSaveOk() { return N3DS_QuickSlotScreenOk(true) && CanGameBeSaved(); }
++bool N3DS_QuickLoadOk() { return N3DS_QuickSlotScreenOk(false); }
++
++// Quick save now. Returns false when it could not be written (the old QuickSave is then still
++// there: a save is written to a temporary file first and moved over only when complete).
++bool N3DS_QuickSave()
++{
++	if (!N3DS_QuickSaveOk()) return false;
++	try
++	{
++		guiPreviousOptionScreen = guiCurrentScreen;   // as ALT+S: the screen to open after loading it
++		return SaveGame(GetQuickSaveName(), GetQuickSaveName()) != FALSE;
++	}
++	catch (...)
++	{
++		return false;
++	}
++}
++
++// Quick load now (the caller has asked the player first). Returns false when nothing was started.
++bool N3DS_QuickLoad()
++{
++	if (!N3DS_QuickLoadOk()) return false;
++	if (guiCurrentScreen == GAME_SCREEN) LeaveTacticalScreen(GAME_SCREEN);   // as ALT+L
++	DoQuickLoad();
++	return gfDoingQuickLoad != FALSE;
++}
++
 +// The ExitSave's place in gSavedGamesList (InitSaveGameArray has run), -1 none.
 +bool gfN3DSLoadExitSaveUponEntry = false;
 +INT8 N3DS_ExitSaveIndex()
@@ -895,6 +1146,78 @@ index add6ddf..786c063 100644
 +	return true;
 +}
 +#endif
+diff --git a/src/game/Tactical/Civ_Quotes.cc b/src/game/Tactical/Civ_Quotes.cc
+index d54b7bf..93a4f8e 100644
+--- a/src/game/Tactical/Civ_Quotes.cc
++++ b/src/game/Tactical/Civ_Quotes.cc
+@@ -335,6 +335,15 @@ void BeginCivQuote( SOLDIERTYPE *pCiv, UINT8 ubCivQuoteID, UINT8 ubEntryID, INT1
+ 	{
+ 		MapScreenMessage( FONT_MCOLOR_WHITE, MSG_DIALOG, ST::format("{}", gzCivQuote) );
+ 	}
++#ifdef JA2_3DS
++	else
++	{
++		// JA2-U1: what a civilian or an enemy says (its bubble is too small to read at half size),
++		// e.g. the enemy's offer before the "Surrender?" box
++		extern void N3DS_DashMessage(const char* text);
++		N3DS_DashMessage(gzCivQuote.c_str());
++	}
++#endif
+ 
+ 	// Prepare text box
+ 	gCivQuoteData.dialogue_box = PrepareMercPopupBox(0, BASIC_MERC_POPUP_BACKGROUND, BASIC_MERC_POPUP_BORDER, gzCivQuote, DIALOGUE_DEFAULT_WIDTH, 0, 0, 0, &gusCivQuoteBoxWidth, &gusCivQuoteBoxHeight);
+diff --git a/src/game/Utils/Animated_ProgressBar.cc b/src/game/Utils/Animated_ProgressBar.cc
+index 5b939e5..2ed3ad8 100644
+--- a/src/game/Utils/Animated_ProgressBar.cc
++++ b/src/game/Utils/Animated_ProgressBar.cc
+@@ -136,10 +136,17 @@ void SetProgressBarMsgAttributes(UINT32 ubID, SGPFont const font, UINT8 ubForeCo
+ }
+ 
+ 
++#ifdef JA2_3DS
++void N3DS_SetProgress(int percent);   // N3DS_Platform.cc: the top screen says "Loading... NN%" (-1: done)
++#endif
++
+ //When finished, the progress bar needs to be removed.
+ void RemoveProgressBar( UINT8 ubID )
+ {
+ 	Assert( ubID < MAX_PROGRESSBARS );
++#ifdef JA2_3DS
++	if (ubID == 0) N3DS_SetProgress(-1);
++#endif
+ 	if( pBar[ubID] )
+ 	{
+ 		delete pBar[ubID];
+@@ -216,6 +223,9 @@ void RenderProgressBar( UINT8 ubID, UINT32 uiPercentage )
+ 		}
+ 
+ 		pCurr->rLastActual = ( DOUBLE )( ( INT32)( rActual * 100 ) * 0.01 );
++#ifdef JA2_3DS
++		if (ubID == 0) N3DS_SetProgress((INT32)(rActual * 100));   // JA2-Q2: shown on the top screen by the RefreshScreen below
++#endif
+ 
+ 		INT32 const x   = pCurr->pos.x;
+ 		INT32 const y   = pCurr->pos.y;
+diff --git a/src/game/Utils/Message.cc b/src/game/Utils/Message.cc
+index b126be7..8cea554 100644
+--- a/src/game/Utils/Message.cc
++++ b/src/game/Utils/Message.cc
+@@ -375,6 +375,15 @@ void MapScreenMessage(UINT16 usColor, UINT8 ubPriority, const ST::string& str)
+ 
+ 	if (DestString.empty()) return;
+ 
++#ifdef JA2_3DS
++	// JA2-U1 / JA2-U3: the game's message lines are too small to read at half size, so the newest
++	// ones are also listed on the top-screen dashboard in the port's own font.
++	{
++		extern void N3DS_DashMessage(const char* text);
++		N3DS_DashMessage(DestString.c_str());
++	}
++#endif
++
+ 	BOOLEAN fNewString = TRUE;
+ 	for (auto const& codepoints : LineWrap(MAP_SCREEN_MESSAGE_FONT, MAP_LINE_WIDTH, DestString))
+ 	{
 diff --git a/src/sgp/CMakeLists.txt b/src/sgp/CMakeLists.txt
 index ef31945..9a57e44 100644
 --- a/src/sgp/CMakeLists.txt
@@ -955,7 +1278,7 @@ index d276eef..2ab0dbe 100644
  
  // The gfKeyState table is used to track which of the keys is up or down at any one time. This is used while polling
 diff --git a/src/sgp/SGP.cc b/src/sgp/SGP.cc
-index afb5d46..c68bb0b 100644
+index afb5d46..54a5298 100644
 --- a/src/sgp/SGP.cc
 +++ b/src/sgp/SGP.cc
 @@ -1,3 +1,8 @@
@@ -1041,9 +1364,9 @@ index afb5d46..c68bb0b 100644
  				case SDL_MOUSEWHEEL: MouseWheelScroll(&event.wheel); break;
  
 +#ifdef JA2_3DS
-+				case SDL_FINGERMOTION: N3DS_MapFinger(&event.tfinger); FingerMove(&event.tfinger); break;
-+				case SDL_FINGERUP:     N3DS_MapFinger(&event.tfinger); FingerUp(&event.tfinger); break;
-+				case SDL_FINGERDOWN:   N3DS_MapFinger(&event.tfinger); FingerDown(&event.tfinger); break;
++				case SDL_FINGERMOTION: if (N3DS_MapFinger(&event.tfinger)) FingerMove(&event.tfinger); break;
++				case SDL_FINGERUP:     if (N3DS_MapFinger(&event.tfinger)) FingerUp(&event.tfinger); break;
++				case SDL_FINGERDOWN:   if (N3DS_MapFinger(&event.tfinger)) FingerDown(&event.tfinger); break;
 +#else
  				case SDL_FINGERMOTION: FingerMove(&event.tfinger); break;
  				case SDL_FINGERUP:     FingerUp(&event.tfinger); break;
@@ -1436,10 +1759,10 @@ index 8f48538..16737a3 100644
  	guiDirtyRegionCount = 0;
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.cc b/src/sgp/n3ds/N3DS_Dashboard.cc
 new file mode 100644
-index 0000000..ad395e0
+index 0000000..10f51ab
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.cc
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,74 @@
 +// Top-screen dashboard content for the 3DS port (game side: reads JA2 state)
 +#ifdef JA2_3DS
 +#include "N3DS_Dashboard.h"
@@ -1450,6 +1773,8 @@ index 0000000..ad395e0
 +#include "Game_Clock.h"
 +#include "Map_Information.h"
 +#include "StrategicMap.h"
++#include "LaptopSave.h"
++#include "Soldier_Macros.h"
 +
 +N3DSScreen N3DS_CurrentScreen()
 +{
@@ -1483,6 +1808,17 @@ index 0000000..ad395e0
 +	if (!d.inGame) return;
 +	d.time = gswzWorldTimeStr.to_std_string();
 +	if (gfWorldLoaded && gWorldSector.x > 0) d.sector = GetSectorIDString(gWorldSector, FALSE).to_std_string();
++	// JA2-U3: the dashboard was nearly empty with no merc selected and on the map
++	d.hasFunds = true; d.funds = LaptopSaveInfo.iCurrentBalance;
++	if (d.screen == N3DS_SCR_MAP) d.clock = IsTimeBeingCompressed() ? "Time is running" : "Time is paused";
++	if (d.screen == N3DS_SCR_TACTICAL && (gTacticalStatus.uiFlags & INCOMBAT))
++		d.turn = gTacticalStatus.ubCurrentTeam == OUR_TEAM ? "Combat: your turn" : "Combat: not your turn";
++	{
++		int n = 0;
++		CFOR_EACH_IN_TEAM(s, OUR_TEAM)
++			if (s->bLife > 0 && (d.screen != N3DS_SCR_TACTICAL || s->bInSector)) ++n;
++		d.mercs = n;
++	}
 +	const SOLDIERTYPE* s = g_selected_man;
 +	if (!s || !s->bActive) return;
 +	d.hasMerc = true;
@@ -1495,13 +1831,18 @@ index 0000000..ad395e0
 +	const int st[8] = { s->bAgility, s->bDexterity, s->bStrength, s->bWisdom, s->bMarksmanship, s->bMedical, s->bMechanical, s->bExplosive };
 +	for (int i = 0; i < 8; ++i) d.stats[i] = st[i];
 +}
++
++bool N3DS_CanEndTurn()
++{
++	return guiCurrentScreen == GAME_SCREEN && (gTacticalStatus.uiFlags & INCOMBAT) && gTacticalStatus.ubCurrentTeam == OUR_TEAM;
++}
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.h b/src/sgp/n3ds/N3DS_Dashboard.h
 new file mode 100644
-index 0000000..463e901
+index 0000000..c557ee8
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.h
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,23 @@
 +#pragma once
 +#include <string>
 +// What the top-screen dashboard shows (filled from game state by N3DS_Dashboard.cc)
@@ -1515,7 +1856,14 @@ index 0000000..463e901
 +	std::string name;
 +	int level = 0, life = 0, lifeMax = 1, breath = 0, breathMax = 1, morale = 0, ap = -1;
 +	int stats[8] = {}; // AGI DEX STR WIS MRK MED MEC EXP
++	// JA2-U3: more to show when no merc is selected, and on the map
++	bool hasFunds = false; int funds = 0;       // the player's balance
++	const char* clock = "";                     // map: "Time is paused" / "Time is running"
++	const char* turn = "";                      // tactical, in combat: whose turn it is
++	int mercs = 0;                              // mercs of the player's team in this sector (tactical) / on the team (map)
 +};
++// JA2-X4: the player's turn in turn-based combat (END TURN in the START menu is offered then)
++bool N3DS_CanEndTurn();
 +void N3DS_GetDashboard(N3DSDash& d);
 +N3DSScreen N3DS_CurrentScreen();
 diff --git a/src/sgp/n3ds/N3DS_Font.h b/src/sgp/n3ds/N3DS_Font.h
@@ -1598,10 +1946,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..c504d88
+index 0000000..b53e316
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1259 @@
+@@ -0,0 +1,1746 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -1743,6 +2091,12 @@ index 0000000..c504d88
 +	// rare lines (start, boot steps, exit, saves on exit, errors), written at once.
 +	{ struct stat ds; g_debugLog = stat(N3DS_DIR "/debug.txt", &ds) == 0; }
 +	const char* logPath = N3DS_DIR "/console.txt";
++	// JA2-Q4: the log of the run before is kept as console.old.txt (console.txt used to be emptied
++	// at every start, so the log of a crash was gone after the next launch).
++	{
++		struct stat ls;
++		if (stat(logPath, &ls) == 0 && ls.st_size > 0) { remove(N3DS_DIR "/console.old.txt"); rename(logPath, N3DS_DIR "/console.old.txt"); }
++	}
 +	// Both streams append: stdout opened with "w" kept its own position and wrote over
 +	// stderr's lines in the shared file. Empty the file once, then open both for append.
 +	if (FILE* t = fopen(logPath, "w")) fclose(t);
@@ -1936,6 +2290,27 @@ index 0000000..c504d88
 +	ndspChnWaveBufAdd(kClickCh, &g_clickWave);
 +}
 +
++// ================================================================ settings kept on the card
++// A setting is a marker file in the game folder (.swap, .lefty, .magnify, .manual_seen): there = on.
++// JA2-Q4: the write is checked. A card that is full or locked no longer forgets a setting
++// silently: the failure goes to console.txt and the SETTINGS page says so. The setting still
++// applies until the game is closed.
++static bool g_markerFailed = false;
++static bool MarkerSet(const char* path, bool on)
++{
++	bool ok;
++	struct stat sb;
++	if (on) {
++		if (stat(path, &sb) == 0) ok = true;                 // already there (start-up reads it back)
++		else { FILE* f = fopen(path, "w"); ok = f != nullptr; if (f && fclose(f) != 0) ok = false; }
++	} else {
++		ok = stat(path, &sb) != 0 || remove(path) == 0;      // was never there, or gone now
++	}
++	g_markerFailed = !ok;
++	if (!ok) { printf("[3ds] setting not saved: could not %s %s\n", on ? "create" : "remove", path); fflush(stdout); }
++	return ok;
++}
++
 +// ================================================================ screen swap
 +static bool g_swap = false; // false: game on touch screen, dashboard on top
 +static bool g_padOn = false; // swapped: the stylus is down on the touchpad
@@ -1944,14 +2319,14 @@ index 0000000..c504d88
 +	g_swap = on;
 +	const int st = on ? SDL_IGNORE : SDL_ENABLE; // touch must not click the game while it is on the top screen
 +	SDL_EventState(SDL_FINGERDOWN, st); SDL_EventState(SDL_FINGERUP, st); SDL_EventState(SDL_FINGERMOTION, st);
-+	if (on) { if (FILE* f = fopen(N3DS_DIR "/.swap", "w")) fclose(f); } else remove(N3DS_DIR "/.swap");
++	MarkerSet(N3DS_DIR "/.swap", on);
 +}
 +// Left-handed play (UI rule 10): the D-pad and the face buttons swap jobs, so the free hand always has controls.
 +static bool g_lefty = false;
 +static void SetLefty(bool on)
 +{
 +	g_lefty = on;
-+	if (on) { if (FILE* f = fopen(N3DS_DIR "/.lefty", "w")) fclose(f); } else remove(N3DS_DIR "/.lefty");
++	MarkerSet(N3DS_DIR "/.lefty", on);
 +}
 +// Magnifier (START menu, off by default: Nov 11 rule "zoom only on a button press"). The game's
 +// 640x480 frame is shown at half size on the touch screen, which makes its own text very small;
@@ -1961,7 +2336,7 @@ index 0000000..c504d88
 +static void SetMag(bool on)
 +{
 +	g_mag = on;
-+	if (on) { if (FILE* f = fopen(N3DS_DIR "/.magnify", "w")) fclose(f); } else remove(N3DS_DIR "/.magnify");
++	MarkerSet(N3DS_DIR "/.magnify", on);
 +}
 +// Zoom (C-Stick up / down, off at start: Nov 11 rule "zoom only on a button press"). Principle,
 +// Ryan Nov 18 2026: "text fonts and sizes have to be readable". The touch screen then shows a
@@ -1980,12 +2355,23 @@ index 0000000..c504d88
 +	if (g_zx0 < 0) g_zx0 = 0; if (g_zx0 > 320) g_zx0 = 320;
 +	if (g_zy0 < 0) g_zy0 = 0; if (g_zy0 > 240) g_zy0 = 240;
 +}
-+void N3DS_MapFinger(SDL_TouchFingerEvent* f)
++static int OverlayButtonAt(int px, int py);   // the port's big buttons over the game picture (below)
++// Called for every touch event before the game gets it. Returns false when the game must not see
++// it: a touch that went down on one of the port's big buttons (main menu, message box, options)
++// is that button's, from the press to the release. Zoomed: maps the touch into the zoom window.
++bool N3DS_MapFinger(SDL_TouchFingerEvent* f)
 +{
-+	if (!g_zoom || g_swap || !f) return;
++	static bool blocked = false;
++	if (!f) return true;
++	if (f->type == SDL_FINGERDOWN) blocked = OverlayButtonAt((int)(f->x * 320.0f), (int)(f->y * 240.0f)) >= 0;
++	const bool drop = blocked;
++	if (f->type == SDL_FINGERUP) blocked = false;
++	if (drop) return false;
++	if (!g_zoom || g_swap) return true;
 +	f->x = ((float)g_zx0 + f->x * 320.0f) / 640.0f;
 +	f->y = ((float)g_zy0 + f->y * 240.0f) / 480.0f;
 +	f->dx *= 0.5f; f->dy *= 0.5f;
++	return true;
 +}
 +static u32 Remap(u32 m) // physical keys -> logical keys the rest of the code uses
 +{
@@ -2002,6 +2388,128 @@ index 0000000..c504d88
 +	return o;
 +}
 +
++// ================================================================ the port's big buttons over the game
++// JA2-U2 (UI principle 1: every prompt becomes a big button). The game's own buttons are far too
++// small at half size: a message box's YES / NO are about 22 x 9 pixels on the touch screen, the
++// main menu's lines 10 pixels tall, the Options page's Save / Load / Quit / Done about 40 x 10.
++// While one of those is up, the port draws house buttons for the same choices over the game
++// picture on the touch screen; each does exactly what a click on the game's own button does.
++// - message box: one button per answer along the foot of the touch screen; the top screen shows
++//   the message in the port's readable font. The focus starts on No when there is a No.
++// - main menu: CONTINUE (LAST EXIT) when there is an exit save, NEW GAME, LOAD GAME (grey with no
++//   saves), PREFERENCES, CREDITS, QUIT (which asks first, as EXIT GAME does).
++// - Options page: SAVE, LOAD, QUIT (to the main menu; the game asks), DONE.
++// A tap presses a button; the D-pad moves a gold ring and A presses (rule 6). A touch that goes
++// down on a button never reaches the game (N3DS_MapFinger); touches elsewhere work as before.
++int  N3DS_MsgBoxGet(const char** text, const char* labels[4], int values[4]);   // MessageBoxScreen.cc
++void N3DS_MsgBoxAnswer(int value);
++int  N3DS_MainMenuState();                                                      // MainMenuScreen.cc
++void N3DS_MainMenuChoose(int item);
++int  N3DS_OptionsState();                                                       // Options_Screen.cc
++void N3DS_OptionsDo(int what);
++int  N3DS_SaveFlags();                                                          // SaveLoadScreen.cc: 1 ExitSave, 2 QuickSave
++bool N3DS_ContinueExitSave();
++
++enum { OV_NONE, OV_MSG, OV_MENU, OV_OPTS };
++enum { OVA_MSG, OVA_MENU, OVA_CONTINUE, OVA_QUIT, OVA_OPTS };
++struct OvBtn { int x, y, w, h; std::string label; int act, arg; bool enabled; };
++static int g_ovKind = OV_NONE;
++static std::vector<OvBtn> g_ov;
++static std::string g_ovText;                 // the message box's text
++static int g_ovFocus = 0, g_ovPressed = -1, g_ovPressFrames = 0;
++static bool g_ovWantExit = false;            // QUIT was pressed: open the exit question
++
++static int OverlayButtonAt(int px, int py)
++{
++	if (g_ovKind == OV_NONE) return -1;
++	for (size_t i = 0; i < g_ov.size(); ++i) {
++		const OvBtn& b = g_ov[i];
++		if (px >= b.x && px < b.x + b.w && py >= b.y && py < b.y + b.h) return (int)i;
++	}
++	return -1;
++}
++
++// Work out which buttons are up now. Called once per input pass.
++static void OverlayUpdate()
++{
++	static int lastKind = OV_NONE;
++	static size_t lastCount = 0;
++	static std::string lastText;
++	static int menuFlags = 0;
++	const char* text = nullptr; const char* labels[4] = {}; int values[4] = {};
++	std::vector<OvBtn> v;
++	int kind = OV_NONE;
++	const int n = N3DS_MsgBoxGet(&text, labels, values);
++	if (n > 0) {
++		kind = OV_MSG;
++		g_ovText = text ? text : "";
++		const int w = (308 - 4 * (n - 1)) / n;
++		for (int i = 0; i < n; ++i) v.push_back({ 6 + i * (w + 4), 190, w, 44, labels[i] ? labels[i] : "", OVA_MSG, values[i], true });
++	} else if (const int ms = N3DS_MainMenuState()) {
++		kind = OV_MENU;
++		if (lastKind != OV_MENU) menuFlags = N3DS_SaveFlags();   // once per visit: it reads the save folder
++		const bool cont = (menuFlags & 1) != 0;
++		const int h = 30, gap = 4, rows = cont ? 4 : 3;
++		int y = 240 - 6 - rows * h - (rows - 1) * gap;
++		if (cont) { v.push_back({ 6, y, 308, h, "CONTINUE (LAST EXIT)", OVA_CONTINUE, 0, true }); y += h + gap; }
++		v.push_back({ 6, y, 152, h, "NEW GAME", OVA_MENU, 0, true });
++		v.push_back({ 162, y, 152, h, "LOAD GAME", OVA_MENU, 1, ms == 2 }); y += h + gap;
++		v.push_back({ 6, y, 152, h, "PREFERENCES", OVA_MENU, 2, true });
++		v.push_back({ 162, y, 152, h, "CREDITS", OVA_MENU, 3, true }); y += h + gap;
++		v.push_back({ 6, y, 308, h, "QUIT", OVA_QUIT, 0, true });
++	} else if (const int os = N3DS_OptionsState()) {
++		kind = OV_OPTS;
++		static const char* const l[4] = { "SAVE", "LOAD", "QUIT", "DONE" };
++		for (int i = 0; i < 4; ++i) v.push_back({ 6 + i * 78, 204, 74, 30, l[i], OVA_OPTS, i, i != 0 || os == 2 });
++	}
++	const bool fresh = kind != lastKind || v.size() != lastCount || (kind == OV_MSG && g_ovText != lastText);
++	if (fresh) {
++		// a new set of buttons: the focus starts on No (message), the first button (main menu) or DONE
++		g_ovFocus = 0; g_ovPressed = -1; g_ovPressFrames = 0;
++		if (kind == OV_MSG) { for (size_t i = 0; i < v.size(); ++i) if (v[i].label == "No" || v[i].label == "NO" || v[i].label == "no") g_ovFocus = (int)i; }
++		if (kind == OV_OPTS) g_ovFocus = 3;
++	}
++	lastKind = kind; lastCount = v.size(); lastText = kind == OV_MSG ? g_ovText : std::string();
++	g_ov.swap(v);
++	g_ovKind = kind;
++	if (g_ovFocus >= (int)g_ov.size()) g_ovFocus = 0;
++}
++
++static void OverlayAct(const OvBtn& b)
++{
++	switch (b.act) {
++		case OVA_MSG:      N3DS_MsgBoxAnswer(b.arg); break;
++		case OVA_MENU:     N3DS_MainMenuChoose(b.arg); break;
++		case OVA_CONTINUE: if (!N3DS_ContinueExitSave()) printf("[3ds] continue: no ExitSave\n"); break;
++		case OVA_QUIT:     g_ovWantExit = true; break;
++		case OVA_OPTS:     N3DS_OptionsDo(b.arg); break;
++	}
++}
++
++static void Click();
++// The overlay's share of the input: D-pad and A, and a touch that goes down on a button.
++// Returns true while buttons are up (the caller then keeps the D-pad and A from the game).
++static bool OverlayInput(u32 down)
++{
++	OverlayUpdate();
++	if (g_ovKind == OV_NONE) { g_ovPressFrames = 0; g_ovPressed = -1; return false; }
++	if (g_ovPressFrames > 0) {               // a press shows for a few passes, then acts; new presses are dropped
++		if (--g_ovPressFrames == 0 && g_ovPressed >= 0 && g_ovPressed < (int)g_ov.size()) { const OvBtn b = g_ov[g_ovPressed]; g_ovPressed = -1; OverlayAct(b); }
++		return true;
++	}
++	const int n = (int)g_ov.size();
++	int hit = -1;
++	if (down & (KEY_DUP | KEY_DLEFT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + n - 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
++	if (down & (KEY_DDOWN | KEY_DRIGHT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
++	if (down & KEY_A) hit = g_ovFocus;
++	if (down & KEY_TOUCH) { touchPosition tp; hidTouchRead(&tp); const int i = OverlayButtonAt(tp.px, tp.py); if (i >= 0) hit = i; }
++	if (hit >= 0 && g_ov[hit].enabled) {     // a grey button does nothing: no click, no press (rule 2)
++		Click();
++		g_ovFocus = hit; g_ovPressed = hit; g_ovPressFrames = 6;
++	}
++	return true;
++}
++
 +void N3DS_Init()
 +{
 +	osSetSpeedupEnable(true);              // New 3DS: 804 MHz + L2 cache
@@ -2015,6 +2523,7 @@ index 0000000..c504d88
 +	SetSwap(stat(N3DS_DIR "/.swap", &sb) == 0);
 +	SetLefty(stat(N3DS_DIR "/.lefty", &sb) == 0);
 +	SetMag(stat(N3DS_DIR "/.magnify", &sb) == 0);
++	g_markerFailed = false;   // start-up only read the settings back
 +	g_ready = true;
 +}
 +
@@ -2077,11 +2586,146 @@ index 0000000..c504d88
 +		for (int x = 0; x < W; ++x) if (u16* p = PxP(c, x, y)) *p = r[x];
 +	}
 +	Fill(c, 0, H, W, 16, kPanel);
-+	const char* hint = "Magnifier: the area around the cursor   START menu to turn off";
++	const char* hint = "Magnifier: around the pointer   START > SETTINGS: off";
 +	Text(c, (W - std::min(TextW(hint, kFontSans), W - 12)) / 2, H + 1, hint, kTitle, kFontSans, W - 12);
 +}
 +
++// ---------------------------------------------------------------- text and buttons for the port's pages
++// Word-wrap text to maxw pixels in font f (line breaks in the text are kept). Every line fits.
++static std::vector<std::string> WrapText(const std::string& in, int maxw, const N3DSFont& f)
++{
++	std::vector<std::string> out;
++	size_t st = 0;
++	while (st <= in.size()) {
++		size_t e = in.find('\n', st); if (e == std::string::npos) e = in.size();
++		std::string para = in.substr(st, e - st);
++		while (!para.empty()) {
++			size_t n = para.size();
++			if (TextW(para.c_str(), f) > maxw) {
++				n = 1;
++				size_t lastSpace = 0;
++				for (size_t i = 1; i <= para.size(); ++i) {
++					if (TextW(para.substr(0, i).c_str(), f) > maxw) break;
++					n = i;
++					if (i < para.size() && para[i] == ' ') lastSpace = i;
++				}
++				if (n < para.size() && lastSpace > 0) n = lastSpace;
++			}
++			out.push_back(para.substr(0, n));
++			para.erase(0, n);
++			while (!para.empty() && para[0] == ' ') para.erase(0, 1);
++		}
++		st = e + 1;
++	}
++	return out;
++}
++
++// A house button: edge, face, raised lower edge; pressed = gold face, label sunk a pixel;
++// focused = 2 px gold ring; disabled = dark face and grey label.
++static void HouseButton(const Canvas& c, int x, int y, int w, int h, const char* label, bool pressed, bool focused, bool enabled = true)
++{
++	Fill(c, x, y, w, h, enabled ? kEdge : kBarBg);
++	Fill(c, x + 1, y + 1, w - 2, h - 2, !enabled ? kPanel : pressed ? kTitle : kBtn);
++	if (!pressed && enabled) Fill(c, x + 1, y + h - 2, w - 2, 1, kPanel);
++	const int tw = std::min(TextW(label, kFontSans), w - 8);
++	Text(c, x + (w - tw) / 2 + (pressed ? 1 : 0), y + (h - 14) / 2 + (pressed ? 1 : 0), label, !enabled ? kDim : pressed ? kBg : kText, kFontSans, w - 8);
++	if (focused && !pressed) {
++		Fill(c, x, y, w, 2, kTitle); Fill(c, x, y + h - 2, w, 2, kTitle);
++		Fill(c, x, y, 2, h, kTitle); Fill(c, x + w - 2, y, 2, h, kTitle);
++	}
++}
++
++// The big buttons over the touch screen's picture (JA2-U2)
++static int OverlayTop()
++{
++	int top = 240;
++	if (g_ovKind != OV_NONE) for (const OvBtn& b : g_ov) top = std::min(top, b.y);
++	return top;
++}
++// onPage: the buttons sit on one of the port's own pages (the game is swapped to the top screen),
++// so the page under and between them is cleared; over the game picture nothing is cleared.
++static void DrawOverlay(const Canvas& c, bool onPage)
++{
++	if (g_ovKind == OV_NONE) return;
++	if (onPage) { const int top = OverlayTop() - 2; Fill(c, 0, top, c.w, c.h - top, kBg); }
++	for (size_t i = 0; i < g_ov.size(); ++i) {
++		const OvBtn& b = g_ov[i];
++		HouseButton(c, b.x, b.y, b.w, b.h, b.label.c_str(), g_ovPressFrames > 0 && (int)i == g_ovPressed, (int)i == g_ovFocus, b.enabled);
++	}
++}
++
++// A message box's text in the port's font (the box itself is unreadable at half size): the whole
++// screen c. On the top screen it ends with the hint strip; on the touch screen (game swapped to
++// the top) the answer buttons are drawn over its foot afterwards, so the text stops above them.
++static void DrawMsgPage(const Canvas& c, bool withButtonsBelow)
++{
++	const int W = c.w;
++	Fill(c, 0, 0, W, c.h, kBg);
++	Fill(c, 0, 0, W, 22, kSel);
++	Text(c, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
++	Text(c, W - 6 - TextW("Message", kFontSans), 5, "Message", kText, kFontSans);
++	const int bottom = withButtonsBelow ? 186 : c.h - 16 - 4 - 16;
++	const std::vector<std::string> lines = WrapText(g_ovText, W - 16, kFontBold);
++	const int room = (bottom - 30) / 17;
++	int y = 30;
++	if ((int)lines.size() < room) y += ((room - (int)lines.size()) * 17) / 3;   // a short message sits a little down the page
++	for (int i = 0; i < (int)lines.size() && i < room; ++i, y += 17) {
++		if ((int)lines.size() > room && i == room - 1) { Text(c, 8, y, "(more in the box on the game screen)", kDim, kFontSans, W - 16); break; }
++		Text(c, 8, y, lines[i].c_str(), kText, kFontBold, W - 16);
++	}
++	if (!withButtonsBelow) {
++		const char* a = "Answer with the big buttons on the touch screen.";
++		Text(c, (W - std::min(TextW(a, kFontSans), W - 12)) / 2, c.h - 16 - 17, a, kDim, kFontSans, W - 12);
++		Fill(c, 0, c.h - 16, W, 16, kPanel);
++		const char* b = g_lefty ? "A/B/X/Y: choose   D-Right: answer" : "D-Pad: choose   A: answer";
++		Text(c, (W - std::min(TextW(b, kFontSans), W - 12)) / 2, c.h - 15, b, kTitle, kFontSans, W - 12);
++	}
++}
++
 +// ---------------------------------------------------------------- dashboard
++// JA2-Q2: a load or save in progress (the game's progress bar is on the touch screen; the top
++// screen used to say "Tap an option on the bottom screen." all through a 45-second load)
++static int g_progress = -1;
++static u64 g_progressAt = 0;          // when the percentage last moved
++static u64 g_dashLast = 0;            // when the dashboard's data was last read (every 0.25 s)
++void N3DS_SetProgress(int percent)
++{
++	if (percent > 100) percent = 100;
++	g_progressAt = svcGetSystemTick();
++	if (percent != g_progress) { g_progress = percent; g_dashLast = 0; }
++}
++// JA2-U1 / JA2-U3: the newest game messages, for the dashboard (the game's own lines are too small)
++static std::string g_dashMsgs[6];
++static int g_dashMsgCount = 0;
++void N3DS_DashMessage(const char* text)
++{
++	if (!text || !*text) return;
++	if (g_dashMsgCount && g_dashMsgs[g_dashMsgCount - 1] == text) return;   // the same line twice in a row: once
++	if (g_dashMsgCount == 6) { for (int i = 1; i < 6; ++i) g_dashMsgs[i - 1].swap(g_dashMsgs[i]); g_dashMsgCount = 5; }
++	g_dashMsgs[g_dashMsgCount++] = text;
++	g_dashLast = 0;
++}
++// the newest messages that fit between y and limit, oldest first, whole lines only
++static void DrawDashMessages(const Canvas& c, int y, int limit)
++{
++	const int W = c.w, lh = 14;
++	int room = (limit - y) / lh;
++	if (room < 2 || !g_dashMsgCount) return;
++	Fill(c, 4, y, W - 8, 1, kPanel);
++	y += 3; room = (limit - y) / lh;
++	std::vector<std::vector<std::string>> blocks;
++	int used = 0, first = g_dashMsgCount;
++	for (int i = g_dashMsgCount - 1; i >= 0; --i) {       // newest first, while they still fit whole
++		std::vector<std::string> l = WrapText(g_dashMsgs[i], W - 12, kFontSans);
++		if (used + (int)l.size() > room) break;
++		used += (int)l.size(); first = i; blocks.push_back(l);
++	}
++	for (int i = (int)blocks.size() - 1; i >= 0; --i) {
++		const bool newest = i == 0;
++		for (const std::string& l : blocks[i]) { Text(c, 6, y, l.c_str(), newest ? kText : kDim, kFontSans, W - 12); y += lh; }
++	}
++	(void)first;
++}
 +static const char* kStatNames[8] = { "AGI", "DEX", "STR", "WIS", "MRK", "MED", "MEC", "EXP" };
 +static void Bar(const Canvas& c, int x, int y, int w, const char* label, int v, int max)
 +{
@@ -2095,7 +2739,6 @@ index 0000000..c504d88
 +	char num[16]; snprintf(num, sizeof num, "%d/%d", v, max);
 +	Text(c, bx + bw + 6, y, num, kText, kFontSans, 56);
 +}
-+static u64 g_dashLast = 0;            // when the dashboard's data was last read (every 0.25 s)
 +static bool DashboardDue() { return g_dashLast == 0 || svcGetSystemTick() - g_dashLast > SYSCLOCK_ARM11 / 4; }
 +static void DrawDashboard(const Canvas& c, bool withSwapButton)
 +{
@@ -2103,6 +2746,8 @@ index 0000000..c504d88
 +	u64& last = g_dashLast;
 +	const u64 now = svcGetSystemTick();
 +	if (now - last > SYSCLOCK_ARM11 / 4 || last == 0) { N3DS_GetDashboard(d); last = now; }
++	// a load that ended without removing its bar (an error part way): the page never sticks on "Loading"
++	if (g_progress >= 0 && now - g_progressAt > 20ull * SYSCLOCK_ARM11) g_progress = -1;
 +	const int W = c.w;
 +	Fill(c, 0, 0, W, c.h, kBg);
 +	// header
@@ -2117,7 +2762,7 @@ index 0000000..c504d88
 +		if (!d.sector.empty()) { const std::string sct = "Sector " + d.sector; Text(c, W - 6 - std::min(TextW(sct.c_str(), kFontSans), W / 2 - 12), y + 1, sct.c_str(), kText, kFontSans, W / 2 - 12); }
 +		y += 20;
 +	}
-+	if (d.hasMerc) {
++	if (d.hasMerc && g_progress < 0) {
 +		Fill(c, 4, y, W - 8, 1, kPanel);
 +		y += 4;
 +		char lvl[24]; snprintf(lvl, sizeof lvl, "Level %d", d.level);
@@ -2139,31 +2784,100 @@ index 0000000..c504d88
 +			Text(c, 6 + (i % 4) * colw, y + (i / 4) * (15 - 2 * k), st, kText, kFontMono, colw - 4);
 +		}
 +		y += 32;
-+	} else if (d.screen == N3DS_SCR_MENU || !d.inGame) {
++	} else if (g_progress >= 0) {
++		// JA2-Q2: loading or saving (about 45 s for a tactical save on the console): say so here
++		// with the percentage; the game's own bar is on the touch screen
++		y += 34;
++		char pl[32]; snprintf(pl, sizeof pl, "Loading... %d%%", g_progress);
++		Text(c, (W - TextW(pl, kFontBold)) / 2, y, pl, kText, kFontBold); y += 24;
++		Fill(c, 40, y, W - 80, 12, kBarBg);
++		Fill(c, 40, y, (W - 80) * g_progress / 100, 12, C565(70, 190, 90));
++		y += 24;
++		const char* l2 = "This takes a while. The game has not stopped.";
++		Text(c, (W - std::min(TextW(l2, kFontSans), W - 12)) / 2, y, l2, kDim, kFontSans, W - 12);
++	} else if (d.screen == N3DS_SCR_MENU) {
++		// JA2-U3 / JA2-X1 / JA2-X5: the main menu's card says how to choose, how to read small
++		// text and how to carry on from the last exit (it was two lines and an empty page)
++		y += 6;
++		const char* l1 = "Tap a big button on the touch screen.";
++		Text(c, (W - std::min(TextW(l1, kFontBold), W - 12)) / 2, y, l1, kText, kFontBold, W - 12); y += 24;
++		static const char* const card[] = {
++			"The stylus is the mouse: tap = left click. B = right click.",
++			"Small text? Push the C-Stick up to zoom in, down to zoom out.",
++			"START > SETTINGS > MAGNIFIER shows the area around the",
++			"pointer up here at full size instead of this page.",
++			"START opens the menu: manual, quick save, settings, exit.",
++			"CONTINUE (LAST EXIT) carries on where you last left the game.",
++		};
++		int limit = (withSwapButton ? c.h - 6 - 26 - 4 - 16 : c.h - 16) - 19;
++		if (withSwapButton && g_ovKind != OV_NONE) limit = std::min(limit, OverlayTop() - 2 - 16 - 19);
++		for (const char* l : card) {
++			if (y + 15 > limit) break;                    // whole lines only
++			if (TextW(l, kFontSans) > W - 12) continue;   // a line too wide for this screen is left out, never cut
++			Text(c, 6, y, l, kDim, kFontSans); y += 16;
++		}
++	} else if (d.inGame) {
++		// JA2-U3: no merc selected (or the map): money, time or turn, the team, then the newest messages
++		Fill(c, 4, y, W - 8, 1, kPanel);
++		y += 5;
++		char fl[48];
++		if (d.funds < 0) snprintf(fl, sizeof fl, "Funds: -$%d", -d.funds); else snprintf(fl, sizeof fl, "Funds: $%d", d.funds);
++		Text(c, 6, y, fl, kText, kFontBold, W / 2);
++		const char* st = d.clock[0] ? d.clock : d.turn;
++		if (st[0]) Text(c, W - 6 - std::min(TextW(st, kFontSans), W / 2 - 12), y + 1, st, kText, kFontSans, W / 2 - 12);
++		y += 18;
++		char ml[48];
++		snprintf(ml, sizeof ml, d.screen == N3DS_SCR_TACTICAL ? "Mercs in this sector: %d" : "Mercs on the team: %d", d.mercs);
++		Text(c, 6, y, ml, kDim, kFontSans, W - 12);
++		y += 18;
++	} else {
 +		y += 20;
-+		const char* l1 = d.screen == N3DS_SCR_MENU ? "Tap a menu item to choose it." : d.screen == N3DS_SCR_INTRO ? "Loading..." : "Tap an option on the bottom screen.";
-+		Text(c, (W - TextW(l1, kFontBold)) / 2, y, l1, kText, kFontBold); y += 22;
++		const char* l1 = d.screen == N3DS_SCR_INTRO ? "Loading..." : "Tap an option on the touch screen.";
++		Text(c, (W - std::min(TextW(l1, kFontBold), W - 12)) / 2, y, l1, kText, kFontBold, W - 12); y += 22;
 +		const char* l2 = "START opens the menu: manual, save, exit.";
-+		Text(c, (W - TextW(l2, kFontSans)) / 2, y, l2, kDim, kFontSans);
++		Text(c, (W - std::min(TextW(l2, kFontSans), W - 12)) / 2, y, l2, kDim, kFontSans, W - 12);
++		y += 20;
 +	}
 +	// controls: what the screen's buttons do (grey line), then the house hint strip
-+	// (16 px, gold, at the foot of the top screen; above the swap button when swapped)
++	// (16 px, gold, at the foot of the top screen; above the swap button when swapped).
++	// JA2-U6: one style everywhere, "Button: what it does", three spaces between items.
 +	const char *a, *b;
 +	switch (d.screen) {
-+		case N3DS_SCR_TACTICAL: a = g_lefty ? "Tap=click  D-Pad down=right click  ZR hold=end turn" : "Tap=click  B=right click  ZR hold=end turn  L/R stance"; b = g_lefty ? "START menu  SELECT Esc  D-Pad up next merc  C-Stick zoom" : "START menu  SELECT Esc  X next merc  Y map  C-Stick zoom"; break;
-+		case N3DS_SCR_MAP:      a = g_lefty ? "Tap=click  D-Pad down=right click  up=time on/off" : "Tap = click   B = right click   X = time on/off"; b = "START menu   SELECT Esc / enter sector   ZL swap"; break;
-+		default:                a = g_lefty ? "Tap or D-Pad right = click   D-Pad down = right click" : "Tap or A = click   B = right click   Circle Pad = cursor"; b = "START menu   SELECT Esc   ZL swap   C-Stick zoom"; break;
++		case N3DS_SCR_TACTICAL:
++			a = g_lefty ? "Tap: click   D-Pad down: right click   ZR hold: end turn" : "Tap: click   B: right click   ZR hold: end turn   L / R: stance";
++			b = g_lefty ? "START: menu   D-Pad up: next merc   C-Stick up: zoom" : "START: menu   X: next merc   Y: map   C-Stick up: zoom";
++			break;
++		case N3DS_SCR_MAP:
++			a = g_lefty ? "Tap: click   D-Pad down: right click   D-Pad up: time on / off" : "Tap: click   B: right click   X: time on / off";
++			b = "START: menu   SELECT: Esc / enter sector   ZL: swap screens";
++			break;
++		case N3DS_SCR_MENU:
++			a = g_lefty ? "Tap a button, or choose with A/B/X/Y and press D-Pad right." : "Tap a button, or choose with the D-Pad and press A.";
++			b = "START: menu   C-Stick up: zoom   ZL: swap screens";
++			break;
++		default:
++			a = g_lefty ? "Tap or D-Pad right: click   D-Pad down: right click" : "Tap or A: click   B: right click   Circle Pad: pointer";
++			b = "START: menu   SELECT: Esc   C-Stick up: zoom   ZL: swap";
++			break;
 +	}
-+	if (g_zoom && !g_swap) a = "ZOOM: full size, follows the pointer.  C-Stick down = whole view";
++	if (g_zoom && !g_swap) a = "ZOOM: full size, follows the pointer.   C-Stick down: whole view";
 +	if (withSwapButton) {   // the game is on top: this screen is its touchpad (UI rule 7)
 +		a = "Slide here: move the pointer   Tap: click";
-+		b = g_lefty ? "D-Pad down right click   ZL swap back" : "B right click   ZL swap back   START menu";
++		b = g_lefty ? "D-Pad down: right click   ZL: swap back" : "B: right click   ZL: swap back   START: menu";
 +	}
-+	const int stripY = withSwapButton ? c.h - 6 - 26 - 4 - 16 : c.h - 16;
++	int stripY = withSwapButton ? c.h - 6 - 26 - 4 - 16 : c.h - 16;
++	// the port's big buttons cover the foot of the touchpad page (main menu, Options): the hint
++	// lines move up to just above them, and the swap-back button (covered) is left out; ZL swaps back
++	const bool ovOnPage = withSwapButton && g_ovKind != OV_NONE;
++	if (ovOnPage) {
++		stripY = std::min(stripY, OverlayTop() - 2 - 16);
++		b = "ZL: swap back   START: menu";
++	}
++	if (d.inGame && g_progress < 0) DrawDashMessages(c, y, stripY - 19);   // JA2-U1 / JA2-U3
 +	Text(c, 6, stripY - 17, a, kDim, kFontSans, W - 12);
 +	Fill(c, 0, stripY, W, 16, kPanel);
 +	Text(c, (W - std::min(TextW(b, kFontSans), W - 12)) / 2, stripY + 1, b, kTitle, kFontSans, W - 12);
-+	if (withSwapButton) {   // UI rule 11: 26 px tall, 6 px from the edges
++	if (withSwapButton && !ovOnPage) {   // UI rule 11: 26 px tall, 6 px from the edges
 +		Fill(c, 6, c.h - 6 - 26, W - 12, 26, kEdge);
 +		Fill(c, 7, c.h - 6 - 25, W - 14, 24, kBtn);
 +		const char* t = "Tap here: put the game back on this screen";
@@ -2303,8 +3017,8 @@ index 0000000..c504d88
 +	{
 +		static int lastMode = -1;
 +		static u64 lastAt = 0;
-+		const int mode = (g_swap ? 1 : 0) | (g_zoom ? 2 : 0) | (g_mag ? 4 : 0) | (g_lefty ? 8 : 0);
-+		const bool plain = !g_swap && !g_zoom && !g_mag;
++		const int mode = (g_swap ? 1 : 0) | (g_zoom ? 2 : 0) | (g_mag ? 4 : 0) | (g_lefty ? 8 : 0) | (g_ovKind != OV_NONE ? 16 : 0);
++		const bool plain = !g_swap && !g_zoom && !g_mag && g_ovKind == OV_NONE;   // the port's big buttons are drawn over the picture: everything is redrawn
 +		const bool force = g_presentForce || mode != lastMode || !g_updSet || lastAt == 0 || t0 - lastAt > SYSCLOCK_ARM11 / 5;
 +		lastMode = mode; lastAt = t0;
 +		g_updSet = false;
@@ -2316,15 +3030,19 @@ index 0000000..c504d88
 +		}
 +		g_presentForce = true;              // the other layouts draw everything; back to plain redraws in full
 +	}
++	const bool msg = g_ovKind == OV_MSG;
 +	if (!g_swap) {
 +		if (g_zoom) { ZoomFollow(cx, cy); DrawGameZoom(CanvasFor(GFX_BOTTOM), screen); }
 +		else DrawGameHalf(CanvasFor(GFX_BOTTOM), 0, screen);
-+		if (g_mag) DrawGameMagnified(CanvasFor(GFX_TOP), screen, cx, cy);
++		DrawOverlay(CanvasFor(GFX_BOTTOM), false);                  // JA2-U2: big buttons over the picture
++		if (msg) DrawMsgPage(CanvasFor(GFX_TOP), false);            // the message, readable
++		else if (g_mag) DrawGameMagnified(CanvasFor(GFX_TOP), screen, cx, cy);
 +		else DrawDashboard(CanvasFor(GFX_TOP), false);
 +	} else {
 +		if (g_mag || g_zoom) DrawGameMagnified(CanvasFor(GFX_TOP), screen, cx, cy);   // swapped too: 1:1 around the pointer
 +		else DrawGameFill(CanvasFor(GFX_TOP), screen);
-+		DrawDashboard(CanvasFor(GFX_BOTTOM), true);
++		if (msg) DrawMsgPage(CanvasFor(GFX_BOTTOM), true); else DrawDashboard(CanvasFor(GFX_BOTTOM), true);
++		DrawOverlay(CanvasFor(GFX_BOTTOM), true);
 +	}
 +	gfxFlushBuffers();
 +	gfxSwapBuffers();
@@ -2410,7 +3128,9 @@ index 0000000..c504d88
 +	return v;
 +}
 +static const int kManRows = 14, kManLineH = 15;
-+static const int kBtnSwap = 100, kBtnLefty = 101, kBtnOpts = 102;
++// JA2-U5: the third button is Close, as in the other ports' manuals (it was Save/Load/Quit, which
++// is in the START menu)
++static const int kBtnSwap = 100, kBtnLefty = 101, kBtnOpts = 102;   // kBtnOpts: the Close button
 +
 +static void DrawManualTop(int scroll, const std::vector<ManLine>& lines)
 +{
@@ -2447,7 +3167,10 @@ index 0000000..c504d88
 +		const bool pr = i == pressed;
 +		if (pr) Fill(b, x + 2, y + 2, kManColW - 4, kManRowH - 4, kTitle);
 +		else { Fill(b, x, y, kManColW, kManRowH, kEdge); Fill(b, x + 1, y + 1, kManColW - 2, kManRowH - 2, i == ch ? kBtnHi : kBtn); }
-+		if (i == sel && !pr) { Fill(b, x, y, kManColW, 2, kTitle); Fill(b, x, y + kManRowH - 2, kManColW, 2, kTitle); }
++		if (i == sel && !pr) {   // the house focus: a 2 px gold ring (it was a gold line above and below)
++			Fill(b, x, y, kManColW, 2, kTitle); Fill(b, x, y + kManRowH - 2, kManColW, 2, kTitle);
++			Fill(b, x, y, 2, kManRowH, kTitle); Fill(b, x + kManColW - 2, y, 2, kManRowH, kTitle);
++		}
 +		char line[64];
 +		if (i == 0) snprintf(line, sizeof line, "%s", kN3DSManualChapters[i].name); else snprintf(line, sizeof line, "%d. %s", i, kN3DSManualChapters[i].name);
 +		Text(b, x + 4 + (pr ? 1 : 0), y + 5 + (pr ? 1 : 0), line, pr ? kBg : kText, kFontSans, kManColW - 6);
@@ -2455,19 +3178,19 @@ index 0000000..c504d88
 +	auto button = [&](int id, int x, int w, const char* label) {
 +		const int y = kManBtnY, h = kManBtnH; const bool pr = id == pressed;
 +		if (pr) Fill(b, x + 2, y + 2, w - 4, h - 4, kTitle); else { Fill(b, x, y, w, h, kEdge); Fill(b, x + 1, y + 1, w - 2, h - 2, kBtn); }
-+		if (id == sel && !pr) { Fill(b, x, y, w, 2, kTitle); Fill(b, x, y + h - 2, w, 2, kTitle); }
++		if (id == sel && !pr) { Fill(b, x, y, w, 2, kTitle); Fill(b, x, y + h - 2, w, 2, kTitle); Fill(b, x, y, 2, h, kTitle); Fill(b, x + w - 2, y, 2, h, kTitle); }
 +		const int tw = std::min(TextW(label, kFontSans), w - 8);
 +		Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + 7 + (pr ? 1 : 0), label, pr ? kBg : kText, kFontSans, w - 8);
 +	};
 +	button(kBtnSwap, 6, 98, g_swap ? "Game to touch" : "Swap screens");
 +	button(kBtnLefty, 108, 98, g_lefty ? "Left hand: on" : "Left hand: off");
-+	button(kBtnOpts, 210, 104, "Save/Load/Quit");
++	button(kBtnOpts, 210, 104, "Close");
 +}
 +
 +static void N3DS_RunManual(int startChapter = 0)
 +{
 +	int ch = startChapter, scroll = 0, sel = startChapter;
-+	int pressed = -1, pressFrames = 0, action = 0; // action: 1 = options, 2 = swap
++	int pressed = -1, pressFrames = 0, action = 0; // action: 1 = close, 2 = swap
 +	std::vector<ManLine> lines = SectionLines(ch);
 +	hidSetRepeatParameters(18, 4);
 +	auto go = [&](int c) { ch = c; sel = c; scroll = 0; lines = SectionLines(ch); };
@@ -2526,7 +3249,6 @@ index 0000000..c504d88
 +		if (!(hidKeysHeld() & (KEY_SELECT | KEY_B | KEY_START | KEY_TOUCH | KEY_A | KEY_CPAD_UP | KEY_CPAD_DOWN | KEY_CSTICK_UP | KEY_CSTICK_DOWN))) break;
 +		gspWaitForVBlank();
 +	}
-+	if (action == 1) { PushKey(SDLK_o, true); PushKey(SDLK_o, false); }
 +	if (action == 2) SetSwap(!g_swap);
 +}
 +
@@ -2602,95 +3324,173 @@ index 0000000..c504d88
 +	return answer == 0;
 +}
 +
-+static void N3DS_RunPortMenu()
++// Wrapped paragraph at (x, y): every line fits maxw. Returns the y under it.
++static int Para(const Canvas& c, int x, int y, const char* text, u16 col, const N3DSFont& f, int maxw, int lh = 18)
 +{
-+	enum { kResume, kManual, kOptions, kMag, kLefty, kExit, kContinue };
-+	// JA-09: on the main menu, CONTINUE loads the ExitSave (what EXIT GAME / HOME > Close saved)
-+	const bool canContinue = N3DS_CurrentScreen() == N3DS_SCR_MENU && N3DS_ExitSaveExists();
-+	int kIds[7] = { kResume, kManual, kOptions, kMag, kLefty, kExit };
-+	int n = 6;
-+	if (canContinue) { for (int k = 6; k > 0; --k) kIds[k] = kIds[k - 1]; kIds[0] = kContinue; n = 7; }
-+	int focus = 0, pressed = -1, pressFrames = 0, chosen = -1;
-+	bool confirm = false;
++	for (const std::string& l : WrapText(text, maxw, f)) { Text(c, x, y, l.c_str(), col, f, maxw); y += lh; }
++	return y;
++}
++
++bool N3DS_QuickSaveOk();     // SaveLoadScreen.cc (JA2-X3)
++bool N3DS_QuickLoadOk();
++bool N3DS_QuickSave();
++bool N3DS_QuickLoad();
++
++// The START menu. Pages: the main list, EXIT GAME's question, QUICK LOAD's question, SETTINGS.
++// - Main list in a game: RESUME, MANUAL, END TURN (your turn in combat), QUICK SAVE | QUICK LOAD,
++//   SAVE / LOAD / OPTIONS, SETTINGS, EXIT GAME. On the main menu: CONTINUE (LAST EXIT) when there
++//   is an exit save, RESUME, MANUAL, OPTIONS, SETTINGS, EXIT GAME.
++// - JA2-X3: QUICK SAVE and QUICK LOAD are the game's ALT+S / ALT+L, two taps from play instead of
++//   three screens of tiny buttons. QUICK LOAD asks first (YES, LOAD / NO, focus on NO, B = no): it
++//   replaces the game in progress. Each is grey when the game would refuse it.
++// - JA2-X4: END TURN here is the two-step way to end a turn (ZR held still works).
++// - SETTINGS holds MAGNIFIER and LEFT HAND (they were rows of the main list).
++// A grey button does nothing: no click, no press (rule 2); the D-pad skips it.
++// startAtExit: opened by the main menu's QUIT button, straight on EXIT GAME's question.
++static void N3DS_RunPortMenu(bool startAtExit = false)
++{
++	enum { kResume, kManual, kOptions, kSettings, kExit, kContinue, kEndTurn, kQSave, kQLoad, kMag, kLefty, kBack, kYes, kNo };
++	enum { pgMain, pgExit, pgLoad, pgSettings };
++	struct Btn { int id, x, y, w, h; bool enabled; };
++	const bool onMainMenu = N3DS_CurrentScreen() == N3DS_SCR_MENU;
++	const N3DSScreen scr = N3DS_CurrentScreen();
++	const bool inGame = scr == N3DS_SCR_TACTICAL || scr == N3DS_SCR_MAP || scr == N3DS_SCR_LAPTOP;
++	// one pass over the save folder (it is slow on the card): which of ExitSave / QuickSave exist
++	const int saveFlags = (onMainMenu || inGame) && !startAtExit ? N3DS_SaveFlags() : 0;
++	const bool canContinue = onMainMenu && (saveFlags & 1);
++	const bool canEndTurn = N3DS_CanEndTurn();
++	const bool canQSave = inGame && N3DS_QuickSaveOk();
++	const bool canQLoad = inGame && (saveFlags & 2) && N3DS_QuickLoadOk();
++	int page = startAtExit ? pgExit : pgMain, focus = 0, pressed = -1, pressFrames = 0, chosen = -1;
++	std::vector<Btn> btns;
 +	hidSetRepeatParameters(18, 4);
 +	auto label = [&](int id) -> const char* {
 +		switch (id) {
 +			case kContinue: return "CONTINUE (LAST EXIT)";
 +			case kResume: return "RESUME";
 +			case kManual: return "MANUAL";
-+			case kOptions: return "SAVE / LOAD / OPTIONS";
++			case kEndTurn: return "END TURN";
++			case kQSave: return "QUICK SAVE";
++			case kQLoad: return "QUICK LOAD";
++			case kOptions: return inGame ? "SAVE / LOAD / OPTIONS" : "OPTIONS";
++			case kSettings: return "SETTINGS";
 +			case kLefty: return g_lefty ? "LEFT HAND: ON" : "LEFT HAND: OFF";
 +			case kMag: return g_mag ? "MAGNIFIER: ON" : "MAGNIFIER: OFF";
++			case kBack: return "BACK";
++			case kYes: return page == pgLoad ? "YES, LOAD" : "YES, EXIT";
++			case kNo: return "NO";
 +			default: return "EXIT GAME";
 +		}
 +	};
-+	auto rectOf = [&](int i, int& x, int& y, int& w, int& h) {
-+		if (!confirm) { const int y0 = 28, gap = 4; h = (240 - 6 - y0 - gap * (n - 1)) / n; x = 6; w = 308; y = y0 + i * (h + gap); }
-+		else { x = i == 0 ? 6 : 164; y = 120; w = 150; h = 112; }
++	auto build = [&]() {
++		btns.clear();
++		if (page == pgExit || page == pgLoad) {
++			btns.push_back({ kYes, 6, 120, 150, 112, true });
++			btns.push_back({ kNo, 164, 120, 150, 112, true });
++			focus = 1;                              // house style: the focus starts on NO
++			return;
++		}
++		// rows of full-width buttons filling the touch screen (rule 11); one row may hold two
++		std::vector<std::vector<int>> rows;
++		if (page == pgSettings) rows = { { kMag }, { kLefty }, { kBack } };
++		else {
++			if (canContinue) rows.push_back({ kContinue });
++			rows.push_back({ kResume });
++			rows.push_back({ kManual });
++			if (canEndTurn) rows.push_back({ kEndTurn });
++			if (inGame) rows.push_back({ kQSave, kQLoad });
++			rows.push_back({ kOptions });
++			rows.push_back({ kSettings });
++			rows.push_back({ kExit });
++		}
++		const int n = (int)rows.size(), y0 = 28, gap = 4;
++		const int bottom = page == pgSettings ? 150 : 240 - 6;      // SETTINGS keeps room for its notes
++		const int h = (bottom - y0 - gap * (n - 1)) / n;
++		for (int r = 0; r < n; ++r) {
++			const int y = y0 + r * (h + gap), k = (int)rows[r].size(), w = (308 - 4 * (k - 1)) / k;
++			for (int i = 0; i < k; ++i) {
++				const int id = rows[r][i];
++				btns.push_back({ id, 6 + i * (w + 4), y, w, h, id == kQSave ? canQSave : id == kQLoad ? canQLoad : true });
++			}
++		}
++		focus = 0;
 +	};
++	auto focusOn = [&](int id) { for (size_t i = 0; i < btns.size(); ++i) if (btns[i].id == id) focus = (int)i; };
++	build();
 +	while (aptMainLoop() && chosen < 0) {
 +		hidScanInput();
 +		const u32 down = Remap(hidKeysDown()), rep = Remap(hidKeysDownRepeat());
-+		const int nb = confirm ? 2 : n;
++		const int nb = (int)btns.size();
 +		int hit = -1;
 +		if (!pressFrames) {
-+			if (rep & (KEY_DUP | KEY_DLEFT)) focus = (focus + nb - 1) % nb;
-+			if (rep & (KEY_DDOWN | KEY_DRIGHT)) focus = (focus + 1) % nb;
++			if (rep & (KEY_DUP | KEY_DLEFT)) { for (int k = 0; k < nb; ++k) { focus = (focus + nb - 1) % nb; if (btns[focus].enabled) break; } }
++			if (rep & (KEY_DDOWN | KEY_DRIGHT)) { for (int k = 0; k < nb; ++k) { focus = (focus + 1) % nb; if (btns[focus].enabled) break; } }
 +			if (down & KEY_A) hit = focus;
 +			if (down & KEY_TOUCH) {
 +				touchPosition tp; hidTouchRead(&tp);
-+				for (int i = 0; i < nb; ++i) { int x, y, w, h; rectOf(i, x, y, w, h); if (tp.px >= x && tp.px < x + w && tp.py >= y && tp.py < y + h) hit = i; }
++				for (int i = 0; i < nb; ++i) { const Btn& b = btns[i]; if (tp.px >= b.x && tp.px < b.x + b.w && tp.py >= b.y && tp.py < b.y + b.h) hit = i; }
 +			}
-+			if (down & (KEY_B | KEY_START)) { if (confirm) { confirm = false; focus = n - 1; } else chosen = kResume; }
++			if (down & (KEY_B | KEY_START)) {       // B or START: back a page, or resume
++				if (page == pgMain || startAtExit) chosen = kResume;
++				else { const int from = page; page = pgMain; build(); focusOn(from == pgExit ? kExit : from == pgLoad ? kQLoad : kSettings); }
++			}
 +		}
-+		if (hit >= 0) {
-+			Click(); pressed = hit; pressFrames = 6; focus = hit;
-+		}
++		if (hit >= 0 && btns[hit].enabled) { Click(); pressed = hit; pressFrames = 6; focus = hit; }
 +		// draw (the press shows for a few frames, then acts: the page it leads to is drawn next)
 +		Canvas t = CanvasFor(GFX_TOP);
 +		Fill(t, 0, 0, t.w, t.h, kBg);
 +		Fill(t, 0, 0, t.w, 22, kSel);
 +		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
 +		Text(t, t.w - 6 - TextW("PAUSED", kFontSans), 5, "PAUSED", kText, kFontSans);
-+		Text(t, 8, 40, confirm ? "Exit the game?" : "The game is paused.", kText, kFontBold);
-+		const bool canSave = confirm && N3DS_SuspendSaveOk();
-+		Text(t, 8, 62, confirm ? (canSave ? "It is saved first (Continue loads it)." : "Anything you have not saved is lost.")
-+		                       : (g_lefty ? "Choose on the touch screen, or with A/B/X/Y and D-Right." : "Choose on the touch screen, or with the D-pad and A."), kDim, kFontSans, t.w - 16);
++		const bool canSave = page == pgExit && N3DS_SuspendSaveOk();
++		// JA2-U4: the same sentence on both screens
++		const char* exitLine = canSave ? "It is saved first (Continue loads it)." : "Anything you have not saved is lost.";
++		const char* loadLine = "The game you are playing is replaced by the quick save.";
++		const char* head = page == pgExit ? "Exit the game?" : page == pgLoad ? "Load the quick save?" : page == pgSettings ? "Settings" : "The game is paused.";
++		Text(t, 8, 40, head, kText, kFontBold);
++		int ty = 62;
++		if (page == pgExit) ty = Para(t, 8, ty, exitLine, kDim, kFontSans, t.w - 16);
++		else if (page == pgLoad) ty = Para(t, 8, ty, loadLine, kDim, kFontSans, t.w - 16);
++		else if (page == pgSettings) {
++			ty = Para(t, 8, ty, "Magnifier: the top screen shows the area around the pointer at full size instead of the dashboard.", kDim, kFontSans, t.w - 16);
++			ty = Para(t, 8, ty + 4, "Left hand: the D-Pad and A/B/X/Y swap jobs.", kDim, kFontSans, t.w - 16);
++		} else {
++			ty = Para(t, 8, ty, g_lefty ? "Choose on the touch screen, or with A/B/X/Y and D-Right." : "Choose on the touch screen, or with the D-pad and A.", kDim, kFontSans, t.w - 16);
++			if (inGame && (!canQSave || !canQLoad)) ty = Para(t, 8, ty + 4, "Grey buttons cannot be used right now.", kDim, kFontSans, t.w - 16);
++		}
++		if (g_markerFailed && page == pgSettings) Para(t, 8, ty + 8, "! This setting could not be saved to the SD card. Is the card full or locked?", C565(255, 80, 64), kFontSans, t.w - 16);
 +		Fill(t, 0, t.h - 16, t.w, 16, kPanel);
 +		// JA-08: the hints follow the left-hand setting (A/B/X/Y and the D-pad swap jobs)
-+		const char* hint = g_lefty ? (confirm ? "D-Right choose    D-Down no" : "D-Right choose    D-Down / START resume")
-+		                           : (confirm ? "A choose    B no" : "A choose    B / START resume");
++		const bool sub = page != pgMain;
++		const char* hint = g_lefty ? (sub ? (startAtExit ? "D-Right: choose    D-Down: no" : "D-Right: choose    D-Down: back") : "D-Right: choose    D-Down / START: resume")
++		                           : (sub ? (startAtExit ? "A: choose    B: no" : "A: choose    B: back") : "A: choose    B / START: resume");
 +		Text(t, (t.w - TextW(hint, kFontSans)) / 2, t.h - 15, hint, kTitle, kFontSans);
 +		Canvas b = CanvasFor(GFX_BOTTOM);
 +		Fill(b, 0, 0, b.w, b.h, kBg);
 +		Fill(b, 0, 0, b.w, 22, kSel);
-+		Text(b, 6, 4, confirm ? "EXIT GAME" : "MENU", kTitle, kFontBold);
-+		if (confirm) { Text(b, 8, 40, "Exit the game?", kText, kFontBold); Text(b, 8, 62, canSave ? "It is saved first." : "Unsaved progress is lost.", kDim, kFontSans); }
++		Text(b, 6, 4, page == pgExit ? "EXIT GAME" : page == pgLoad ? "QUICK LOAD" : page == pgSettings ? "SETTINGS" : "MENU", kTitle, kFontBold);
++		if (page == pgExit || page == pgLoad) {
++			Text(b, 8, 40, head, kText, kFontBold);
++			Para(b, 8, 62, page == pgExit ? exitLine : loadLine, kDim, kFontSans, b.w - 16);
++		}
++		if (page == pgSettings && g_markerFailed) Para(b, 8, 160, "! Not saved to the SD card (full or locked?). It stays as set until you exit.", C565(255, 80, 64), kFontSans, b.w - 16);
 +		for (int i = 0; i < nb; ++i) {
-+			int x, y, w, h; rectOf(i, x, y, w, h);
-+			const bool pr = pressFrames > 0 && i == pressed;
-+			const char* l = confirm ? (i == 0 ? "YES, EXIT" : "NO") : label(kIds[i]);
-+			Fill(b, x, y, w, h, kEdge);
-+			Fill(b, x + 1, y + 1, w - 2, h - 2, pr ? kTitle : kBtn);
-+			if (!pr) Fill(b, x + 1, y + h - 2, w - 2, 1, kPanel);   // raised edge
-+			const int tw = std::min(TextW(l, kFontSans), w - 8);
-+			Text(b, x + (w - tw) / 2 + (pr ? 1 : 0), y + (h - 14) / 2 + (pr ? 1 : 0), l, pr ? kBg : kText, kFontSans, w - 8);
-+			if (i == focus && !pr) {            // 2 px gold focus ring
-+				Fill(b, x - 2, y - 2, w + 4, 2, kTitle); Fill(b, x - 2, y + h, w + 4, 2, kTitle);
-+				Fill(b, x - 2, y, 2, h, kTitle); Fill(b, x + w, y, 2, h, kTitle);
-+			}
++			const Btn& bt = btns[i];
++			HouseButton(b, bt.x, bt.y, bt.w, bt.h, label(bt.id), pressFrames > 0 && i == pressed, i == focus, bt.enabled);
 +		}
 +		gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
 +		if (pressFrames > 0 && --pressFrames == 0) {
-+			if (!confirm) {
-+				const int id = kIds[pressed];
-+				if (id == kLefty) SetLefty(!g_lefty);
-+				else if (id == kMag) SetMag(!g_mag);
-+				else if (id == kExit) { confirm = true; focus = 1; }
-+				else chosen = id;
-+			} else if (pressed == 0) chosen = kExit;
-+			else { confirm = false; focus = n - 1; }
++			const int id = btns[pressed].id;
 +			pressed = -1;
++			if (id == kLefty) SetLefty(!g_lefty);
++			else if (id == kMag) SetMag(!g_mag);
++			else if (id == kExit) { page = pgExit; build(); }
++			else if (id == kQLoad) { page = pgLoad; build(); }
++			else if (id == kSettings) { page = pgSettings; g_markerFailed = false; build(); }
++			else if (id == kBack) { page = pgMain; build(); focusOn(kSettings); }
++			else if (id == kNo) { if (startAtExit) chosen = kResume; else { const int from = page; page = pgMain; build(); focusOn(from == pgExit ? kExit : kQLoad); } }
++			else if (id == kYes) chosen = page == pgLoad ? kQLoad : kExit;
++			else chosen = id;
 +		}
 +	}
 +	while (aptMainLoop()) { // don't let the closing press leak into the game
@@ -2698,19 +3498,42 @@ index 0000000..c504d88
 +		if (!(hidKeysHeld() & (KEY_B | KEY_START | KEY_TOUCH | KEY_A))) break;
 +		gspWaitForVBlank();
 +	}
++	// a one-line page on the touch screen while something slow runs, or to say how it went
++	auto notice = [&](const char* title, const char* line, u16 col) {
++		for (int k = 0; k < 2; ++k) {
++			Canvas b = CanvasFor(GFX_BOTTOM);
++			Fill(b, 0, 0, b.w, b.h, kBg);
++			Fill(b, 0, 0, b.w, 22, kSel);
++			Text(b, 6, 4, title, kTitle, kFontBold);
++			int y = 100;
++			for (const std::string& l : WrapText(line, b.w - 16, kFontBold)) { Text(b, (b.w - TextW(l.c_str(), kFontBold)) / 2, y, l.c_str(), col, kFontBold); y += 18; }
++			gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
++		}
++	};
 +	if (chosen == kContinue) { if (!N3DS_ContinueExitSave()) printf("[3ds] continue: no ExitSave\n"); }
 +	else if (chosen == kManual) N3DS_RunManual();
 +	else if (chosen == kOptions) { PushKey(SDLK_o, true); PushKey(SDLK_o, false); }
++	else if (chosen == kEndTurn) { if (N3DS_CanEndTurn()) { PushKey(SDLK_d, true); PushKey(SDLK_d, false); } }
++	else if (chosen == kQSave) {
++		notice("QUICK SAVE", "Saving...", kText);
++		const bool ok = N3DS_QuickSave();
++		printf("[3ds] quick save from the START menu: %s\n", ok ? "ok" : "failed"); fflush(stdout);
++		// say how it went, for a second or until a button or the stylus (a failure waits for one)
++		notice("QUICK SAVE", ok ? "Quick save done." : "! The quick save failed. Is the SD card full or locked? Your older quick save is still there. Tap the screen to go on.", ok ? kText : C565(255, 80, 64));
++		for (int f = 0; aptMainLoop() && (f < 60 || !ok); ++f) {
++			hidScanInput();
++			if (f > 10 && (hidKeysDown() & (KEY_A | KEY_B | KEY_START | KEY_TOUCH))) break;
++			gspWaitForVBlank();
++		}
++		while (aptMainLoop()) { hidScanInput(); if (!(hidKeysHeld() & (KEY_B | KEY_START | KEY_TOUCH | KEY_A))) break; gspWaitForVBlank(); }
++	}
++	else if (chosen == kQLoad) {
++		const bool ok = N3DS_QuickLoad();
++		printf("[3ds] quick load from the START menu: %s\n", ok ? "started" : "not possible here"); fflush(stdout);
++	}
 +	else if (chosen == kExit) {
 +		if (N3DS_SuspendSaveOk()) {   // "Saving..." while JA2's (slow) quick save runs
-+			for (int k = 0; k < 2; ++k) {
-+				Canvas b = CanvasFor(GFX_BOTTOM);
-+				Fill(b, 0, 0, b.w, b.h, kBg);
-+				Fill(b, 0, 0, b.w, 22, kSel);
-+				Text(b, 6, 4, "EXIT GAME", kTitle, kFontBold);
-+				Text(b, (b.w - TextW("Saving...", kFontBold)) / 2, 110, "Saving...", kText, kFontBold);
-+				gfxFlushBuffers(); gfxSwapBuffers(); g_presentForce = true; gspWaitForVBlank();
-+			}
++			notice("EXIT GAME", "Saving...", kText);
 +			const bool ok = N3DS_SuspendSave();
 +			printf("[3ds] suspend save on exit: %s\n", ok ? "ok" : "failed"); fflush(stdout);
 +			if (!ok && !N3DS_AskExitAnyway()) return;   // JA-01: never quit after a failed save without asking
@@ -2752,7 +3575,7 @@ index 0000000..c504d88
 +		firstRun = false;
 +		struct stat sb;
 +		if (stat(N3DS_DIR "/.manual_seen", &sb) != 0) {
-+			if (FILE* f = fopen(N3DS_DIR "/.manual_seen", "w")) fclose(f);
++			MarkerSet(N3DS_DIR "/.manual_seen", true);
 +			N3DS_RunManual(1); // open on the Controls chapter the first time
 +			prev = Remap(hidKeysHeld());
 +		}
@@ -2772,6 +3595,16 @@ index 0000000..c504d88
 +		return;
 +	}
 +
++	// JA2-U2: the port's big buttons over the game picture (message box, main menu, Options page).
++	// While they are up, the D-pad and A work them and are kept from the game.
++	const bool ov = OverlayInput(down);
++	if (g_ovWantExit) {                  // the main menu's QUIT: ask first, as EXIT GAME does
++		g_ovWantExit = false;
++		N3DS_RunPortMenu(true);
++		prev = Remap(hidKeysHeld());
++		return;
++	}
++
 +	// game on the top screen (UI rule 7): the touch screen is a touchpad. Slide = move the pointer
 +	// (relative, 2 game pixels per touch pixel), a short tap = left click where it points; B is the
 +	// right click as always (R is JA2's stance key). The button at the foot swaps back.
@@ -2782,7 +3615,8 @@ index 0000000..c504d88
 +		static u64 padAt = 0;
 +		if (g_swap && (down & KEY_TOUCH)) {
 +			touchPosition tp; hidTouchRead(&tp);
-+			if (tp.py >= 240 - 6 - 26 - 2) { Click(); SetSwap(false); padOn = false; padButton = true; }
++			if (g_ovPressFrames > 0 || OverlayButtonAt(tp.px, tp.py) >= 0) { padOn = false; }   // the touch is a big button's
++			else if (g_ovKind == OV_NONE && tp.py >= 240 - 6 - 26 - 2) { Click(); SetSwap(false); padOn = false; padButton = true; }
 +			else { padOn = true; padMoved = false; lastX = startX = tp.px; lastY = startY = tp.py; padAt = osGetTime(); fx = (float)gN3DSCursorX; fy = (float)gN3DSCursorY; }
 +		} else if (g_swap && padOn && (held & KEY_TOUCH)) {
 +			touchPosition tp; hidTouchRead(&tp);
@@ -2819,7 +3653,8 @@ index 0000000..c504d88
 +		// Esc on JA2's main menu quits the game at once: not from a button there (Quit is on screen;
 +		// EXIT GAME in the START menu asks first). Seen on the real 3DS, Nov 13 2026.
 +		if (m.sym == SDLK_ESCAPE && scr == N3DS_SCR_MENU) continue;
-+		if (down & m.key) PushKey(m.sym, true);
++		const bool dpad = (m.key & (KEY_DUP | KEY_DDOWN | KEY_DLEFT | KEY_DRIGHT)) != 0;
++		if ((down & m.key) && !(ov && dpad)) PushKey(m.sym, true);   // the D-pad is the big buttons' while they are up
 +		if (up & m.key)   PushKey(m.sym, false);
 +	}
 +
@@ -2850,7 +3685,7 @@ index 0000000..c504d88
 +	if ((down & KEY_CSTICK_UP) && !g_zoom) { Click(); g_zoom = true; }
 +	if ((down & KEY_CSTICK_DOWN) && g_zoom) { Click(); g_zoom = false; }
 +
-+	if (down & KEY_A) PushMouseButton(SDL_BUTTON_LEFT, true);
++	if ((down & KEY_A) && !ov) PushMouseButton(SDL_BUTTON_LEFT, true);   // A presses the highlighted big button while they are up
 +	if (up & KEY_A)   PushMouseButton(SDL_BUTTON_LEFT, false);
 +	if (down & KEY_B) PushMouseButton(SDL_BUTTON_RIGHT, true);
 +	if (up & KEY_B)   PushMouseButton(SDL_BUTTON_RIGHT, false);
@@ -2863,7 +3698,7 @@ index 0000000..c504d88
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Platform.h b/src/sgp/n3ds/N3DS_Platform.h
 new file mode 100644
-index 0000000..ba9af5b
+index 0000000..3cbc7fe
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.h
 @@ -0,0 +1,14 @@
@@ -2875,7 +3710,7 @@ index 0000000..ba9af5b
 +void N3DS_Init();                    // CPU speedup, screen formats
 +void N3DS_Present(SDL_Surface* screen, int cursorX, int cursorY); // draw both screens
 +void N3DS_SetUpdateRect(int x, int y, int w, int h);   // JA-04: what RefreshScreen changed (before N3DS_Present)
-+void N3DS_MapFinger(SDL_TouchFingerEvent* f);   // zoomed: touch -> the zoom window's game coordinates
++bool N3DS_MapFinger(SDL_TouchFingerEvent* f);   // false: the touch is on one of the port's big buttons, not for the game; zoomed: touch -> the zoom window's game coordinates
 +void N3DS_PumpInput();
 +void N3DS_LogMem(const char* tag);
 +bool N3DS_DebugLogOn();   // sdmc:/3ds/ja2/debug.txt existed at start-up

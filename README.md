@@ -15,12 +15,14 @@ engine (v0.22.1), patched for the New 3DS (`armv6k-nintendo-3ds`).
 - **Top screen:** dashboard: date/time/sector, selected merc's health, energy, morale,
   action points and skills, and the controls for the current screen.
 - **SWAP** (from the manual) puts the game on the top screen; the choice is saved.
-- **ZL swaps the screens** at any time. **Manual** on SELECT: Circle Pad / C-Stick scroll, D-Pad moves between sections,
-  L/R previous/next section, tap a section, B or START closes.
+- **ZL swaps the screens** at any time. **Manual** (START > MANUAL): Circle Pad / C-Stick scroll, D-Pad moves between sections,
+  L/R previous/next section, tap a section, B, START or the Close button closes.
 - Quiet click and press animation on the manual's touch buttons; any button skips the intro.
-- **START menu:** RESUME, MANUAL, SAVE / LOAD / OPTIONS, MAGNIFIER, LEFT HAND and EXIT GAME; on the main menu also **CONTINUE (LAST EXIT)**.
+- **START menu:** RESUME, MANUAL, END TURN (your turn in combat), QUICK SAVE, QUICK LOAD (asks first), SAVE / LOAD / OPTIONS, SETTINGS (MAGNIFIER, LEFT HAND) and EXIT GAME; on the main menu **CONTINUE (LAST EXIT)** instead of the save buttons. A button that cannot be used right now is grey.
+- **Big buttons where the game's own are tiny:** the main menu (NEW GAME, LOAD GAME, PREFERENCES, CREDITS, QUIT, and CONTINUE (LAST EXIT) when there is an exit save), every message box (one button per answer; the message itself is shown in a readable size on the top screen; the gold ring starts on No) and the Options page (SAVE, LOAD, QUIT, DONE). Tap, or D-pad and A.
+- **Dashboard:** with no merc selected and on the map it shows your money, whose turn it is or whether time is running, and the newest game messages in a readable size. During a load it shows "Loading..." with the percentage. The game's own help windows (they name keyboard keys) are off.
 - **EXIT GAME** asks first, then saves into its own slot, `ExitSave`, and quits; HOME > Close does the same while a game is running. If that save fails the game says so and asks EXIT ANYWAY / NO. `ExitSave` never replaces your own QuickSave. CONTINUE loads it.
-- Logs: `sdmc:/3ds/ja2/console.txt` (start, exit, errors); an empty `sdmc:/3ds/ja2/debug.txt` switches on the full log.
+- Logs: `sdmc:/3ds/ja2/console.txt` (start, exit, errors; the run before is kept as `console.old.txt`); an empty `sdmc:/3ds/ja2/debug.txt` switches on the full log.
 
 What the patch (`3ds/patches/stracciatella-3ds.patch`) changes, in short:
 
