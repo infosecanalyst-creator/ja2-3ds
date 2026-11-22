@@ -96,13 +96,16 @@ over the picture where it matters:
   readable size on the top screen. The gold
   ring starts on No.
 - The Options page: SAVE, LOAD, QUIT, DONE.
+- The save / load list: SAVE or LOAD, and
+  CANCEL. Tap a slot, or pick one with the
+  D-pad's up and down.
+- The new-game page: OK and CANCEL.
 Tap one, or move the gold ring with the
 D-pad and press A. They do exactly what the
 game's own buttons do.
 
-The game's own help windows are switched
-off: they name keyboard keys. This manual
-replaces them.
+The game's own help windows are off (they
+name keyboard keys); this manual replaces them.
 == 2. THE TWO SCREENS  (3/3)
 MAGNIFIER (START > SETTINGS): the game's own
 text is small at half size. With the

@@ -886,7 +886,7 @@ index f153f86..6812267 100644
  	EXTR_U8(   d, ubMusicModeToPlay)
  	gMusicModeToPlay = (MusicMode)ubMusicModeToPlay;
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..6727915 100644
+index add6ddf..550ca9a 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -1,3 +1,4 @@
@@ -986,7 +986,7 @@ index add6ddf..6727915 100644
  
  		gFadeInDoneCallback = DoneFadeInForSaveLoadScreen;
  
-@@ -1517,3 +1556,159 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1556,179 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -1039,6 +1039,26 @@ index add6ddf..6727915 100644
 +{
 +	if (guiCurrentScreen != GAME_SCREEN && guiCurrentScreen != MAP_SCREEN && guiCurrentScreen != LAPTOP_SCREEN) return false;
 +	return gTacticalStatus.fHasAGameBeenStarted && !gTacticalStatus.fDidGameJustStart;
++}
++
++// JA2-U2: the save / load list's own Save (or Load) and Cancel buttons are tiny at half size, so
++// the port shows them as big buttons. N3DS_SaveLoadState: 0 the list is not up (or is busy
++// leaving or saving), else 1 the load list / 2 the save list, plus 4 when a slot is chosen (the
++// game's own button is enabled then). N3DS_SaveLoadDo does what a click on the game's button
++// does: 0 Save / Load the chosen slot, 1 Cancel.
++int N3DS_SaveLoadState()
++{
++	if (guiCurrentScreen != SAVE_LOAD_SCREEN || !gfSaveLoadScreenButtonsCreated || gfSaveLoadScreenEntry || gfSaveLoadScreenExit) return 0;
++	if (gfStartedFadingOut || gfLoadGameUponEntry || gubSaveGameNextPass != 0) return 0;
++	return (gfSaveGame ? 2 : 1) | (guiSlgSaveLoadBtn->Enabled() ? 4 : 0);
++}
++void N3DS_SaveLoadDo(int what)
++{
++	const int state = N3DS_SaveLoadState();
++	if (!state) return;
++	if (what == 1) { LeaveSaveLoadScreen(); return; }
++	if (!(state & 4)) return;
++	if (gfSaveGame && gbSelectedSaveLocation == 0 && gfUserInTextInputMode) SaveNewSave(); else SaveLoadSelectedSave();
 +}
 +
 +// Is there an ExitSave to continue from?
@@ -1759,10 +1779,10 @@ index 8f48538..16737a3 100644
  	guiDirtyRegionCount = 0;
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.cc b/src/sgp/n3ds/N3DS_Dashboard.cc
 new file mode 100644
-index 0000000..10f51ab
+index 0000000..17cfbcb
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.cc
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,76 @@
 +// Top-screen dashboard content for the 3DS port (game side: reads JA2 state)
 +#ifdef JA2_3DS
 +#include "N3DS_Dashboard.h"
@@ -1832,6 +1852,8 @@ index 0000000..10f51ab
 +	for (int i = 0; i < 8; ++i) d.stats[i] = st[i];
 +}
 +
++bool N3DS_OnNewGameScreen() { return guiCurrentScreen == GAME_INIT_OPTIONS_SCREEN; }
++
 +bool N3DS_CanEndTurn()
 +{
 +	return guiCurrentScreen == GAME_SCREEN && (gTacticalStatus.uiFlags & INCOMBAT) && gTacticalStatus.ubCurrentTeam == OUR_TEAM;
@@ -1839,10 +1861,10 @@ index 0000000..10f51ab
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.h b/src/sgp/n3ds/N3DS_Dashboard.h
 new file mode 100644
-index 0000000..c557ee8
+index 0000000..27ee7c3
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.h
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,25 @@
 +#pragma once
 +#include <string>
 +// What the top-screen dashboard shows (filled from game state by N3DS_Dashboard.cc)
@@ -1862,6 +1884,8 @@ index 0000000..c557ee8
 +	const char* turn = "";                      // tactical, in combat: whose turn it is
 +	int mercs = 0;                              // mercs of the player's team in this sector (tactical) / on the team (map)
 +};
++// JA2-U2: the new-game options page is up (its OK / Cancel get big buttons)
++bool N3DS_OnNewGameScreen();
 +// JA2-X4: the player's turn in turn-based combat (END TURN in the START menu is offered then)
 +bool N3DS_CanEndTurn();
 +void N3DS_GetDashboard(N3DSDash& d);
@@ -1946,10 +1970,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..b53e316
+index 0000000..c279199
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1746 @@
+@@ -0,0 +1,1765 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -2399,6 +2423,9 @@ index 0000000..b53e316
 +// - main menu: CONTINUE (LAST EXIT) when there is an exit save, NEW GAME, LOAD GAME (grey with no
 +//   saves), PREFERENCES, CREDITS, QUIT (which asks first, as EXIT GAME does).
 +// - Options page: SAVE, LOAD, QUIT (to the main menu; the game asks), DONE.
++// - save / load list: SAVE or LOAD (grey until a slot is chosen) and CANCEL. The D-pad's up and
++//   down still move the game's own selection through the list.
++// - new-game options page: OK and CANCEL (the game's Enter and Esc).
 +// A tap presses a button; the D-pad moves a gold ring and A presses (rule 6). A touch that goes
 +// down on a button never reaches the game (N3DS_MapFinger); touches elsewhere work as before.
 +int  N3DS_MsgBoxGet(const char** text, const char* labels[4], int values[4]);   // MessageBoxScreen.cc
@@ -2407,11 +2434,13 @@ index 0000000..b53e316
 +void N3DS_MainMenuChoose(int item);
 +int  N3DS_OptionsState();                                                       // Options_Screen.cc
 +void N3DS_OptionsDo(int what);
++int  N3DS_SaveLoadState();                                                      // SaveLoadScreen.cc
++void N3DS_SaveLoadDo(int what);
 +int  N3DS_SaveFlags();                                                          // SaveLoadScreen.cc: 1 ExitSave, 2 QuickSave
 +bool N3DS_ContinueExitSave();
 +
-+enum { OV_NONE, OV_MSG, OV_MENU, OV_OPTS };
-+enum { OVA_MSG, OVA_MENU, OVA_CONTINUE, OVA_QUIT, OVA_OPTS };
++enum { OV_NONE, OV_MSG, OV_MENU, OV_OPTS, OV_SLOTS, OV_NEWGAME };
++enum { OVA_MSG, OVA_MENU, OVA_CONTINUE, OVA_QUIT, OVA_OPTS, OVA_SLOTS, OVA_KEY };
 +struct OvBtn { int x, y, w, h; std::string label; int act, arg; bool enabled; };
 +static int g_ovKind = OV_NONE;
 +static std::vector<OvBtn> g_ov;
@@ -2461,6 +2490,14 @@ index 0000000..b53e316
 +		kind = OV_OPTS;
 +		static const char* const l[4] = { "SAVE", "LOAD", "QUIT", "DONE" };
 +		for (int i = 0; i < 4; ++i) v.push_back({ 6 + i * 78, 204, 74, 30, l[i], OVA_OPTS, i, i != 0 || os == 2 });
++	} else if (const int ss = N3DS_SaveLoadState()) {
++		kind = OV_SLOTS;                    // 24 px tall: the list's last row ends just above
++		v.push_back({ 6, 210, 152, 24, (ss & 2) ? "SAVE" : "LOAD", OVA_SLOTS, 0, (ss & 4) != 0 });
++		v.push_back({ 162, 210, 152, 24, "CANCEL", OVA_SLOTS, 1, true });
++	} else if (N3DS_OnNewGameScreen()) {
++		kind = OV_NEWGAME;
++		v.push_back({ 6, 210, 152, 24, "OK", OVA_KEY, SDLK_RETURN, true });
++		v.push_back({ 162, 210, 152, 24, "CANCEL", OVA_KEY, SDLK_ESCAPE, true });
 +	}
 +	const bool fresh = kind != lastKind || v.size() != lastCount || (kind == OV_MSG && g_ovText != lastText);
 +	if (fresh) {
@@ -2468,6 +2505,7 @@ index 0000000..b53e316
 +		g_ovFocus = 0; g_ovPressed = -1; g_ovPressFrames = 0;
 +		if (kind == OV_MSG) { for (size_t i = 0; i < v.size(); ++i) if (v[i].label == "No" || v[i].label == "NO" || v[i].label == "no") g_ovFocus = (int)i; }
 +		if (kind == OV_OPTS) g_ovFocus = 3;
++		if (kind == OV_SLOTS) g_ovFocus = 1;            // CANCEL (SAVE / LOAD is grey until a slot is chosen)
 +	}
 +	lastKind = kind; lastCount = v.size(); lastText = kind == OV_MSG ? g_ovText : std::string();
 +	g_ov.swap(v);
@@ -2483,22 +2521,28 @@ index 0000000..b53e316
 +		case OVA_CONTINUE: if (!N3DS_ContinueExitSave()) printf("[3ds] continue: no ExitSave\n"); break;
 +		case OVA_QUIT:     g_ovWantExit = true; break;
 +		case OVA_OPTS:     N3DS_OptionsDo(b.arg); break;
++		case OVA_SLOTS:    N3DS_SaveLoadDo(b.arg); break;
++		case OVA_KEY:      PushKey((SDL_Keycode)b.arg, true); PushKey((SDL_Keycode)b.arg, false); break;
 +	}
 +}
 +
 +static void Click();
-+// The overlay's share of the input: D-pad and A, and a touch that goes down on a button.
-+// Returns true while buttons are up (the caller then keeps the D-pad and A from the game).
-+static bool OverlayInput(u32 down)
++// The overlay's share of the input: the D-pad and A, and a touch that goes down on a button.
++// Returns the buttons it owns while it is up (0: nothing is up); the caller keeps those from the
++// game. The main menu's grid takes the whole D-pad; a single row of buttons takes Left and Right
++// only, so Up and Down still reach the game (they move the selection in the save list).
++static u32 OverlayInput(u32 down)
 +{
 +	OverlayUpdate();
-+	if (g_ovKind == OV_NONE) { g_ovPressFrames = 0; g_ovPressed = -1; return false; }
++	if (g_ovKind == OV_NONE) { g_ovPressFrames = 0; g_ovPressed = -1; return 0; }
++	const u32 owned = KEY_A | KEY_DLEFT | KEY_DRIGHT | (g_ovKind == OV_MENU ? (KEY_DUP | KEY_DDOWN) : 0);
 +	if (g_ovPressFrames > 0) {               // a press shows for a few passes, then acts; new presses are dropped
 +		if (--g_ovPressFrames == 0 && g_ovPressed >= 0 && g_ovPressed < (int)g_ov.size()) { const OvBtn b = g_ov[g_ovPressed]; g_ovPressed = -1; OverlayAct(b); }
-+		return true;
++		return owned;
 +	}
 +	const int n = (int)g_ov.size();
 +	int hit = -1;
++	down &= owned | KEY_TOUCH;
 +	if (down & (KEY_DUP | KEY_DLEFT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + n - 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
 +	if (down & (KEY_DDOWN | KEY_DRIGHT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
 +	if (down & KEY_A) hit = g_ovFocus;
@@ -2507,7 +2551,7 @@ index 0000000..b53e316
 +		Click();
 +		g_ovFocus = hit; g_ovPressed = hit; g_ovPressFrames = 6;
 +	}
-+	return true;
++	return owned;
 +}
 +
 +void N3DS_Init()
@@ -3597,7 +3641,7 @@ index 0000000..b53e316
 +
 +	// JA2-U2: the port's big buttons over the game picture (message box, main menu, Options page).
 +	// While they are up, the D-pad and A work them and are kept from the game.
-+	const bool ov = OverlayInput(down);
++	const u32 ov = OverlayInput(down);
 +	if (g_ovWantExit) {                  // the main menu's QUIT: ask first, as EXIT GAME does
 +		g_ovWantExit = false;
 +		N3DS_RunPortMenu(true);
@@ -3653,8 +3697,7 @@ index 0000000..b53e316
 +		// Esc on JA2's main menu quits the game at once: not from a button there (Quit is on screen;
 +		// EXIT GAME in the START menu asks first). Seen on the real 3DS, Nov 13 2026.
 +		if (m.sym == SDLK_ESCAPE && scr == N3DS_SCR_MENU) continue;
-+		const bool dpad = (m.key & (KEY_DUP | KEY_DDOWN | KEY_DLEFT | KEY_DRIGHT)) != 0;
-+		if ((down & m.key) && !(ov && dpad)) PushKey(m.sym, true);   // the D-pad is the big buttons' while they are up
++		if ((down & m.key) && !(ov & m.key)) PushKey(m.sym, true);   // a button the big buttons own is kept from the game
 +		if (up & m.key)   PushKey(m.sym, false);
 +	}
 +
@@ -3685,7 +3728,7 @@ index 0000000..b53e316
 +	if ((down & KEY_CSTICK_UP) && !g_zoom) { Click(); g_zoom = true; }
 +	if ((down & KEY_CSTICK_DOWN) && g_zoom) { Click(); g_zoom = false; }
 +
-+	if ((down & KEY_A) && !ov) PushMouseButton(SDL_BUTTON_LEFT, true);   // A presses the highlighted big button while they are up
++	if ((down & KEY_A) && !(ov & KEY_A)) PushMouseButton(SDL_BUTTON_LEFT, true);   // A presses the highlighted big button while they are up
 +	if (up & KEY_A)   PushMouseButton(SDL_BUTTON_LEFT, false);
 +	if (down & KEY_B) PushMouseButton(SDL_BUTTON_RIGHT, true);
 +	if (up & KEY_B)   PushMouseButton(SDL_BUTTON_RIGHT, false);
