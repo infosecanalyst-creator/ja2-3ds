@@ -632,7 +632,7 @@ index b548d0c..fddba5e 100644
  
  
 diff --git a/src/game/SaveLoadGame.cc b/src/game/SaveLoadGame.cc
-index f153f86..23e65ac 100644
+index f153f86..6812267 100644
 --- a/src/game/SaveLoadGame.cc
 +++ b/src/game/SaveLoadGame.cc
 @@ -1,4 +1,10 @@
@@ -679,11 +679,34 @@ index f153f86..23e65ac 100644
  
  		GCM->tempFiles()->deleteFile(savegameTempPath);
  	}
+@@ -1902,6 +1924,17 @@ static void LoadGeneralInfo(HWFILE const f, UINT32 const savegame_version)
+ 	UINT32 screen_after_loading;
+ 	EXTR_U32(  d, screen_after_loading)
+ 	guiScreenToGotoAfterLoadingSavedGame = static_cast<ScreenID>(screen_after_loading); // XXX TODO001A unchecked conversion
++#ifdef __3DS__
++	// A save records the screen to open after loading. Saves written by EXIT GAME before build
++	// 4182376 recorded the game's Options screen (the variable's start value), so CONTINUE and
++	// Load ended on Options with nothing behind it. Only the tactical screen and the map are
++	// places to come back to: anything else opens the map.
++	if (guiScreenToGotoAfterLoadingSavedGame != GAME_SCREEN && guiScreenToGotoAfterLoadingSavedGame != MAP_SCREEN)
++	{
++		printf("[3ds] load: the save asks for screen %u after loading; opening the map instead\n", (unsigned)screen_after_loading);
++		guiScreenToGotoAfterLoadingSavedGame = MAP_SCREEN;
++	}
++#endif
+ 	EXTR_U32(  d, guiCurrentUniqueSoldierId)
+ 	EXTR_U8(   d, ubMusicModeToPlay)
+ 	gMusicModeToPlay = (MusicMode)ubMusicModeToPlay;
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..b121e79 100644
+index add6ddf..0153827 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
-@@ -383,7 +383,14 @@ static void EnterSaveLoadScreen()
+@@ -1,3 +1,4 @@
++#include <cstdio>
+ #include "Directories.h"
+ #include "Font.h"
+ #include "GameLoop.h"
+@@ -383,7 +384,14 @@ static void EnterSaveLoadScreen()
  	if (gfLoadGameUponEntry)
  	{
  		// Make sure the save is valid
@@ -699,7 +722,7 @@ index add6ddf..b121e79 100644
  		if (last_slot != -1 && gSavedGamesList.begin() + last_slot < gSavedGamesList.end())
  		{
  			gbSelectedSaveLocation = last_slot;
-@@ -566,7 +573,7 @@ static void RenderSaveLoadScreen(void)
+@@ -566,7 +574,7 @@ static void RenderSaveLoadScreen(void)
  }
  
  static int32_t ScrollPositionTopMax() {
@@ -708,7 +731,7 @@ index add6ddf..b121e79 100644
  }
  
  static void RenderScrollBar(void) {
-@@ -581,7 +588,7 @@ static void RenderScrollBar(void) {
+@@ -581,7 +589,7 @@ static void RenderScrollBar(void) {
  	}
  	SetClippingRect(previousClippingRect);
  
@@ -717,7 +740,7 @@ index add6ddf..b121e79 100644
  	auto currentTop = gCurrentScrollTop;
  	auto maxYPos = SLG_SCROLLBAR_INNER_HEIGHT - SLG_SCROLLBAR_INDICATOR_HEIGHT - 2;
  	auto indicatorPosition = int(round(double_t(maxYPos) * double_t(currentTop) / double_t(maxTop)));
-@@ -784,12 +791,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
+@@ -784,12 +792,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
  	return validSaves;
  }
  
@@ -739,7 +762,19 @@ index add6ddf..b121e79 100644
  		if (gfSaveGame && (IsAutoSaveName((*i).name()) || IsQuickSaveName((*i).name()))) {
  			// Dont display quick- and autosaves when saving game
  			continue;
-@@ -1517,3 +1533,95 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1193,6 +1210,11 @@ static void DoneFadeOutForSaveLoadScreen(void)
+ 	{
+ 		auto& saveName = (*(gSavedGamesList.begin() + gbSelectedSaveLocation)).name();
+ 		LoadSavedGame(saveName);
++#ifdef __3DS__
++		printf("[3ds] load: %s loaded, opening the %s\n", saveName.c_str(),
++		       guiScreenToGotoAfterLoadingSavedGame == MAP_SCREEN ? "map" : "tactical screen");
++		fflush(stdout);
++#endif
+ 
+ 		gFadeInDoneCallback = DoneFadeInForSaveLoadScreen;
+ 
+@@ -1517,3 +1539,96 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -824,6 +859,7 @@ index add6ddf..b121e79 100644
 +	{
 +		gfN3DSLoadExitSaveUponEntry = true;
 +		N3DS_MainMenuLoadUponEntry();
++		printf("[3ds] continue: loading the ExitSave from the main menu\n");
 +		return true;
 +	}
 +	gfSaveGame = FALSE;
