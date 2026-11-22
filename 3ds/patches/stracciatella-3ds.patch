@@ -698,7 +698,7 @@ index f153f86..6812267 100644
  	EXTR_U8(   d, ubMusicModeToPlay)
  	gMusicModeToPlay = (MusicMode)ubMusicModeToPlay;
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..0153827 100644
+index add6ddf..786c063 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -1,3 +1,4 @@
@@ -717,12 +717,36 @@ index add6ddf..0153827 100644
 +		extern bool gfN3DSLoadExitSaveUponEntry;
 +		INT8 N3DS_ExitSaveIndex();
 +		if (gfN3DSLoadExitSaveUponEntry) last_slot = N3DS_ExitSaveIndex();
-+		gfN3DSLoadExitSaveUponEntry = false;
++		if (last_slot == -1) gfN3DSLoadExitSaveUponEntry = false;
 +#endif
  		if (last_slot != -1 && gSavedGamesList.begin() + last_slot < gSavedGamesList.end())
  		{
  			gbSelectedSaveLocation = last_slot;
-@@ -566,7 +574,7 @@ static void RenderSaveLoadScreen(void)
+@@ -457,6 +465,23 @@ static void EnterSaveLoadScreen()
+ 		}
+ 	}
+ 
++#ifdef __3DS__
++	{
++		// CONTINUE (LAST EXIT): the lines above have just chosen again (the save named in the
++		// settings, else the first in the list, which on the card was the QuickSave), so the
++		// ExitSave picked for "load upon entry" was dropped and the wrong game was loaded.
++		// Choose the ExitSave here, after them.
++		extern bool gfN3DSLoadExitSaveUponEntry;
++		INT8 N3DS_ExitSaveIndex();
++		if (gfN3DSLoadExitSaveUponEntry && gfLoadGameUponEntry)
++		{
++			const INT8 slot = N3DS_ExitSaveIndex();
++			if (slot != -1) gbSelectedSaveLocation = slot;
++			printf("[3ds] continue: ExitSave is entry %d of %d in the list\n", (int)slot, (int)gSavedGamesList.size());
++		}
++		gfN3DSLoadExitSaveUponEntry = false;
++	}
++#endif
+ 	EnableButton(guiSlgSaveLoadBtn, gbSelectedSaveLocation != -1);
+ 	// Mark all buttons dirty, required for redrawing with the Tab system
+ 	guiSlgCancelBtn->uiFlags |= BUTTON_DIRTY;
+@@ -566,7 +591,7 @@ static void RenderSaveLoadScreen(void)
  }
  
  static int32_t ScrollPositionTopMax() {
@@ -731,7 +755,7 @@ index add6ddf..0153827 100644
  }
  
  static void RenderScrollBar(void) {
-@@ -581,7 +589,7 @@ static void RenderScrollBar(void) {
+@@ -581,7 +606,7 @@ static void RenderScrollBar(void) {
  	}
  	SetClippingRect(previousClippingRect);
  
@@ -740,7 +764,7 @@ index add6ddf..0153827 100644
  	auto currentTop = gCurrentScrollTop;
  	auto maxYPos = SLG_SCROLLBAR_INNER_HEIGHT - SLG_SCROLLBAR_INDICATOR_HEIGHT - 2;
  	auto indicatorPosition = int(round(double_t(maxYPos) * double_t(currentTop) / double_t(maxTop)));
-@@ -784,12 +792,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
+@@ -784,12 +809,21 @@ std::vector<SaveGameInfo> GetValidSaveGames()
  	return validSaves;
  }
  
@@ -762,7 +786,7 @@ index add6ddf..0153827 100644
  		if (gfSaveGame && (IsAutoSaveName((*i).name()) || IsQuickSaveName((*i).name()))) {
  			// Dont display quick- and autosaves when saving game
  			continue;
-@@ -1193,6 +1210,11 @@ static void DoneFadeOutForSaveLoadScreen(void)
+@@ -1193,6 +1227,11 @@ static void DoneFadeOutForSaveLoadScreen(void)
  	{
  		auto& saveName = (*(gSavedGamesList.begin() + gbSelectedSaveLocation)).name();
  		LoadSavedGame(saveName);
@@ -774,7 +798,7 @@ index add6ddf..0153827 100644
  
  		gFadeInDoneCallback = DoneFadeInForSaveLoadScreen;
  
-@@ -1517,3 +1539,96 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1556,96 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }

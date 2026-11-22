@@ -2,6 +2,7 @@
 
 ## 2026-11-21
 
+- CONTINUE (LAST EXIT) now loads the exit save itself. On the console it loaded another save from the list (the QuickSave), because the Load screen chose its own entry again after CONTINUE had picked the exit save.
 - CONTINUE (LAST EXIT) and Load no longer end on the game's Options screen with an older save: a save that names any screen other than the tactical screen or the map now opens the map (exit saves and quick saves written before the fix above named the Options screen). console.txt gets a line when a save is loaded.
 - A game saved by EXIT GAME / HOME > Close opens on the tactical or map screen when loaded (before, it could open on the game's Options screen).
 - CONTINUE (LAST EXIT) in the START menu now really loads the exit save from the main menu (before, nothing happened: the main menu never ran the fade the load was waiting for).
