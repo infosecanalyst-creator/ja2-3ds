@@ -8,6 +8,8 @@
 - Options page: big SAVE, LOAD, QUIT and DONE buttons. Save / load list: big SAVE or LOAD and CANCEL buttons (D-pad up / down picks a slot). New-game page: big OK and CANCEL buttons.
 - START menu: new QUICK SAVE and QUICK LOAD (QUICK LOAD asks first, focus on NO), END TURN on your turn in combat, and a SETTINGS page holding MAGNIFIER and LEFT HAND. Buttons that cannot be used are grey.
 - Dashboard: with no merc selected and on the map it shows money, turn or time state, the number of mercs and the newest game messages in a readable size. The main menu page is no longer nearly empty.
+- Options page: the top screen lists every option with ON / OFF in a readable size; D-pad and A change them.
+- Dashboard: the selected merc's item in hand and rounds left; on the map, the team list (name, sector, job, contract days, health).
 - Loading: the top screen shows "Loading..." with the percentage for the whole load.
 - The game's own help windows are off: they name keyboard keys and close with a 9-pixel X.
 - EXIT GAME shows the same sentence on both screens.

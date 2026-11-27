@@ -71,10 +71,11 @@ TOP: the dashboard. It shows the date, time
 and sector, the selected merc's health,
 energy, morale, action points and skills,
 and the controls for the screen you are on.
-With no merc selected, and on the map, it
-shows your money, whose turn it is or
-whether time is running, and the newest
-game messages in a readable size.
+It also shows the item in hand and its
+rounds, your money, whose turn it is, and
+the newest game messages. On the map it
+lists your team: name, sector, job,
+contract days left and health.
 
 ZOOM (C-Stick up): the touch screen shows a
 quarter of the game at full size, so its
@@ -346,7 +347,10 @@ The Options page has four big buttons at the
 foot of the touch screen: SAVE and LOAD open
 the list of save slots, QUIT goes back to
 the main menu (the game asks first), DONE
-closes the page.
+closes the page. The top screen lists every
+option with ON or OFF in a readable size:
+D-pad up from the buttons, move to an
+option, press A to change it.
 
 Saves go to sdmc:/3ds/ja2/SavedGames/.
 Save often - before every attack.

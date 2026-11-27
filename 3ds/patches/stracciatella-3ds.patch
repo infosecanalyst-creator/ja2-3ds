@@ -783,10 +783,10 @@ index d32c7ce..2f8743d 100644
  	}};
  
 diff --git a/src/game/Options_Screen.cc b/src/game/Options_Screen.cc
-index da7499c..80e1b0a 100644
+index da7499c..ea24155 100644
 --- a/src/game/Options_Screen.cc
 +++ b/src/game/Options_Screen.cc
-@@ -581,6 +581,32 @@ static void BtnDoneCallback(GUI_BUTTON* btn, UINT32 reason)
+@@ -581,8 +581,60 @@ static void BtnDoneCallback(GUI_BUTTON* btn, UINT32 reason)
  }
  
  
@@ -818,7 +818,35 @@ index da7499c..80e1b0a 100644
 +
  static void HandleOptionToggle(UINT8 button_id, bool state, bool down, bool play_sound);
  
++#ifdef JA2_3DS
++// JA2-U1: the Options page's check boxes and their labels cannot be read at half size, so the
++// port lists them on the top screen in its own font. N3DS_OptionsToggles gives the labels and
++// states (returns the count, 0 when the page is not up); N3DS_OptionsToggle flips one as a click
++// on its check box does (same handler, so the speech / subtitles rule and the sound apply).
++#include <string>
++int N3DS_OptionsToggles(const char* names[], bool states[], int max)
++{
++	static std::string label[NUM_GAME_OPTIONS];
++	if (!N3DS_OptionsState()) return 0;
++	int n = 0;
++	for (; n < NUM_GAME_OPTIONS && n < max; ++n)
++	{
++		label[n]  = zOptionsToggleText[n].to_std_string();
++		names[n]  = label[n].c_str();
++		states[n] = guiOptionsToggles[n]->Clicked();
++	}
++	return n;
++}
++void N3DS_OptionsToggle(int i)
++{
++	if (!N3DS_OptionsState() || i < 0 || i >= NUM_GAME_OPTIONS) return;
++	HandleOptionToggle(static_cast<UINT8>(i), !guiOptionsToggles[i]->Clicked(), true, true);
++}
++#endif
++
  
+ static void BtnOptionsTogglesCallback(GUI_BUTTON* btn, UINT32 reason)
+ {
 diff --git a/src/game/SaveLoadGame.cc b/src/game/SaveLoadGame.cc
 index f153f86..6812267 100644
 --- a/src/game/SaveLoadGame.cc
@@ -1779,10 +1807,10 @@ index 8f48538..16737a3 100644
  	guiDirtyRegionCount = 0;
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.cc b/src/sgp/n3ds/N3DS_Dashboard.cc
 new file mode 100644
-index 0000000..17cfbcb
+index 0000000..93c30df
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.cc
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,111 @@
 +// Top-screen dashboard content for the 3DS port (game side: reads JA2 state)
 +#ifdef JA2_3DS
 +#include "N3DS_Dashboard.h"
@@ -1795,6 +1823,12 @@ index 0000000..17cfbcb
 +#include "StrategicMap.h"
 +#include "LaptopSave.h"
 +#include "Soldier_Macros.h"
++#include "Assignments.h"
++#include "Text.h"
++#include "Item_Types.h"
++#include "ContentManager.h"
++#include "GameInstance.h"
++#include "ItemModel.h"
 +
 +N3DSScreen N3DS_CurrentScreen()
 +{
@@ -1839,9 +1873,38 @@ index 0000000..17cfbcb
 +			if (s->bLife > 0 && (d.screen != N3DS_SCR_TACTICAL || s->bInSector)) ++n;
 +		d.mercs = n;
 +	}
++	if (d.screen == N3DS_SCR_MAP)
++	{
++		// JA2-U1: the map's team list (name, place, job, contract) in a readable size
++		const INT32 now = (INT32)GetWorldTotalMin();
++		CFOR_EACH_IN_TEAM(m, OUR_TEAM)
++		{
++			if (d.teamCount >= 10) break;
++			if (m->bLife <= 0 || m->bAssignment == ASSIGNMENT_DEAD) continue;
++			N3DSDash::TeamLine& t = d.team[d.teamCount++];
++			t.name = m->name.to_std_string();
++			t.where = m->bAssignment == IN_TRANSIT ? std::string("--") : m->sSector.AsShortString().to_std_string();
++			if (m->bAssignment >= 0 && m->bAssignment < (INT8)std::size(pAssignmentStrings)) t.job = ST::string(pAssignmentStrings[m->bAssignment]).to_std_string();
++			t.life = m->bLife; t.lifeMax = m->bLifeMax > 0 ? m->bLifeMax : 100;
++			if (m->iEndofContractTime > now) t.days = (m->iEndofContractTime - now + 1439) / 1440;
++		}
++		return;   // the map page shows the team, not one merc
++	}
 +	const SOLDIERTYPE* s = g_selected_man;
 +	if (!s || !s->bActive) return;
 +	d.hasMerc = true;
++	{
++		const OBJECTTYPE& o = s->inv[HANDPOS];
++		if (o.usItem != NOTHING)
++		{
++			const ItemModel* const item = GCM->getItem(o.usItem);
++			if (item)
++			{
++				d.inHand = item->getShortName().to_std_string();
++				if (item->isGun()) d.shots = o.ubGunShotsLeft;
++			}
++		}
++	}
 +	d.name = s->name.to_std_string();
 +	d.level = s->bExpLevel;
 +	d.life = s->bLife; d.lifeMax = s->bLifeMax > 0 ? s->bLifeMax : 100;
@@ -1861,10 +1924,10 @@ index 0000000..17cfbcb
 +#endif
 diff --git a/src/sgp/n3ds/N3DS_Dashboard.h b/src/sgp/n3ds/N3DS_Dashboard.h
 new file mode 100644
-index 0000000..27ee7c3
+index 0000000..a8570ab
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Dashboard.h
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,30 @@
 +#pragma once
 +#include <string>
 +// What the top-screen dashboard shows (filled from game state by N3DS_Dashboard.cc)
@@ -1883,6 +1946,11 @@ index 0000000..27ee7c3
 +	const char* clock = "";                     // map: "Time is paused" / "Time is running"
 +	const char* turn = "";                      // tactical, in combat: whose turn it is
 +	int mercs = 0;                              // mercs of the player's team in this sector (tactical) / on the team (map)
++	// JA2-U1: what the merc panel and the map's team list show too small to read
++	std::string inHand;                         // the selected merc's item in hand ("" = nothing)
++	int shots = -1;                             // rounds left in it when it is a gun
++	struct TeamLine { std::string name, where, job; int life = 0, lifeMax = 1, days = -1; };
++	TeamLine team[10]; int teamCount = 0;       // map: the team (name, sector, assignment, contract days left)
 +};
 +// JA2-U2: the new-game options page is up (its OK / Cancel get big buttons)
 +bool N3DS_OnNewGameScreen();
@@ -1970,10 +2038,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..c279199
+index 0000000..6ca80c5
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1765 @@
+@@ -0,0 +1,1868 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -2434,14 +2502,18 @@ index 0000000..c279199
 +void N3DS_MainMenuChoose(int item);
 +int  N3DS_OptionsState();                                                       // Options_Screen.cc
 +void N3DS_OptionsDo(int what);
++int  N3DS_OptionsToggles(const char* names[], bool states[], int max);        // Options_Screen.cc (JA2-U1)
++void N3DS_OptionsToggle(int i);
 +int  N3DS_SaveLoadState();                                                      // SaveLoadScreen.cc
 +void N3DS_SaveLoadDo(int what);
 +int  N3DS_SaveFlags();                                                          // SaveLoadScreen.cc: 1 ExitSave, 2 QuickSave
 +bool N3DS_ContinueExitSave();
 +
 +enum { OV_NONE, OV_MSG, OV_MENU, OV_OPTS, OV_SLOTS, OV_NEWGAME };
-+enum { OVA_MSG, OVA_MENU, OVA_CONTINUE, OVA_QUIT, OVA_OPTS, OVA_SLOTS, OVA_KEY };
-+struct OvBtn { int x, y, w, h; std::string label; int act, arg; bool enabled; };
++enum { OVA_MSG, OVA_MENU, OVA_CONTINUE, OVA_QUIT, OVA_OPTS, OVA_SLOTS, OVA_KEY, OVA_TOGGLE };
++// w == 0: not a touch button but a line of the Options list on the top screen (OVA_TOGGLE; "on" is its state)
++struct OvBtn { int x, y, w, h; std::string label; int act, arg; bool enabled; bool on; };
++static const int kOptRows = 10;  // rows per column of the Options list
 +static int g_ovKind = OV_NONE;
 +static std::vector<OvBtn> g_ov;
 +static std::string g_ovText;                 // the message box's text
@@ -2453,7 +2525,7 @@ index 0000000..c279199
 +	if (g_ovKind == OV_NONE) return -1;
 +	for (size_t i = 0; i < g_ov.size(); ++i) {
 +		const OvBtn& b = g_ov[i];
-+		if (px >= b.x && px < b.x + b.w && py >= b.y && py < b.y + b.h) return (int)i;
++		if (b.w > 0 && px >= b.x && px < b.x + b.w && py >= b.y && py < b.y + b.h) return (int)i;
 +	}
 +	return -1;
 +}
@@ -2490,6 +2562,13 @@ index 0000000..c279199
 +		kind = OV_OPTS;
 +		static const char* const l[4] = { "SAVE", "LOAD", "QUIT", "DONE" };
 +		for (int i = 0; i < 4; ++i) v.push_back({ 6 + i * 78, 204, 74, 30, l[i], OVA_OPTS, i, i != 0 || os == 2 });
++		// JA2-U1: the check boxes, listed on the top screen in the port's font (not when the top
++		// screen shows the game: swapped or magnifier). The D-pad reaches them from the buttons.
++		if (!g_swap && !g_mag) {
++			const char* names[32]; bool states[32];
++			const int nt = N3DS_OptionsToggles(names, states, 2 * kOptRows);
++			for (int i = 0; i < nt; ++i) v.push_back({ 0, 0, 0, 0, names[i], OVA_TOGGLE, i, true, states[i] });
++		}
 +	} else if (const int ss = N3DS_SaveLoadState()) {
 +		kind = OV_SLOTS;                    // 24 px tall: the list's last row ends just above
 +		v.push_back({ 6, 210, 152, 24, (ss & 2) ? "SAVE" : "LOAD", OVA_SLOTS, 0, (ss & 4) != 0 });
@@ -2499,7 +2578,7 @@ index 0000000..c279199
 +		v.push_back({ 6, 210, 152, 24, "OK", OVA_KEY, SDLK_RETURN, true });
 +		v.push_back({ 162, 210, 152, 24, "CANCEL", OVA_KEY, SDLK_ESCAPE, true });
 +	}
-+	const bool fresh = kind != lastKind || v.size() != lastCount || (kind == OV_MSG && g_ovText != lastText);
++	const bool fresh = kind != lastKind || (kind != OV_OPTS && v.size() != lastCount) || (kind == OV_MSG && g_ovText != lastText);
 +	if (fresh) {
 +		// a new set of buttons: the focus starts on No (message), the first button (main menu) or DONE
 +		g_ovFocus = 0; g_ovPressed = -1; g_ovPressFrames = 0;
@@ -2523,6 +2602,7 @@ index 0000000..c279199
 +		case OVA_OPTS:     N3DS_OptionsDo(b.arg); break;
 +		case OVA_SLOTS:    N3DS_SaveLoadDo(b.arg); break;
 +		case OVA_KEY:      PushKey((SDL_Keycode)b.arg, true); PushKey((SDL_Keycode)b.arg, false); break;
++		case OVA_TOGGLE:   N3DS_OptionsToggle(b.arg); break;
 +	}
 +}
 +
@@ -2535,7 +2615,8 @@ index 0000000..c279199
 +{
 +	OverlayUpdate();
 +	if (g_ovKind == OV_NONE) { g_ovPressFrames = 0; g_ovPressed = -1; return 0; }
-+	const u32 owned = KEY_A | KEY_DLEFT | KEY_DRIGHT | (g_ovKind == OV_MENU ? (KEY_DUP | KEY_DDOWN) : 0);
++	const bool optList = g_ovKind == OV_OPTS && g_ov.size() > 4;   // the Options list is on the top screen
++	const u32 owned = KEY_A | KEY_DLEFT | KEY_DRIGHT | (g_ovKind == OV_MENU || optList ? (KEY_DUP | KEY_DDOWN) : 0);
 +	if (g_ovPressFrames > 0) {               // a press shows for a few passes, then acts; new presses are dropped
 +		if (--g_ovPressFrames == 0 && g_ovPressed >= 0 && g_ovPressed < (int)g_ov.size()) { const OvBtn b = g_ov[g_ovPressed]; g_ovPressed = -1; OverlayAct(b); }
 +		return owned;
@@ -2543,6 +2624,25 @@ index 0000000..c279199
 +	const int n = (int)g_ov.size();
 +	int hit = -1;
 +	down &= owned | KEY_TOUCH;
++	if (optList) {
++		// Options: the list (two columns of kOptRows on the top screen) above the row of four buttons.
++		// Up / Down walk a column and step between the list's foot and the buttons; Left / Right
++		// change column in the list and move along the buttons.
++		const int nt = n - 4;
++		static int lastList = 4;
++		if (g_ovFocus >= 4) {
++			const int t = g_ovFocus - 4, col = t / kOptRows, row = t % kOptRows;
++			if ((down & KEY_DUP) && row > 0) g_ovFocus--;
++			if (down & KEY_DDOWN) { if (row < kOptRows - 1 && t + 1 < nt) g_ovFocus++; else { lastList = g_ovFocus; g_ovFocus = col == 0 ? 1 : 3; } }
++			if ((down & KEY_DLEFT) && col > 0) g_ovFocus -= kOptRows;
++			if ((down & KEY_DRIGHT) && t + kOptRows < nt) g_ovFocus += kOptRows;
++		} else {
++			if (down & KEY_DUP) g_ovFocus = lastList < n ? lastList : 4;
++			if ((down & KEY_DLEFT) && g_ovFocus > 0) { g_ovFocus--; if (!g_ov[g_ovFocus].enabled && g_ovFocus == 0) g_ovFocus = 1; }
++			if ((down & KEY_DRIGHT) && g_ovFocus < 3) g_ovFocus++;
++		}
++		down &= ~(KEY_DUP | KEY_DDOWN | KEY_DLEFT | KEY_DRIGHT);
++	}
 +	if (down & (KEY_DUP | KEY_DLEFT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + n - 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
 +	if (down & (KEY_DDOWN | KEY_DRIGHT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
 +	if (down & KEY_A) hit = g_ovFocus;
@@ -2683,7 +2783,7 @@ index 0000000..c279199
 +static int OverlayTop()
 +{
 +	int top = 240;
-+	if (g_ovKind != OV_NONE) for (const OvBtn& b : g_ov) top = std::min(top, b.y);
++	if (g_ovKind != OV_NONE) for (const OvBtn& b : g_ov) if (b.w > 0) top = std::min(top, b.y);
 +	return top;
 +}
 +// onPage: the buttons sit on one of the port's own pages (the game is swapped to the top screen),
@@ -2694,8 +2794,48 @@ index 0000000..c279199
 +	if (onPage) { const int top = OverlayTop() - 2; Fill(c, 0, top, c.w, c.h - top, kBg); }
 +	for (size_t i = 0; i < g_ov.size(); ++i) {
 +		const OvBtn& b = g_ov[i];
-+		HouseButton(c, b.x, b.y, b.w, b.h, b.label.c_str(), g_ovPressFrames > 0 && (int)i == g_ovPressed, (int)i == g_ovFocus, b.enabled);
++		if (b.w > 0) HouseButton(c, b.x, b.y, b.w, b.h, b.label.c_str(), g_ovPressFrames > 0 && (int)i == g_ovPressed, (int)i == g_ovFocus, b.enabled);
 +	}
++}
++
++// JA2-U1: the Options page's check boxes as a readable list on the top screen: two columns,
++// label and ON / OFF (word and colour). The gold ring shows where the D-pad is; A flips it.
++// A label too long for its column is wrapped onto a second, smaller-spaced line, never cut.
++static void DrawOptionsPage(const Canvas& c)
++{
++	const int W = c.w;
++	Fill(c, 0, 0, W, c.h, kBg);
++	Fill(c, 0, 0, W, 22, kSel);
++	Text(c, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
++	Text(c, W - 6 - TextW("Options", kFontSans), 5, "Options", kText, kFontSans);
++	const int colW = (W - 12 - 6) / 2, rowH = 18, stW = TextW("OFF", kFontBold) + 6;
++	int t = 0;
++	for (size_t i = 0; i < g_ov.size(); ++i) {
++		const OvBtn& b = g_ov[i];
++		if (b.act != OVA_TOGGLE) continue;
++		const int x = 6 + (t / kOptRows) * (colW + 6), y = 25 + (t % kOptRows) * rowH;
++		const bool pr = g_ovPressFrames > 0 && (int)i == g_ovPressed;
++		if (pr) Fill(c, x, y, colW, rowH - 1, kBtn);
++		const int labelW = colW - stW - 8;
++		if (TextW(b.label.c_str(), kFontSans) <= labelW) Text(c, x + 4, y + 1, b.label.c_str(), kText, kFontSans);
++		else {
++			// two lines of the small mono font would not fit the row: shorten at a word and mark it
++			std::vector<std::string> l = WrapText(b.label, labelW - TextW("..", kFontSans), kFontSans);
++			const std::string first = l.empty() ? std::string() : l[0] + "..";
++			Text(c, x + 4, y + 1, first.c_str(), kText, kFontSans);
++		}
++		Text(c, x + colW - stW, y, b.on ? "ON" : "OFF", b.on ? C565(110, 220, 120) : kDim, kFontBold);
++		if ((int)i == g_ovFocus && !pr) {
++			Fill(c, x, y - 1, colW, 2, kTitle); Fill(c, x, y + rowH - 2, colW, 2, kTitle);
++			Fill(c, x, y - 1, 2, rowH + 1, kTitle); Fill(c, x + colW - 2, y - 1, 2, rowH + 1, kTitle);
++		}
++		++t;
++	}
++	const char* a = g_lefty ? "A/B/X/Y: move   D-Pad right: change or press" : "D-Pad: move   A: change or press";
++	Text(c, (W - std::min(TextW(a, kFontSans), W - 12)) / 2, c.h - 16 - 16, a, kDim, kFontSans, W - 12);
++	Fill(c, 0, c.h - 16, W, 16, kPanel);
++	const char* b2 = "SAVE  LOAD  QUIT  DONE: the big buttons on the touch screen";
++	Text(c, (W - std::min(TextW(b2, kFontSans), W - 12)) / 2, c.h - 15, b2, kTitle, kFontSans, W - 12);
 +}
 +
 +// A message box's text in the port's font (the box itself is unreadable at half size): the whole
@@ -2753,8 +2893,8 @@ index 0000000..c279199
 +static void DrawDashMessages(const Canvas& c, int y, int limit)
 +{
 +	const int W = c.w, lh = 14;
-+	int room = (limit - y) / lh;
-+	if (room < 2 || !g_dashMsgCount) return;
++	int room = (limit - y - 3) / lh;
++	if (room < 1 || !g_dashMsgCount) return;
 +	Fill(c, 4, y, W - 8, 1, kPanel);
 +	y += 3; room = (limit - y) / lh;
 +	std::vector<std::vector<std::string>> blocks;
@@ -2817,17 +2957,29 @@ index 0000000..c279199
 +		// rows sit closer so the second row of stats ends above the "Slide here" line (it was
 +		// drawn over it).
 +		const int k = withSwapButton ? 1 : 0;
++		// (rows a pixel or two closer than before, so two message lines fit under the stats)
 +		y += 26 - 2 * k;
-+		Bar(c, 6, y, W - 12, "Health", d.life, d.lifeMax); y += 17 - 2 * k;
-+		Bar(c, 6, y, W - 12, "Energy", d.breath, d.breathMax); y += 17 - 2 * k;
-+		Bar(c, 6, y, W - 12, "Morale", d.morale, 100); y += 19 - 3 * k;
-+		if (d.ap >= 0) { char ap[32]; snprintf(ap, sizeof ap, "Action points: %d", d.ap); Text(c, 6, y, ap, kTitle, kFontBold); y += 18 - 3 * k; }
++		Bar(c, 6, y, W - 12, "Health", d.life, d.lifeMax); y += 16 - k;
++		Bar(c, 6, y, W - 12, "Energy", d.breath, d.breathMax); y += 16 - k;
++		Bar(c, 6, y, W - 12, "Morale", d.morale, 100); y += 17 - k;
++		if (d.ap >= 0) {
++			char ap[32]; snprintf(ap, sizeof ap, "Action points: %d", d.ap);
++			const int apw = Text(c, 6, y, ap, kTitle, kFontBold);
++			// JA2-U1: the item in hand and its rounds (the merc panel's numbers are too small to read)
++			if (!d.inHand.empty()) {
++				char ih[96];
++				if (d.shots >= 0) snprintf(ih, sizeof ih, "%s: %d", d.inHand.c_str(), d.shots); else snprintf(ih, sizeof ih, "%s", d.inHand.c_str());
++				const int room = W - 12 - apw - 16;
++				if (TextW(ih, kFontSans) <= room) Text(c, W - 6 - TextW(ih, kFontSans), y + 1, ih, kText, kFontSans);   // left out if it does not fit whole
++			}
++			y += 16 - k;
++		}
 +		const int colw = (W - 12) / 4;
 +		for (int i = 0; i < 8; ++i) {
 +			char st[16]; snprintf(st, sizeof st, "%s %d", kStatNames[i], d.stats[i]);
 +			Text(c, 6 + (i % 4) * colw, y + (i / 4) * (15 - 2 * k), st, kText, kFontMono, colw - 4);
 +		}
-+		y += 32;
++		y += 30;
 +	} else if (g_progress >= 0) {
 +		// JA2-Q2: loading or saving (about 45 s for a tactical save on the console): say so here
 +		// with the percentage; the game's own bar is on the touch screen
@@ -2870,10 +3022,28 @@ index 0000000..c279199
 +		const char* st = d.clock[0] ? d.clock : d.turn;
 +		if (st[0]) Text(c, W - 6 - std::min(TextW(st, kFontSans), W / 2 - 12), y + 1, st, kText, kFontSans, W / 2 - 12);
 +		y += 18;
-+		char ml[48];
-+		snprintf(ml, sizeof ml, d.screen == N3DS_SCR_TACTICAL ? "Mercs in this sector: %d" : "Mercs on the team: %d", d.mercs);
-+		Text(c, 6, y, ml, kDim, kFontSans, W - 12);
-+		y += 18;
++		if (d.screen == N3DS_SCR_MAP && d.teamCount > 0) {
++			// JA2-U1: the team (the map's own list is too small to read): name, sector, job,
++			// contract days left, health. Whole rows only; what does not fit this page is left out.
++			const int limit = (withSwapButton ? c.h - 6 - 26 - 4 - 16 : c.h - 16) - 19;
++			const bool wide = W >= 400;
++			for (int i = 0; i < d.teamCount && y + 14 <= limit; ++i, y += 14) {
++				const N3DSDash::TeamLine& t = d.team[i];
++				char hp[24]; snprintf(hp, sizeof hp, "%d/%d", t.life, t.lifeMax);
++				char dy[24]; if (t.days >= 0) snprintf(dy, sizeof dy, "%dd", t.days); else dy[0] = 0;
++				Text(c, 6, y, t.name.c_str(), kText, kFontSans, wide ? 104 : 86);
++				Text(c, wide ? 116 : 96, y, t.where.c_str(), kTitle, kFontSans, 34);
++				Text(c, wide ? 154 : 132, y, t.job.c_str(), kDim, kFontSans, wide ? 124 : 84);
++				Text(c, wide ? 284 : 220, y, dy, kDim, kFontSans, 40);
++				Text(c, W - 6 - TextW(hp, kFontSans), y, hp, t.life * 3 < t.lifeMax ? C565(215, 60, 50) : kText, kFontSans);
++			}
++			y += 2;
++		} else {
++			char ml[48];
++			snprintf(ml, sizeof ml, d.screen == N3DS_SCR_TACTICAL ? "Mercs in this sector: %d" : "Mercs on the team: %d", d.mercs);
++			Text(c, 6, y, ml, kDim, kFontSans, W - 12);
++			y += 18;
++		}
 +	} else {
 +		y += 20;
 +		const char* l1 = d.screen == N3DS_SCR_INTRO ? "Loading..." : "Tap an option on the touch screen.";
@@ -3080,6 +3250,7 @@ index 0000000..c279199
 +		else DrawGameHalf(CanvasFor(GFX_BOTTOM), 0, screen);
 +		DrawOverlay(CanvasFor(GFX_BOTTOM), false);                  // JA2-U2: big buttons over the picture
 +		if (msg) DrawMsgPage(CanvasFor(GFX_TOP), false);            // the message, readable
++		else if (g_ovKind == OV_OPTS && g_ov.size() > 4) DrawOptionsPage(CanvasFor(GFX_TOP));   // JA2-U1
 +		else if (g_mag) DrawGameMagnified(CanvasFor(GFX_TOP), screen, cx, cy);
 +		else DrawDashboard(CanvasFor(GFX_TOP), false);
 +	} else {
