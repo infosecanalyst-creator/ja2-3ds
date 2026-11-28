@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-27 (cross-port consistency)
+
+- START menu in the house order shared by all the 3DS ports: RESUME, MANUAL, QUICK SAVE | QUICK LOAD, SAVE / LOAD / OPTIONS, SETTINGS, END TURN, EXIT GAME. END TURN (your turn in combat) moved from third to just before EXIT GAME. On the main menu CONTINUE (LAST EXIT) moved from the top to under MANUAL, where the load row is in a game.
+- EXIT GAME asks "Exit Jagged Alliance 2?" (was "Exit the game?"). The second line: "It is saved first (Continue loads it)." when it can save, "Not saved here: progress since your last save is lost." when it cannot, and "No game is running: nothing to save." on the main menu.
+- The exit and quick load questions answer YES / NO (were YES, EXIT and YES, LOAD), as in the other ports. The ring still starts on NO and B still means no.
+- A failed exit save says "Not saved! The exit save failed." on the top screen (EXIT ANYWAY / NO as before).
+
 ## 2026-11-21 (night: audit fixes)
 
 - Message boxes get big answer buttons at the foot of the touch screen (the game's own YES / NO are about 22 x 9 pixels there), and the message is shown in a readable size on the top screen. The gold ring starts on No. Tap, or D-pad and A.

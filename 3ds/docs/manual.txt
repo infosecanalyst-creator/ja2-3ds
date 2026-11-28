@@ -325,13 +325,13 @@ item names and stats - point at them.
 The START menu, in a game:
   RESUME
   MANUAL
-  END TURN        your turn in combat only
   QUICK SAVE      saves at once (QuickSave)
   QUICK LOAD      asks first, then loads it
   SAVE / LOAD / OPTIONS   the game's Options
                   page: save slots, load,
                   settings, quit to main menu
   SETTINGS        magnifier, left hand
+  END TURN        your turn in combat only
   EXIT GAME       asks first, saves, quits
 A grey button cannot be used right now (for
 example QUICK LOAD with no quick save yet).
@@ -339,9 +339,9 @@ On the main menu it has CONTINUE (LAST EXIT)
 instead of the save buttons.
 
 QUICK LOAD replaces the game you are playing
-with your last quick save, so it asks YES,
-LOAD / NO first. The gold ring starts on NO
-and B means no.
+with your last quick save, so it asks YES /
+NO first. The gold ring starts on NO and B
+means no.
 == 11. SAVING AND OPTIONS  (2/4)
 The Options page has four big buttons at the
 foot of the touch screen: SAVE and LOAD open
@@ -366,8 +366,10 @@ with the percentage all the time.
 Quitting: EXIT GAME in the START menu, or
 QUIT on the main menu, or HOME > Close.
 == 11. SAVING AND OPTIONS  (3/4)
-EXIT GAME asks first, then saves the game
-into its own slot, "ExitSave", and quits.
+EXIT GAME asks "Exit Jagged Alliance 2?"
+(YES / NO, the ring on NO, B means no), then
+saves the game into its own slot,
+"ExitSave", and quits.
 HOME > Close does the same while a game is
 running. ExitSave never replaces your own
 QuickSave and is not offered as a slot to

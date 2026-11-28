@@ -2073,10 +2073,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..e82a15a
+index 0000000..2893568
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1885 @@
+@@ -0,0 +1,1889 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -3519,8 +3519,9 @@ index 0000000..e82a15a
 +
 +
 +// ---------------------------------------------------------------- START: the port menu
-+// House style (claude/3ds-look-and-feel.md): RESUME, MANUAL, SAVE / LOAD / OPTIONS (the game's
-+// options screen, which holds Save, Load and Quit), LEFT HAND and EXIT GAME, which asks first.
++// House style (claude/3ds-look-and-feel.md): RESUME, MANUAL, the save and load rows, SAVE / LOAD /
++// OPTIONS (the game's options screen, which holds Save, Load and Quit), SETTINGS (LEFT HAND),
++// port pages, then EXIT GAME last, which asks first.
 +// Full-width buttons filling the touch screen (rule 11), D-pad + A or a tap, B or START resumes.
 +void requestGameExit();
 +bool N3DS_SuspendSaveOk();   // SaveLoadScreen.cc: can EXIT GAME quick-save right now?
@@ -3551,7 +3552,7 @@ index 0000000..e82a15a
 +		Fill(t, 0, 0, t.w, t.h, kBg);
 +		Fill(t, 0, 0, t.w, 22, kSel);
 +		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
-+		Text(t, 8, 40, "! The quick save failed.", kText, kFontBold);
++		Text(t, 8, 40, "Not saved! The exit save failed.", kText, kFontBold);
 +		Text(t, 8, 62, "Is the SD card full or locked?", kDim, kFontSans, t.w - 16);
 +		Text(t, 8, 80, "If you exit now, anything since your", kDim, kFontSans, t.w - 16);
 +		Text(t, 8, 98, "last save is lost.", kDim, kFontSans, t.w - 16);
@@ -3603,11 +3604,12 @@ index 0000000..e82a15a
 +bool N3DS_QuickLoad();
 +
 +// The START menu. Pages: the main list, EXIT GAME's question, QUICK LOAD's question, SETTINGS.
-+// - Main list in a game: RESUME, MANUAL, END TURN (your turn in combat), QUICK SAVE | QUICK LOAD,
-+//   SAVE / LOAD / OPTIONS, SETTINGS, EXIT GAME. On the main menu: CONTINUE (LAST EXIT) when there
-+//   is an exit save, RESUME, MANUAL, OPTIONS, SETTINGS, EXIT GAME.
++// - Main list in a game: RESUME, MANUAL, QUICK SAVE | QUICK LOAD, SAVE / LOAD / OPTIONS, SETTINGS,
++//   END TURN (your turn in combat), EXIT GAME. On the main menu: RESUME, MANUAL, CONTINUE (LAST
++//   EXIT) when there is an exit save (in the load row's place), OPTIONS, SETTINGS, EXIT GAME.
++//   Cross-port pass (Nov 27): house order; END TURN is a port page, so after SETTINGS.
 +// - JA2-X3: QUICK SAVE and QUICK LOAD are the game's ALT+S / ALT+L, two taps from play instead of
-+//   three screens of tiny buttons. QUICK LOAD asks first (YES, LOAD / NO, focus on NO, B = no): it
++//   three screens of tiny buttons. QUICK LOAD asks first (YES / NO, focus on NO, B = no): it
 +//   replaces the game in progress. Each is grey when the game would refuse it.
 +// - JA2-X4: END TURN here is the two-step way to end a turn (ZR held still works).
 +// - SETTINGS holds MAGNIFIER and LEFT HAND (they were rows of the main list).
@@ -3644,7 +3646,7 @@ index 0000000..e82a15a
 +			case kLefty: return g_lefty ? "LEFT HAND: ON" : "LEFT HAND: OFF";
 +			case kMag: return g_mag ? "MAGNIFIER: ON" : "MAGNIFIER: OFF";
 +			case kBack: return "BACK";
-+			case kYes: return page == pgLoad ? "YES, LOAD" : "YES, EXIT";
++			case kYes: return "YES";
 +			case kNo: return "NO";
 +			default: return "EXIT GAME";
 +		}
@@ -3661,13 +3663,13 @@ index 0000000..e82a15a
 +		std::vector<std::vector<int>> rows;
 +		if (page == pgSettings) rows = { { kMag }, { kLefty }, { kBack } };
 +		else {
-+			if (canContinue) rows.push_back({ kContinue });
 +			rows.push_back({ kResume });
 +			rows.push_back({ kManual });
-+			if (canEndTurn) rows.push_back({ kEndTurn });
++			if (canContinue) rows.push_back({ kContinue });
 +			if (inGame) rows.push_back({ kQSave, kQLoad });
 +			rows.push_back({ kOptions });
 +			rows.push_back({ kSettings });
++			if (canEndTurn) rows.push_back({ kEndTurn });
 +			rows.push_back({ kExit });
 +		}
 +		const int n = (int)rows.size(), y0 = 28, gap = 4;
@@ -3710,10 +3712,12 @@ index 0000000..e82a15a
 +		Text(t, 6, 4, "JAGGED ALLIANCE 2", kTitle, kFontBold);
 +		Text(t, t.w - 6 - TextW("PAUSED", kFontSans), 5, "PAUSED", kText, kFontSans);
 +		const bool canSave = page == pgExit && N3DS_SuspendSaveOk();
-+		// JA2-U4: the same sentence on both screens
-+		const char* exitLine = canSave ? "It is saved first (Continue loads it)." : "Anything you have not saved is lost.";
++		// JA2-U4: the same sentence on both screens. House wording (cross-port pass, Nov 27).
++		const char* exitLine = canSave ? "It is saved first (Continue loads it)."
++		                     : onMainMenu ? "No game is running: nothing to save."
++		                     : "Not saved here: progress since your last save is lost.";
 +		const char* loadLine = "The game you are playing is replaced by the quick save.";
-+		const char* head = page == pgExit ? "Exit the game?" : page == pgLoad ? "Load the quick save?" : page == pgSettings ? "Settings" : "The game is paused.";
++		const char* head = page == pgExit ? "Exit Jagged Alliance 2?" : page == pgLoad ? "Load the quick save?" : page == pgSettings ? "Settings" : "The game is paused.";
 +		Text(t, 8, 40, head, kText, kFontBold);
 +		int ty = 62;
 +		if (page == pgExit) ty = Para(t, 8, ty, exitLine, kDim, kFontSans, t.w - 16);
