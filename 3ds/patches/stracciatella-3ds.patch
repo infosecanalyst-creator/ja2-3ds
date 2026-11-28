@@ -611,6 +611,27 @@ index d34d502..292dfd9 100644
  	g.ubSizeOfDisplayCover                        = 4;
  	g.ubSizeOfLOS                                 = 4;
  
+diff --git a/src/game/HelpScreen.cc b/src/game/HelpScreen.cc
+index a11df46..5d2c620 100644
+--- a/src/game/HelpScreen.cc
++++ b/src/game/HelpScreen.cc
+@@ -326,6 +326,16 @@ BOOLEAN ShouldTheHelpScreenComeUp(HelpScreenID const ubScreenID, BOOLEAN const f
+ 		return( TRUE );
+ 	}
+ 
++#ifdef JA2_3DS
++	// JA2-X2: help windows stay off on the 3DS. A saved game carries its own "not seen yet" bits
++	// (SaveLoadGame.cc), which brought the map's help window back after loading a save (seen in
++	// the emulator, run F2-ja2-01), so the setting is checked here, after any save was loaded.
++	if (gGameSettings.fHideHelpInAllScreens)
++	{
++		return( FALSE );
++	}
++#endif
++
+ 	//has the player been in the screen before
+ 	if( ( gHelpScreen.usHasPlayerSeenHelpScreenInCurrentScreen >> ubScreenID ) & 0x01 )
+ 	{
 diff --git a/src/game/Intro.cc b/src/game/Intro.cc
 index a751166..bf57847 100644
 --- a/src/game/Intro.cc
@@ -783,10 +804,10 @@ index d32c7ce..2f8743d 100644
  	}};
  
 diff --git a/src/game/Options_Screen.cc b/src/game/Options_Screen.cc
-index da7499c..ea24155 100644
+index da7499c..814cf87 100644
 --- a/src/game/Options_Screen.cc
 +++ b/src/game/Options_Screen.cc
-@@ -581,8 +581,60 @@ static void BtnDoneCallback(GUI_BUTTON* btn, UINT32 reason)
+@@ -581,8 +581,66 @@ static void BtnDoneCallback(GUI_BUTTON* btn, UINT32 reason)
  }
  
  
@@ -832,6 +853,12 @@ index da7499c..ea24155 100644
 +	for (; n < NUM_GAME_OPTIONS && n < max; ++n)
 +	{
 +		label[n]  = zOptionsToggleText[n].to_std_string();
++		// two English labels are wider than a column of the top-screen list: shorter words there
++		// (the game's own page keeps its text)
++		{
++			if (n == TOPTION_SLEEPWAKE_NOTIFICATION && label[n].rfind("Display sleep/wake", 0) == 0) label[n] = "Sleep / wake messages";
++			if (n == TOPTION_MERC_ALWAYS_LIGHT_UP  && label[n].rfind("Merc Lights during", 0) == 0)      label[n] = "Merc light when moving";
++		}
 +		names[n]  = label[n].c_str();
 +		states[n] = guiOptionsToggles[n]->Clicked();
 +	}
@@ -2046,10 +2073,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..3c2f437
+index 0000000..e82a15a
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1870 @@
+@@ -0,0 +1,1885 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -2650,6 +2677,21 @@ index 0000000..3c2f437
 +			if ((down & KEY_DRIGHT) && g_ovFocus < 3) g_ovFocus++;
 +		}
 +		down &= ~(KEY_DUP | KEY_DDOWN | KEY_DLEFT | KEY_DRIGHT);
++	}
++	if (g_ovKind == OV_MENU && (down & (KEY_DUP | KEY_DDOWN))) {
++		// the main menu is a grid: Up / Down go to the nearest enabled button in the row above / below
++		const OvBtn& c = g_ov[g_ovFocus];
++		const int dir = (down & KEY_DDOWN) ? 1 : -1, cx = c.x + c.w / 2;
++		int best = -1, bdy = 1 << 20, bdx = 1 << 20;
++		for (int i = 0; i < n; ++i) {
++			const OvBtn& b = g_ov[i];
++			const int dy = (b.y - c.y) * dir;
++			if (dy <= 0 || !b.enabled) continue;
++			const int dx = std::abs(b.x + b.w / 2 - cx);
++			if (dy < bdy || (dy == bdy && dx < bdx)) { bdy = dy; bdx = dx; best = i; }
++		}
++		if (best >= 0) g_ovFocus = best;
++		down &= ~(KEY_DUP | KEY_DDOWN);
 +	}
 +	if (down & (KEY_DUP | KEY_DLEFT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + n - 1) % n; if (g_ov[g_ovFocus].enabled) break; } }
 +	if (down & (KEY_DDOWN | KEY_DRIGHT)) { for (int k = 0; k < n; ++k) { g_ovFocus = (g_ovFocus + 1) % n; if (g_ov[g_ovFocus].enabled) break; } }

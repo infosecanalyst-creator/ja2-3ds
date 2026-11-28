@@ -11,7 +11,9 @@
 - Options page: the top screen lists every option with ON / OFF in a readable size; D-pad and A change them.
 - Dashboard: the selected merc's item in hand and rounds left; on the map, the team list (name, sector, job, contract days, health).
 - Loading: the top screen shows "Loading..." with the percentage for the whole load.
-- The game's own help windows are off: they name keyboard keys and close with a 9-pixel X.
+- Main menu big buttons: D-pad up / down move between rows (left / right along them).
+- Options list: two long labels use shorter words on the top screen so nothing is shortened with "..".
+- The game's own help windows are off: they name keyboard keys and close with a 9-pixel X. A loaded save no longer brings them back.
 - EXIT GAME shows the same sentence on both screens.
 - Manual: Close button (in place of Save/Load/Quit, which is in the START menu); the highlighted section has the gold ring.
 - Hint lines use one style: "Button: what it does".
