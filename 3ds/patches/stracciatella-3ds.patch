@@ -914,7 +914,7 @@ index f153f86..6812267 100644
  	EXTR_U8(   d, ubMusicModeToPlay)
  	gMusicModeToPlay = (MusicMode)ubMusicModeToPlay;
 diff --git a/src/game/SaveLoadScreen.cc b/src/game/SaveLoadScreen.cc
-index add6ddf..550ca9a 100644
+index add6ddf..6a70ac1 100644
 --- a/src/game/SaveLoadScreen.cc
 +++ b/src/game/SaveLoadScreen.cc
 @@ -1,3 +1,4 @@
@@ -1014,7 +1014,7 @@ index add6ddf..550ca9a 100644
  
  		gFadeInDoneCallback = DoneFadeInForSaveLoadScreen;
  
-@@ -1517,3 +1556,179 @@ static void StartFadeOutForSaveLoadScreen(void)
+@@ -1517,3 +1556,187 @@ static void StartFadeOutForSaveLoadScreen(void)
  	FadeOutNextFrame( );
  	gfStartedFadingOut = TRUE;
  }
@@ -1114,6 +1114,14 @@ index add6ddf..550ca9a 100644
 +		if (IsQuickSaveName(sg.name())) flags |= 2;
 +	}
 +	return flags;
++}
++
++// In a game the START menu only needs to know whether the QuickSave file is there: one look at
++// the folder, not a read of every save's header (N3DS_SaveFlags), so the menu opens at once.
++bool N3DS_QuickSaveFileExists()
++{
++	try { return GCM->saveGameFiles()->exists(GetSaveGamePath(GetQuickSaveName())); }
++	catch (...) { return false; }
 +}
 +
 +static bool N3DS_QuickSlotScreenOk(bool save)
@@ -2038,10 +2046,10 @@ index 0000000..22b970b
 +static const int kN3DSManualChapterCount = 13;
 diff --git a/src/sgp/n3ds/N3DS_Platform.cc b/src/sgp/n3ds/N3DS_Platform.cc
 new file mode 100644
-index 0000000..6ca80c5
+index 0000000..3c2f437
 --- /dev/null
 +++ b/src/sgp/n3ds/N3DS_Platform.cc
-@@ -0,0 +1,1868 @@
+@@ -0,0 +1,1870 @@
 +// Nintendo 3DS platform glue for JA2 Stracciatella
 +//
 +// Screens: the game renders at 640x480 (RGB565).
@@ -3546,6 +3554,7 @@ index 0000000..6ca80c5
 +	return y;
 +}
 +
++bool N3DS_QuickSaveFileExists();
 +bool N3DS_QuickSaveOk();     // SaveLoadScreen.cc (JA2-X3)
 +bool N3DS_QuickLoadOk();
 +bool N3DS_QuickSave();
@@ -3570,8 +3579,9 @@ index 0000000..6ca80c5
 +	const bool onMainMenu = N3DS_CurrentScreen() == N3DS_SCR_MENU;
 +	const N3DSScreen scr = N3DS_CurrentScreen();
 +	const bool inGame = scr == N3DS_SCR_TACTICAL || scr == N3DS_SCR_MAP || scr == N3DS_SCR_LAPTOP;
-+	// one pass over the save folder (it is slow on the card): which of ExitSave / QuickSave exist
-+	const int saveFlags = (onMainMenu || inGame) && !startAtExit ? N3DS_SaveFlags() : 0;
++	// On the main menu: one pass over the save folder for the ExitSave (slow on the card, as
++	// before). In a game: only whether the QuickSave file is there, so the menu opens at once.
++	const int saveFlags = startAtExit ? 0 : onMainMenu ? N3DS_SaveFlags() : (inGame && N3DS_QuickSaveFileExists()) ? 2 : 0;
 +	const bool canContinue = onMainMenu && (saveFlags & 1);
 +	const bool canEndTurn = N3DS_CanEndTurn();
 +	const bool canQSave = inGame && N3DS_QuickSaveOk();
