@@ -1,0 +1,9 @@
+ja2.3dsx is a MODIFIED build of JA2 Stracciatella v0.22.1 (changed by the ja2-3ds
+authors, 2026-10; see 3ds/patches/stracciatella-3ds.patch). Non-commercial use only, under
+the Strategy First Inc. Source Code License Agreement in this folder. No warranty; no game data.
+
+This build uses libsmacker, (c) 2012-2013 Greg Kennedy (http://libsmacker.sourceforge.net),
+under the Creative Commons Attribution Non-Commercial License 2.0 (libsmacker-LICENSE.txt),
+as modified by JA2 Stracciatella. Other third-party code (SDL2: zlib; Lua, sol2, string_theory,
+magic_enum: MIT; miniaudio: public domain/MIT-0; Rust crates; libctru: zlib) is listed in
+NOTICE.txt in the ja2-3ds repository.
